@@ -71,18 +71,59 @@ class ProductType(BaseModel):
     categories: List[ProductCategory] = []
 
 
+# Technical specifications for panels
+TECH_SPECS = {
+    "flat-embossed-vmd": {
+        "fire_rating": "Class A (ASTM E84)",
+        "nrc_rating": "0.85 - 0.95",
+        "sustainability": ["FSC Certified", "GREENGUARD Gold", "Red List Free"],
+        "material": "High-Density Polyester Fiber",
+        "thickness_mm": "12-25mm",
+        "weight_kg_m2": "2.4 - 4.8",
+        "installation": "Adhesive / Mechanical Fix",
+        "warranty": "10 Years",
+        "certifications": ["ISO 14001", "ISO 9001", "OEKO-TEX Standard 100"]
+    },
+    "colored-hd-ombre": {
+        "fire_rating": "Class A (ASTM E84)",
+        "nrc_rating": "0.80 - 0.90",
+        "sustainability": ["Recycled Content 60%", "GREENGUARD Gold", "Red List Free"],
+        "material": "HD Acoustic Felt",
+        "thickness_mm": "9-12mm",
+        "weight_kg_m2": "1.8 - 2.2",
+        "installation": "Adhesive Mount",
+        "warranty": "8 Years",
+        "certifications": ["ISO 14001", "Declare Label", "HPD"]
+    },
+    "vicstrip": {
+        "fire_rating": "Class B (ASTM E84)",
+        "nrc_rating": "0.70 - 0.85",
+        "sustainability": ["FSC Certified Wood", "Low VOC", "Red List Free"],
+        "material": "MDF Core + Acoustic Backing",
+        "thickness_mm": "12-25mm",
+        "weight_kg_m2": "3.2 - 5.5",
+        "installation": "Rail System / Direct Fix",
+        "warranty": "15 Years",
+        "certifications": ["ISO 14001", "PEFC", "EPD Verified"]
+    }
+}
+
 # Mock Product Data
 def generate_mock_products():
     """Generate mock product data for all product types"""
     
-    # Base texture URLs (placeholder patterns)
-    texture_patterns = [
-        "https://images.unsplash.com/photo-1543242274-d5c24731d725?w=400",
-        "https://images.unsplash.com/photo-1546179297-f40bd5098d4b?w=400",
-        "https://images.unsplash.com/photo-1624547612881-3dd00b4fddf5?w=400",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
-        "https://images.unsplash.com/photo-1534312527009-56c7016453e6?w=400",
-        "https://images.unsplash.com/photo-1557683316-973673baf926?w=400",
+    # Solid color placeholders for textures
+    solid_colors = [
+        "#D4A574",  # Warm tan
+        "#8B7355",  # Brown
+        "#A0522D",  # Sienna
+        "#CD853F",  # Peru
+        "#DEB887",  # Burlywood
+        "#BC8F8F",  # Rosy brown
+        "#F5DEB3",  # Wheat
+        "#D2B48C",  # Tan
+        "#C4A484",  # Light brown
+        "#9E8B6E",  # Khaki brown
     ]
     
     products = []
@@ -117,14 +158,17 @@ def generate_mock_products():
             "designs": []
         }
         for i in range(4):
+            color = solid_colors[(design_counter - 1) % len(solid_colors)]
             category["designs"].append({
                 "id": f"vmd-design-{design_counter}",
                 "product_type": "flat-embossed-vmd",
                 "category": cat,
                 "design_code": f"VMD-{design_counter:04d}",
                 "design_name": f"{cat} Design {i+1}",
-                "texture_url": texture_patterns[i % len(texture_patterns)],
-                "thumbnail_url": texture_patterns[i % len(texture_patterns)],
+                "texture_color": color,
+                "texture_url": None,
+                "thumbnail_url": None,
+                "color_name": ["Warm Tan", "Espresso", "Sienna", "Desert Sand", "Natural Oak", "Rose Clay", "Wheat", "Sandy", "Mocha", "Olive"][i % 10],
             })
             design_counter += 1
         vmd_panel["categories"].append(category)
@@ -138,14 +182,17 @@ def generate_mock_products():
             "designs": []
         }
         for i in range(4):
+            color = solid_colors[(design_counter - 1) % len(solid_colors)]
             category["designs"].append({
                 "id": f"vmd-design-{design_counter}",
                 "product_type": "flat-embossed-vmd",
                 "category": cat,
                 "design_code": f"VMD-{design_counter:04d}",
                 "design_name": f"{cat} Design {i+1}",
-                "texture_url": texture_patterns[i % len(texture_patterns)],
-                "thumbnail_url": texture_patterns[i % len(texture_patterns)],
+                "texture_color": color,
+                "texture_url": None,
+                "thumbnail_url": None,
+                "color_name": ["Carrara White", "Noir", "Walnut", "Charcoal"][i % 4],
                 "emboss": False,
             })
             design_counter += 1
@@ -182,6 +229,16 @@ def generate_mock_products():
         "categories": []
     }
     
+    # Ombre gradient colors
+    ombre_colors = {
+        "Coral Haze": ["#FF6B6B", "#FF8E8E", "#FFB4B4"],
+        "Apricot Gleam": ["#FFB347", "#FFCC80", "#FFE4B5"],
+        "Blue Fox": ["#4A90D9", "#7CB3E8", "#A8D4F5"],
+        "Pearl Oat": ["#F5F5DC", "#FFFFF0", "#FAF0E6"],
+        "Birch Mushroom": ["#8B7355", "#A0937D", "#C4B7A6"],
+        "Glacier": ["#E0FFFF", "#B0E0E6", "#87CEEB"],
+    }
+    
     for cat in ombre_categories:
         category = {
             "id": f"ombre-{cat.lower().replace(' ', '-')}",
@@ -190,6 +247,7 @@ def generate_mock_products():
             "emboss_available": False,
             "designs": []
         }
+        colors = ombre_colors.get(cat, ["#CCCCCC", "#DDDDDD", "#EEEEEE"])
         for i in range(3):
             category["designs"].append({
                 "id": f"ombre-design-{design_counter}",
@@ -197,8 +255,10 @@ def generate_mock_products():
                 "category": cat,
                 "design_code": f"OMB-{design_counter:04d}",
                 "design_name": f"{cat} Gradient {i+1}",
-                "texture_url": texture_patterns[(i+2) % len(texture_patterns)],
-                "thumbnail_url": texture_patterns[(i+2) % len(texture_patterns)],
+                "texture_color": colors[i],
+                "texture_url": None,
+                "thumbnail_url": None,
+                "color_name": f"{cat} Shade {i+1}",
             })
             design_counter += 1
         ombre_panel["categories"].append(category)
@@ -225,6 +285,13 @@ def generate_mock_products():
         "categories": []
     }
     
+    vicstrip_color_names = [
+        "Pure White", "Cloud", "Silver", "Pewter",
+        "Latte", "Walnut", "Espresso", "Chocolate",
+        "Charcoal", "Slate", "Storm", "Graphite",
+        "Ocean", "Azure", "Sky", "Cerulean"
+    ]
+    
     # VicStrip has pattern-based designs instead of categories
     for pattern in vicstrip_panel["patterns"]:
         category = {
@@ -240,11 +307,13 @@ def generate_mock_products():
                 "product_type": "vicstrip",
                 "category": pattern,
                 "design_code": f"VCS-{design_counter:04d}",
-                "design_name": f"{pattern} - Color {i+1}",
-                "texture_url": texture_patterns[0],
-                "thumbnail_url": texture_patterns[0],
+                "design_name": f"{pattern} - {vicstrip_color_names[i]}",
+                "texture_color": color,
+                "texture_url": None,
+                "thumbnail_url": None,
                 "pattern": pattern,
                 "color": color,
+                "color_name": vicstrip_color_names[i],
             })
             design_counter += 1
         vicstrip_panel["categories"].append(category)
@@ -292,6 +361,11 @@ async def get_category_designs(product_id: str, category_id: str):
                 if category["id"] == category_id:
                     return category.get("designs", [])
     return []
+
+@api_router.get("/products/{product_id}/specs")
+async def get_product_specs(product_id: str):
+    """Get technical specifications for a product type"""
+    return TECH_SPECS.get(product_id, {})
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
