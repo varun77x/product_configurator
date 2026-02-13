@@ -1,0 +1,125 @@
+{
+  "design_system": {
+    "typography": {
+      "font_family": {
+        "heading": "Manrope, sans-serif",
+        "body": "Inter, sans-serif"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap"
+      ],
+      "scale": {
+        "h1": "text-4xl font-extrabold tracking-tight lg:text-5xl",
+        "h2": "text-3xl font-bold tracking-tight",
+        "h3": "text-2xl font-semibold tracking-tight",
+        "p": "leading-7 [&:not(:first-child)]:mt-6",
+        "small": "text-sm font-medium leading-none"
+      }
+    },
+    "colors": {
+      "theme": "light",
+      "palette": {
+        "primary": {
+          "DEFAULT": "hsl(215, 25%, 27%)",
+          "foreground": "hsl(0, 0%, 100%)",
+          "description": "Deep Slate Blue - Professional, Corporate, Trust"
+        },
+        "secondary": {
+          "DEFAULT": "hsl(210, 40%, 96.1%)",
+          "foreground": "hsl(222.2, 47.4%, 11.2%)",
+          "description": "Pale Blue/Grey - Backgrounds, Secondary Actions"
+        },
+        "accent": {
+          "DEFAULT": "hsl(24, 95%, 53%)",
+          "foreground": "hsl(0, 0%, 100%)",
+          "description": "Vibrant Orange - CTAs, Highlights, Active States"
+        },
+        "background": "hsl(0, 0%, 100%)",
+        "foreground": "hsl(215, 25%, 27%)",
+        "muted": {
+          "DEFAULT": "hsl(210, 40%, 96.1%)",
+          "foreground": "hsl(215, 16%, 47%)"
+        },
+        "border": "hsl(214.3, 31.8%, 91.4%)"
+      }
+    },
+    "layout": {
+      "spacing": {
+        "container_padding": "p-6 md:p-8",
+        "section_gap": "gap-8",
+        "component_gap": "gap-4"
+      },
+      "grid_system": "Sidebar-Canvas Layout",
+      "structure": {
+        "sidebar_width": "w-full md:w-[400px]",
+        "canvas_area": "flex-1 h-[60vh] md:h-auto relative overflow-hidden bg-slate-900"
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-md font-manrope font-bold shadow-md transition-all hover:translate-y-[-1px]",
+        "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-11 px-8 rounded-md font-manrope font-medium",
+        "accent": "bg-accent text-accent-foreground hover:bg-accent/90 h-11 px-8 rounded-md font-manrope font-bold shadow-lg hover:shadow-orange-500/20 transition-all"
+      },
+      "cards": {
+        "base": "rounded-xl border bg-card text-card-foreground shadow-sm",
+        "interactive": "cursor-pointer transition-all hover:border-accent hover:shadow-md active:scale-95"
+      },
+      "inputs": {
+        "base": "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      }
+    },
+    "visual_enhancers": {
+      "shadows": "shadow-lg shadow-slate-200/50",
+      "borders": "border border-slate-200",
+      "glassmorphism": "bg-white/80 backdrop-blur-md border-white/20",
+      "gradients": "None (Flat/Clean Corporate Style)"
+    }
+  },
+  "assets": {
+    "images": {
+      "background_room": {
+        "url": "https://images.unsplash.com/photo-1758972581344-85dd3ccb10db?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NDh8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBsaXZpbmclMjByb29tJTIwZGFyayUyMHdhbGxzJTIwd2hpdGUlMjBmdXJuaXR1cmUlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NzA5Nzk3MjB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Dark modern living room with white furniture - Main Configurator Scene"
+      },
+      "textures": [
+        {
+          "name": "Wood Slat",
+          "url": "https://images.unsplash.com/photo-1543242274-d5c24731d725?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwzfHxhY291c3RpYyUyMHBhbmVsJTIwdGV4dHVyZSUyMGZlbHQlMjB3b29kJTIwc2xhdCUyMGZhYnJpY3xlbnwwfHx8fDE3NzA5Nzk3MjZ8MA&ixlib=rb-4.1.0&q=85",
+          "category": "VicStrip Panels"
+        },
+        {
+          "name": "Wavy Fabric",
+          "url": "https://images.unsplash.com/photo-1546179297-f40bd5098d4b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwyfHxhY291c3RpYyUyMHBhbmVsJTIwdGV4dHVyZSUyMGZlbHQlMjB3b29kJTIwc2xhdCUyMGZhYnJpY3xlbnwwfHx8fDE3NzA5Nzk3MjZ8MA&ixlib=rb-4.1.0&q=85",
+          "category": "Embossed VMD Panels"
+        },
+        {
+          "name": "Geometric Pattern",
+          "url": "https://images.unsplash.com/photo-1624547612881-3dd00b4fddf5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwxfHxhY291c3RpYyUyMHBhbmVsJTIwdGV4dHVyZSUyMGZlbHQlMjB3b29kJTIwc2xhdCUyMGZhYnJpY3xlbnwwfHx8fDE3NzA5Nzk3MjZ8MA&ixlib=rb-4.1.0&q=85",
+          "category": "Colored HD Ombre Panels"
+        }
+      ]
+    },
+    "icons": "lucide-react"
+  },
+  "implementation_guide": {
+    "layout_strategy": "The app should use a 'Split Screen' layout. Left side (or Bottom on mobile) is the 'Control Panel' (White bg, clean typography). Right side (or Top on mobile) is the 'Visualization Stage' (Dark/Immersive).",
+    "component_mapping": {
+      "ProductSelector": "Shadcn Select or Tabs",
+      "ConfigurationPanel": "Shadcn Accordion (for collapsible sections like Size, Color, Pattern)",
+      "ThumbnailGrid": "CSS Grid (grid-cols-3 gap-2) inside a Shadcn ScrollArea",
+      "ActionButtons": "Fixed bottom bar in Sidebar or Top Header",
+      "FavoritesModal": "Shadcn Dialog"
+    },
+    "universal_guidelines": [
+      "Use 'Manrope' for all Headings to give a technical/architectural feel.",
+      "Use 'Inter' for all UI text for maximum legibility.",
+      "The 'Add to Favorites' button should be the Accent Color (Orange).",
+      "The 'Download' button should be Primary Color (Blue).",
+      "Ensure the Canvas area has a subtle inner shadow to create depth.",
+      "Panel thumbnails must have a selected state: Ring-2 Ring-Accent.",
+      "Do not use gradients for backgrounds, keep it flat and clean.",
+      "Use 'sonner' for toast notifications (e.g., 'Design Saved')."
+    ]
+  }
+}
