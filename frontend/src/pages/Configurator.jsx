@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, ChevronDown, Loader2 } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Loader2, Eye, X, Shield, Flame, Leaf, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -16,6 +18,43 @@ const API = `${BACKEND_URL}/api`;
 
 // Interior background image (user provided)
 const INTERIOR_IMAGE = "https://customer-assets.emergentagent.com/job_74835dcc-aa13-4905-afe8-adfb41a5c38e/artifacts/drq6tblo_UniVic%20Strip_AO%20Map.png";
+
+// Technical specs data (fallback)
+const DEFAULT_SPECS = {
+  "flat-embossed-vmd": {
+    fire_rating: "Class A (ASTM E84)",
+    nrc_rating: "0.85 - 0.95",
+    sustainability: ["FSC Certified", "GREENGUARD Gold", "Red List Free"],
+    material: "High-Density Polyester Fiber",
+    thickness_mm: "12-25mm",
+    weight_kg_m2: "2.4 - 4.8",
+    installation: "Adhesive / Mechanical Fix",
+    warranty: "10 Years",
+    certifications: ["ISO 14001", "ISO 9001", "OEKO-TEX Standard 100"]
+  },
+  "colored-hd-ombre": {
+    fire_rating: "Class A (ASTM E84)",
+    nrc_rating: "0.80 - 0.90",
+    sustainability: ["Recycled Content 60%", "GREENGUARD Gold", "Red List Free"],
+    material: "HD Acoustic Felt",
+    thickness_mm: "9-12mm",
+    weight_kg_m2: "1.8 - 2.2",
+    installation: "Adhesive Mount",
+    warranty: "8 Years",
+    certifications: ["ISO 14001", "Declare Label", "HPD"]
+  },
+  "vicstrip": {
+    fire_rating: "Class B (ASTM E84)",
+    nrc_rating: "0.70 - 0.85",
+    sustainability: ["FSC Certified Wood", "Low VOC", "Red List Free"],
+    material: "MDF Core + Acoustic Backing",
+    thickness_mm: "12-25mm",
+    weight_kg_m2: "3.2 - 5.5",
+    installation: "Rail System / Direct Fix",
+    warranty: "15 Years",
+    certifications: ["ISO 14001", "PEFC", "EPD Verified"]
+  }
+};
 
 const Configurator = () => {
   const [products, setProducts] = useState([]);
@@ -31,6 +70,8 @@ const Configurator = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
+  const [specsOpen, setSpecsOpen] = useState(false);
+  const [techSpecs, setTechSpecs] = useState(null);
   const canvasRef = useRef(null);
 
   // Load products from API
@@ -64,6 +105,21 @@ const Configurator = () => {
     };
     fetchProducts();
   }, []);
+
+  // Load tech specs when product type changes
+  useEffect(() => {
+    const fetchSpecs = async () => {
+      if (selectedProductType?.id) {
+        try {
+          const response = await axios.get(`${API}/products/${selectedProductType.id}/specs`);
+          setTechSpecs(response.data);
+        } catch (error) {
+          setTechSpecs(DEFAULT_SPECS[selectedProductType.id] || null);
+        }
+      }
+    };
+    fetchSpecs();
+  }, [selectedProductType]);
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -204,6 +260,175 @@ const Configurator = () => {
     }
   };
 
+  // Design Thumbnail with Hover Card
+  const DesignThumbnail = ({ design, isSelected, onSelect }) => {
+    const bgColor = design.texture_color || "#CCCCCC";
+    
+    return (
+      <HoverCard openDelay={200} closeDelay={100}>
+        <HoverCardTrigger asChild>
+          <div
+            className={`thumbnail-item ${isSelected ? 'selected' : ''}`}
+            style={{ backgroundColor: bgColor }}
+            onClick={() => onSelect(design)}
+            data-testid={`design-thumbnail-${design.id}`}
+          />
+        </HoverCardTrigger>
+        <HoverCardContent side="right" align="start" className="w-72 p-0 overflow-hidden" data-testid={`design-hover-${design.id}`}>
+          {/* Expanded texture preview */}
+          <div 
+            className="h-32 w-full"
+            style={{ backgroundColor: bgColor }}
+          />
+          {/* Design info */}
+          <div className="p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-manrope font-bold text-sm">{design.design_name}</span>
+            </div>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Product Code</span>
+                <span className="font-mono font-medium">{design.design_code}</span>
+              </div>
+              {design.color_name && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Color</span>
+                  <span className="font-medium">{design.color_name}</span>
+                </div>
+              )}
+              {design.category && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Category</span>
+                  <span className="font-medium">{design.category}</span>
+                </div>
+              )}
+              {design.pattern && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Pattern</span>
+                  <span className="font-medium">{design.pattern}</span>
+                </div>
+              )}
+            </div>
+            {/* Color swatch */}
+            <div className="flex items-center gap-2 pt-2 border-t">
+              <div 
+                className="w-6 h-6 rounded border"
+                style={{ backgroundColor: bgColor }}
+              />
+              <span className="text-xs text-[hsl(215,16%,47%)]">{bgColor}</span>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
+  // Technical Specs Panel
+  const TechSpecsPanel = () => {
+    const specs = techSpecs || DEFAULT_SPECS[selectedProductType?.id] || {};
+    
+    return (
+      <div className="space-y-6" data-testid="tech-specs-panel">
+        {/* Fire Rating */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-red-50">
+            <Flame className="h-5 w-5 text-red-500" />
+          </div>
+          <div>
+            <h4 className="font-manrope font-bold text-sm">Fire Rating</h4>
+            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.fire_rating || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* NRC Rating */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-blue-50">
+            <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-manrope font-bold text-sm">NRC Rating</h4>
+            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.nrc_rating || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* Material */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-gray-100">
+            <svg className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 3v18"/>
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-manrope font-bold text-sm">Material</h4>
+            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.material || "N/A"}</p>
+          </div>
+        </div>
+
+        {/* Thickness & Weight */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
+            <p className="text-xs text-[hsl(215,16%,47%)]">Thickness</p>
+            <p className="font-manrope font-bold text-sm">{specs.thickness_mm || "N/A"}</p>
+          </div>
+          <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
+            <p className="text-xs text-[hsl(215,16%,47%)]">Weight</p>
+            <p className="font-manrope font-bold text-sm">{specs.weight_kg_m2 || "N/A"} kg/m²</p>
+          </div>
+        </div>
+
+        {/* Sustainability */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-green-50">
+            <Leaf className="h-5 w-5 text-green-500" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-manrope font-bold text-sm">Sustainability</h4>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {(specs.sustainability || []).map((item, i) => (
+                <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-amber-50">
+            <Award className="h-5 w-5 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <h4 className="font-manrope font-bold text-sm">Certifications</h4>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {(specs.certifications || []).map((item, i) => (
+                <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Installation & Warranty */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+          <div>
+            <p className="text-xs text-[hsl(215,16%,47%)]">Installation</p>
+            <p className="font-medium text-sm">{specs.installation || "N/A"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[hsl(215,16%,47%)]">Warranty</p>
+            <p className="font-medium text-sm">{specs.warranty || "N/A"}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -255,7 +480,7 @@ const Configurator = () => {
             </div>
 
             {/* Dynamic Options based on Product Type */}
-            <Accordion type="multiple" defaultValue={["category", "options"]} className="space-y-2">
+            <Accordion type="multiple" defaultValue={["category", "options", "designs"]} className="space-y-2">
               {/* Category Selector */}
               {selectedProductType?.categories?.length > 0 && (
                 <AccordionItem value="category" className="border rounded-lg px-4">
@@ -405,19 +630,17 @@ const Configurator = () => {
                   <AccordionContent className="pb-4">
                     <div className="thumbnail-grid" data-testid="design-grid">
                       {selectedCategory.designs.map((design) => (
-                        <div
+                        <DesignThumbnail
                           key={design.id}
-                          className={`thumbnail-item ${selectedDesign?.id === design.id ? 'selected' : ''}`}
-                          style={{ backgroundImage: `url(${design.thumbnail_url})` }}
-                          onClick={() => handleDesignSelect(design)}
-                          data-testid={`design-thumbnail-${design.id}`}
-                          title={design.design_name}
+                          design={design}
+                          isSelected={selectedDesign?.id === design.id}
+                          onSelect={handleDesignSelect}
                         />
                       ))}
                     </div>
                     {selectedDesign && (
                       <div className="mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
-                        <p className="text-sm font-medium">{selectedDesign.design_name}</p>
+                        <p className="font-medium text-sm">{selectedDesign.design_name}</p>
                         <p className="text-xs text-[hsl(215,16%,47%)]">{selectedDesign.design_code}</p>
                       </div>
                     )}
@@ -479,8 +702,8 @@ const Configurator = () => {
                         data-testid={`favorite-card-${favorite.id}`}
                       >
                         <div 
-                          className="aspect-video bg-cover bg-center"
-                          style={{ backgroundImage: `url(${favorite.design?.thumbnail_url})` }}
+                          className="aspect-video"
+                          style={{ backgroundColor: favorite.design?.texture_color || "#CCCCCC" }}
                         />
                         <div className="p-3">
                           <p className="font-medium text-sm truncate">{favorite.design?.design_name}</p>
@@ -530,10 +753,39 @@ const Configurator = () => {
           </Button>
         </div>
 
+        {/* Technical Specs Button */}
+        {selectedDesign && (
+          <Sheet open={specsOpen} onOpenChange={setSpecsOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white z-10"
+                data-testid="specs-btn"
+              >
+                <Eye className="h-5 w-5 text-[hsl(215,25%,27%)]" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[340px] sm:w-[400px]" data-testid="specs-sheet">
+              <SheetHeader>
+                <SheetTitle className="font-manrope">Technical Specifications</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <div className="mb-4 p-3 rounded-lg bg-[hsl(var(--secondary))]">
+                  <p className="font-manrope font-bold">{selectedProductType?.name}</p>
+                  <p className="text-sm text-[hsl(215,16%,47%)]">{selectedDesign?.design_name}</p>
+                </div>
+                <TechSpecsPanel />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
         {/* Canvas Component */}
         <CanvasPreview
           ref={canvasRef}
           backgroundImage={INTERIOR_IMAGE}
+          textureColor={selectedDesign?.texture_color}
           textureUrl={selectedDesign?.texture_url}
           selectedColor={selectedColor}
           size={selectedSize}

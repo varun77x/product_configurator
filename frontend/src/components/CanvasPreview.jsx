@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 
 const CanvasPreview = forwardRef(({ 
   backgroundImage, 
+  textureColor,
   textureUrl, 
   selectedColor, 
   size, 
@@ -13,23 +14,21 @@ const CanvasPreview = forwardRef(({
   const [loading, setLoading] = useState(true);
   const [bgLoaded, setBgLoaded] = useState(false);
   const bgImageRef = useRef(null);
-  const textureImageRef = useRef(null);
 
-  // Wall mask area (percentage of canvas where wall texture is applied)
-  // This defines the wall area in the interior image - adjust based on the provided image
+  // Wall mask area - adjusted for the provided interior image
+  // The wall is the dark area at the top of the image
   const WALL_MASK = {
-    x: 0.0,       // Start from left edge
-    y: 0.0,       // Start from top
-    width: 1.0,   // Full width
-    height: 0.58  // Up to where furniture starts
+    x: 0.0,
+    y: 0.0,
+    width: 1.0,
+    height: 0.56
   };
 
-  // Parse size to get tile dimensions
+  // Parse size to get tile dimensions for grid effect
   const getTileDimensions = useCallback(() => {
     if (!size) return { width: 80, height: 80 };
     const [w, h] = size.split('x').map(Number);
-    // Scale down for canvas (actual mm to canvas pixels ratio)
-    const scale = 0.1;
+    const scale = 0.12;
     return { width: Math.max(w * scale, 60), height: Math.max(h * scale, 60) };
   }, [size]);
 
@@ -45,31 +44,10 @@ const CanvasPreview = forwardRef(({
     img.onerror = () => {
       console.error("Failed to load background image");
       setLoading(false);
-      setBgLoaded(true); // Allow rendering even without bg
+      setBgLoaded(true);
     };
     img.src = backgroundImage;
   }, [backgroundImage]);
-
-  // Load texture image
-  useEffect(() => {
-    if (!textureUrl) {
-      textureImageRef.current = null;
-      return;
-    }
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      textureImageRef.current = img;
-      renderCanvas();
-    };
-    img.onerror = () => {
-      console.error("Failed to load texture image");
-      textureImageRef.current = null;
-      renderCanvas();
-    };
-    img.src = textureUrl;
-  }, [textureUrl]);
 
   // Render canvas
   const renderCanvas = useCallback(() => {
@@ -78,21 +56,19 @@ const CanvasPreview = forwardRef(({
 
     const ctx = canvas.getContext("2d");
     const bgImg = bgImageRef.current;
-    const textureImg = textureImageRef.current;
 
-    // Set canvas size based on container
+    // Set canvas size
     const containerWidth = canvas.parentElement?.clientWidth || 900;
     const containerHeight = canvas.parentElement?.clientHeight || 600;
     
-    // Use a fixed aspect ratio for consistency
     const targetAspect = 16 / 9;
     let canvasWidth, canvasHeight;
     
     if (containerWidth / containerHeight > targetAspect) {
-      canvasHeight = Math.min(containerHeight * 0.9, 600);
+      canvasHeight = Math.min(containerHeight * 0.9, 650);
       canvasWidth = canvasHeight * targetAspect;
     } else {
-      canvasWidth = Math.min(containerWidth * 0.95, 1000);
+      canvasWidth = Math.min(containerWidth * 0.95, 1100);
       canvasHeight = canvasWidth / targetAspect;
     }
 
@@ -108,96 +84,112 @@ const CanvasPreview = forwardRef(({
     const wallWidth = canvasWidth * WALL_MASK.width;
     const wallHeight = canvasHeight * WALL_MASK.height;
 
-    // Draw texture/color on wall area first
+    // Determine the color to use
+    let wallColor = textureColor || "#2d3748";
+    if (productType === "vicstrip" && selectedColor) {
+      wallColor = selectedColor;
+    }
+
+    // Draw wall texture/color
     ctx.save();
     
-    // Fill wall area with base color or texture
-    if (productType === "vicstrip" && selectedColor) {
-      // VicStrip: Fill with color first
-      ctx.fillStyle = selectedColor;
-      ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
-      
-      // Then overlay with slatted texture pattern
-      if (textureImg) {
-        ctx.globalCompositeOperation = "multiply";
-        const tileDims = getTileDimensions();
-        const patternCanvas = document.createElement("canvas");
-        const patternCtx = patternCanvas.getContext("2d");
-        patternCanvas.width = tileDims.width;
-        patternCanvas.height = tileDims.height;
-        patternCtx.drawImage(textureImg, 0, 0, tileDims.width, tileDims.height);
-        const pattern = ctx.createPattern(patternCanvas, "repeat");
-        ctx.fillStyle = pattern;
-        ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
-      }
-    } else if (textureImg) {
-      // Other products: Just tile the texture
-      const tileDims = getTileDimensions();
-      const patternCanvas = document.createElement("canvas");
-      const patternCtx = patternCanvas.getContext("2d");
-      patternCanvas.width = tileDims.width;
-      patternCanvas.height = tileDims.height;
-      patternCtx.drawImage(textureImg, 0, 0, tileDims.width, tileDims.height);
-      const pattern = ctx.createPattern(patternCanvas, "repeat");
-      ctx.fillStyle = pattern;
-      ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
-      
-      // Add emboss effect if enabled
-      if (isEmbossed) {
-        ctx.globalCompositeOperation = "overlay";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-        ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
-        ctx.globalCompositeOperation = "multiply";
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(wallX + 1, wallY + 1, wallWidth, wallHeight);
-      }
-    } else {
-      // No texture - show placeholder wall color
-      ctx.fillStyle = "#2d3748";
-      ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
+    // Fill with solid color
+    ctx.fillStyle = wallColor;
+    ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
+
+    // Add tile grid lines for panel effect
+    const tileDims = getTileDimensions();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
+    ctx.lineWidth = 1;
+
+    // Vertical lines
+    for (let x = wallX; x <= wallX + wallWidth; x += tileDims.width) {
+      ctx.beginPath();
+      ctx.moveTo(x, wallY);
+      ctx.lineTo(x, wallY + wallHeight);
+      ctx.stroke();
     }
-    
+
+    // Horizontal lines
+    for (let y = wallY; y <= wallY + wallHeight; y += tileDims.height) {
+      ctx.beginPath();
+      ctx.moveTo(wallX, y);
+      ctx.lineTo(wallX + wallWidth, y);
+      ctx.stroke();
+    }
+
+    // Add emboss effect if enabled
+    if (isEmbossed) {
+      // Highlight effect
+      ctx.globalCompositeOperation = "overlay";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+      ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
+      
+      // Shadow for depth
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      for (let x = wallX; x < wallX + wallWidth; x += tileDims.width) {
+        for (let y = wallY; y < wallY + wallHeight; y += tileDims.height) {
+          ctx.fillRect(x + 2, y + 2, tileDims.width - 4, tileDims.height - 4);
+        }
+      }
+    }
+
+    // Add VicStrip groove pattern
+    if (productType === "vicstrip") {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+      ctx.lineWidth = 2;
+      
+      // Vertical slat lines
+      const slatWidth = 20;
+      for (let x = wallX + slatWidth; x < wallX + wallWidth; x += slatWidth) {
+        ctx.beginPath();
+        ctx.moveTo(x, wallY);
+        ctx.lineTo(x, wallY + wallHeight);
+        ctx.stroke();
+      }
+    }
+
     ctx.restore();
 
-    // Draw background image (furniture scene) on top
+    // Draw background image (furniture) on top
     if (bgImg) {
       ctx.save();
       
-      // Draw only the furniture portion (bottom part of the image)
       const furnitureY = canvasHeight * WALL_MASK.height;
       const furnitureHeight = canvasHeight - furnitureY;
       
-      // Source coordinates from background image
       const srcY = bgImg.height * WALL_MASK.height;
       const srcHeight = bgImg.height - srcY;
       
       ctx.drawImage(
         bgImg,
-        0, srcY, bgImg.width, srcHeight,  // Source rect
-        0, furnitureY, canvasWidth, furnitureHeight  // Dest rect
+        0, srcY, bgImg.width, srcHeight,
+        0, furnitureY, canvasWidth, furnitureHeight
       );
       
       ctx.restore();
     }
 
-    // Add subtle vignette effect
+    // Add subtle vignette
     const gradient = ctx.createRadialGradient(
-      canvasWidth / 2, canvasHeight / 2, canvasHeight * 0.4,
+      canvasWidth / 2, canvasHeight / 2, canvasHeight * 0.5,
       canvasWidth / 2, canvasHeight / 2, canvasHeight
     );
     gradient.addColorStop(0, "rgba(0,0,0,0)");
-    gradient.addColorStop(1, "rgba(0,0,0,0.15)");
+    gradient.addColorStop(1, "rgba(0,0,0,0.1)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  }, [bgLoaded, selectedColor, size, isEmbossed, productType, getTileDimensions]);
+  }, [bgLoaded, textureColor, selectedColor, size, isEmbossed, productType, getTileDimensions]);
 
   // Re-render when dependencies change
   useEffect(() => {
     if (bgLoaded) {
       renderCanvas();
     }
-  }, [renderCanvas, bgLoaded, selectedColor, size, isEmbossed]);
+  }, [renderCanvas, bgLoaded, textureColor, selectedColor, size, isEmbossed]);
 
   // Handle window resize
   useEffect(() => {
@@ -210,13 +202,12 @@ const CanvasPreview = forwardRef(({
     return () => window.removeEventListener("resize", handleResize);
   }, [renderCanvas, bgLoaded]);
 
-  // Expose download function to parent
+  // Expose download function
   useImperativeHandle(ref, () => ({
     downloadImage: () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      // Create a temporary link element
       const link = document.createElement("a");
       link.download = `univicoustic-design-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png", 1.0);
