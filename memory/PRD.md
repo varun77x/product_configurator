@@ -22,7 +22,9 @@ Build a web-based MVP 2D product configurator for an acoustic wall panel company
 - `/api/products` - Returns all product types with configurations
 - `/api/products/{id}` - Get specific product
 - `/api/products/{id}/categories` - Get categories
+- `/api/products/{id}/specs` - Get technical specifications
 - Mock data generator for 4 product types with ~80 designs
+- Technical specs data (fire rating, NRC, sustainability, certifications)
 - CORS enabled
 
 ### Frontend (React + Tailwind)
@@ -32,8 +34,11 @@ Build a web-based MVP 2D product configurator for an acoustic wall panel company
   - **VMD Panels**: Category, Size, Density, Designs + Emboss toggle for Marble/Wood/Soft Texture/Leather
   - **Ombre Panels**: Category, Size, Designs
   - **VicStrip**: Pattern, Size, Thickness, 16 Color Swatches, Designs
-- Thumbnail grid for design selection
-- Canvas-based 2D wall texture rendering
+- **Design Thumbnail Hover Cards**: Show expanded texture, product code, color name, category on hover
+- **Technical Specs Panel**: Eye icon opens sheet with fire rating, NRC, sustainability, certifications, material info
+- Thumbnail grid for design selection (solid color placeholders)
+- Canvas-based 2D wall texture rendering with panel grid lines
+- User's interior image integrated (furniture scene)
 - Save/Load favorites (localStorage)
 - Download PNG functionality
 - Reset configuration
@@ -44,6 +49,7 @@ Build a web-based MVP 2D product configurator for an acoustic wall panel company
 - Light/minimal corporate theme
 - Brand colors: Blue (#3d4f5f) + Orange (#f97316)
 - Fonts: Manrope (headings) + Inter (body)
+- Solid color textures for design placeholders
 
 ## P0/P1/P2 Features Remaining
 
