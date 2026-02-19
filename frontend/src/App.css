@@ -30,7 +30,7 @@
 /* Canvas Area */
 .canvas-area {
     flex: 1;
-    background: #1a1a2e;
+    background: #ffffff;
     position: relative;
     min-height: 60vh;
     display: flex;
@@ -123,7 +123,7 @@
 .loading-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(26, 26, 46, 0.8);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;

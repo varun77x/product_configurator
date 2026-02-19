@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, Loader2, Eye, X, Shield, Flame, Leaf, Award } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Eye, Loader2, Shield, Flame, Leaf, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
+import { VICSTRIP_PRODUCT, getImagePath } from "@/data/skus";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -57,9 +58,15 @@ const DEFAULT_SPECS = {
 };
 
 const Configurator = () => {
+  // Products from API
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Product type selection
   const [selectedProductType, setSelectedProductType] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  
+  // Generic product state (for non-VicStrip products like VMD, Ombre)
   const [selectedDesign, setSelectedDesign] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedDensity, setSelectedDensity] = useState(null);
@@ -67,8 +74,9 @@ const Configurator = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThickness, setSelectedThickness] = useState(null);
   const [isEmbossed, setIsEmbossed] = useState(false);
+  
+  // UI state
   const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [specsOpen, setSpecsOpen] = useState(false);
   const [techSpecs, setTechSpecs] = useState(null);
@@ -79,20 +87,33 @@ const Configurator = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(`${API}/products`);
-        setProducts(response.data);
+        const apiProducts = response.data;
+        setProducts(apiProducts);
+        
         // Set default selection to first active product
-        const firstActive = response.data.find(p => p.active);
+        const firstActive = apiProducts.find(p => p.active);
         if (firstActive) {
           setSelectedProductType(firstActive);
-          if (firstActive.sizes?.length > 0) setSelectedSize(firstActive.sizes[0]);
-          if (firstActive.densities?.length > 0) setSelectedDensity(firstActive.densities[0]);
-          if (firstActive.patterns?.length > 0) setSelectedPattern(firstActive.patterns[0]);
-          if (firstActive.thicknesses?.length > 0) setSelectedThickness(firstActive.thicknesses[0]);
-          if (firstActive.colors?.length > 0) setSelectedColor(firstActive.colors[0]);
-          if (firstActive.categories?.length > 0) {
-            setSelectedCategory(firstActive.categories[0]);
-            if (firstActive.categories[0].designs?.length > 0) {
-              setSelectedDesign(firstActive.categories[0].designs[0]);
+          
+          // Initialize state based on product type
+          if (firstActive.id === "vicstrip") {
+            // VicStrip-specific initialization
+            setSelectedPattern(VICSTRIP_PRODUCT.patterns[0]);
+            setSelectedDesign({ pattern: VICSTRIP_PRODUCT.patterns[0], color: VICSTRIP_PRODUCT.patterns[0].colors[0] });
+            setSelectedSize("600x600");
+            setSelectedThickness("12 mm");
+          } else {
+            // Generic product initialization (VMD, Ombre, etc.)
+            if (firstActive.sizes?.length > 0) setSelectedSize(firstActive.sizes[0]);
+            if (firstActive.densities?.length > 0) setSelectedDensity(firstActive.densities[0]);
+            if (firstActive.patterns?.length > 0) setSelectedPattern(firstActive.patterns[0]);
+            if (firstActive.thicknesses?.length > 0) setSelectedThickness(firstActive.thicknesses[0]);
+            if (firstActive.colors?.length > 0) setSelectedColor(firstActive.colors[0]);
+            if (firstActive.categories?.length > 0) {
+              setSelectedCategory(firstActive.categories[0]);
+              if (firstActive.categories[0].designs?.length > 0) {
+                setSelectedDesign(firstActive.categories[0].designs[0]);
+              }
             }
           }
         }
@@ -121,6 +142,20 @@ const Configurator = () => {
     fetchSpecs();
   }, [selectedProductType]);
 
+  // Debug: Log state changes
+  useEffect(() => {
+    console.log("=== State Update ===");
+    console.log("Product Type:", selectedProductType?.id);
+    console.log("Selected Design:", selectedDesign);
+    console.log("Selected Pattern:", selectedPattern);
+    console.log("Selected Size:", selectedSize);
+    console.log("Texture Color:", 
+      selectedProductType?.id === "vicstrip"
+        ? selectedDesign?.color?.hex
+        : selectedDesign?.texture_color
+    );
+  }, [selectedProductType, selectedDesign, selectedPattern, selectedSize]);
+
   // Load favorites from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("univicoustic_favorites");
@@ -140,36 +175,44 @@ const Configurator = () => {
     const product = products.find(p => p.id === productId);
     if (product && product.active) {
       setSelectedProductType(product);
+      
+      // Clear all state first
       setSelectedCategory(null);
       setSelectedDesign(null);
       setIsEmbossed(false);
+      setSelectedPattern(null);
+      setSelectedColor(null);
+      setSelectedDensity(null);
+      setSelectedSize(null);
+      setSelectedThickness(null);
       
       // Reset options based on new product type
-      if (product.sizes?.length > 0) setSelectedSize(product.sizes[0]);
-      else setSelectedSize(null);
-      
-      if (product.densities?.length > 0) setSelectedDensity(product.densities[0]);
-      else setSelectedDensity(null);
-      
-      if (product.patterns?.length > 0) setSelectedPattern(product.patterns[0]);
-      else setSelectedPattern(null);
-      
-      if (product.thicknesses?.length > 0) setSelectedThickness(product.thicknesses[0]);
-      else setSelectedThickness(null);
-      
-      if (product.colors?.length > 0) setSelectedColor(product.colors[0]);
-      else setSelectedColor(null);
-      
-      if (product.categories?.length > 0) {
-        setSelectedCategory(product.categories[0]);
-        if (product.categories[0].designs?.length > 0) {
-          setSelectedDesign(product.categories[0].designs[0]);
+      if (product.id === "vicstrip") {
+        // VicStrip-specific initialization
+        const defaultPattern = VICSTRIP_PRODUCT.patterns[0];
+        setSelectedPattern(defaultPattern);
+        setSelectedDesign({ pattern: defaultPattern, color: defaultPattern.colors[0] });
+        setSelectedSize("600x600");
+        setSelectedThickness("12 mm");
+      } else {
+        // Generic product initialization
+        if (product.sizes?.length > 0) setSelectedSize(product.sizes[0]);
+        if (product.densities?.length > 0) setSelectedDensity(product.densities[0]);
+        if (product.patterns?.length > 0) setSelectedPattern(product.patterns[0]);
+        if (product.thicknesses?.length > 0) setSelectedThickness(product.thicknesses[0]);
+        if (product.colors?.length > 0) setSelectedColor(product.colors[0]);
+        
+        if (product.categories?.length > 0) {
+          setSelectedCategory(product.categories[0]);
+          if (product.categories[0].designs?.length > 0) {
+            setSelectedDesign(product.categories[0].designs[0]);
+          }
         }
       }
     }
   };
 
-  // Handle category change
+  // Handle category change (for non-VicStrip products)
   const handleCategoryChange = (categoryId) => {
     const category = selectedProductType?.categories?.find(c => c.id === categoryId);
     if (category) {
@@ -183,9 +226,35 @@ const Configurator = () => {
     }
   };
 
-  // Handle design selection
-  const handleDesignSelect = (design) => {
-    setSelectedDesign(design);
+  // VicStrip: handle pattern change
+  const handlePatternChange = (patternId) => {
+    const pattern = VICSTRIP_PRODUCT.patterns.find(p => p.id === patternId);
+    if (pattern) {
+      setSelectedPattern(pattern);
+      setSelectedDesign({ pattern, color: pattern.colors[0] });
+      // clear category when switching patterns
+      setSelectedCategory(null);
+    }
+  };
+
+  // Handle design selection (accept design object or color id for VicStrip)
+  const handleDesignSelect = (designOrColor) => {
+    if (!designOrColor) return;
+    if (selectedProductType?.id === "vicstrip") {
+      // VicStrip flow
+      if (typeof designOrColor === 'object' && designOrColor.color) {
+        setSelectedDesign(designOrColor);
+      } else if (typeof designOrColor === 'object' && designOrColor.id) {
+        const color = selectedPattern?.colors?.find(c => c.id === designOrColor.color?.id);
+        if (color) setSelectedDesign({ pattern: selectedPattern, color });
+      } else {
+        const color = selectedPattern?.colors?.find(c => c.id === designOrColor);
+        if (color) setSelectedDesign({ pattern: selectedPattern, color });
+      }
+    } else {
+      // Generic product flow (VMD, Ombre, etc.)
+      setSelectedDesign(designOrColor);
+    }
   };
 
   // Save current configuration to favorites
@@ -200,20 +269,32 @@ const Configurator = () => {
       timestamp: new Date().toISOString(),
       productType: selectedProductType?.name,
       productTypeId: selectedProductType?.id,
-      category: selectedCategory?.name,
-      categoryId: selectedCategory?.id,
-      design: selectedDesign,
+      
+      // VicStrip specific
+      ...(selectedProductType?.id === "vicstrip" && {
+        pattern: selectedDesign.pattern,
+        color: selectedDesign.color,
+      }),
+      
+      // Generic product specific
+      ...(selectedProductType?.id !== "vicstrip" && {
+        category: selectedCategory?.name,
+        categoryId: selectedCategory?.id,
+        design: selectedDesign,
+        density: selectedDensity,
+        pattern: selectedPattern,
+        color: selectedColor,
+        isEmbossed: isEmbossed,
+      }),
+      
+      // Common
       size: selectedSize,
-      density: selectedDensity,
-      pattern: selectedPattern,
-      color: selectedColor,
       thickness: selectedThickness,
-      isEmbossed: isEmbossed,
     };
 
     const newFavorites = [...favorites, config];
     saveFavorites(newFavorites);
-    toast.success("Design saved to favorites!");
+    toast.success("Configuration saved!");
   };
 
   // Load favorite configuration
@@ -221,17 +302,33 @@ const Configurator = () => {
     const product = products.find(p => p.id === favorite.productTypeId);
     if (product) {
       setSelectedProductType(product);
-      const category = product.categories?.find(c => c.id === favorite.categoryId);
-      if (category) {
-        setSelectedCategory(category);
-        setSelectedDesign(favorite.design);
+      
+      if (favorite.productTypeId === "vicstrip") {
+        // VicStrip flow
+        const pattern = VICSTRIP_PRODUCT.patterns.find(p => p.id === favorite.pattern.id);
+        if (pattern) {
+          setSelectedPattern(pattern);
+          const color = pattern.colors.find(c => c.id === favorite.color.id);
+          if (color) {
+            setSelectedDesign({ pattern, color });
+          }
+        }
+        setSelectedSize(favorite.size || "600x600");
+        setSelectedThickness(favorite.thickness || "12 mm");
+      } else {
+        // Generic product flow
+        const category = product.categories?.find(c => c.id === favorite.categoryId);
+        if (category) {
+          setSelectedCategory(category);
+          setSelectedDesign(favorite.design);
+        }
+        setSelectedSize(favorite.size);
+        setSelectedDensity(favorite.density);
+        setSelectedPattern(favorite.pattern);
+        setSelectedColor(favorite.color);
+        setSelectedThickness(favorite.thickness);
+        setIsEmbossed(favorite.isEmbossed);
       }
-      setSelectedSize(favorite.size);
-      setSelectedDensity(favorite.density);
-      setSelectedPattern(favorite.pattern);
-      setSelectedColor(favorite.color);
-      setSelectedThickness(favorite.thickness);
-      setIsEmbossed(favorite.isEmbossed);
     }
     setFavoritesOpen(false);
     toast.success("Configuration loaded!");
@@ -258,69 +355,6 @@ const Configurator = () => {
       handleProductTypeChange(selectedProductType.id);
       toast.success("Configuration reset");
     }
-  };
-
-  // Design Thumbnail with Hover Card
-  const DesignThumbnail = ({ design, isSelected, onSelect }) => {
-    const bgColor = design.texture_color || "#CCCCCC";
-    
-    return (
-      <HoverCard openDelay={200} closeDelay={100}>
-        <HoverCardTrigger asChild>
-          <div
-            className={`thumbnail-item ${isSelected ? 'selected' : ''}`}
-            style={{ backgroundColor: bgColor }}
-            onClick={() => onSelect(design)}
-            data-testid={`design-thumbnail-${design.id}`}
-          />
-        </HoverCardTrigger>
-        <HoverCardContent side="right" align="start" className="w-72 p-0 overflow-hidden" data-testid={`design-hover-${design.id}`}>
-          {/* Expanded texture preview */}
-          <div 
-            className="h-32 w-full"
-            style={{ backgroundColor: bgColor }}
-          />
-          {/* Design info */}
-          <div className="p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-manrope font-bold text-sm">{design.design_name}</span>
-            </div>
-            <div className="space-y-1 text-xs">
-              <div className="flex justify-between">
-                <span className="text-[hsl(215,16%,47%)]">Product Code</span>
-                <span className="font-mono font-medium">{design.design_code}</span>
-              </div>
-              {design.color_name && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Color</span>
-                  <span className="font-medium">{design.color_name}</span>
-                </div>
-              )}
-              {design.category && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Category</span>
-                  <span className="font-medium">{design.category}</span>
-                </div>
-              )}
-              {design.pattern && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Pattern</span>
-                  <span className="font-medium">{design.pattern}</span>
-                </div>
-              )}
-            </div>
-            {/* Color swatch */}
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <div 
-                className="w-6 h-6 rounded border"
-                style={{ backgroundColor: bgColor }}
-              />
-              <span className="text-xs text-[hsl(215,16%,47%)]">{bgColor}</span>
-            </div>
-          </div>
-        </HoverCardContent>
-      </HoverCard>
-    );
   };
 
   // Technical Specs Panel
@@ -429,6 +463,68 @@ const Configurator = () => {
     );
   };
 
+  // Design Thumbnail with Hover Card (full metadata)
+  const DesignThumbnail = ({ design, isSelected, onSelect }) => {
+    const bgColor = design.texture_color || "#CCCCCC";
+    return (
+      <HoverCard openDelay={200} closeDelay={100}>
+        <HoverCardTrigger asChild>
+          <div
+            className={`thumbnail-item ${isSelected ? 'selected' : ''}`}
+            style={{ backgroundColor: bgColor }}
+            onClick={() => onSelect(design)}
+            data-testid={`design-thumbnail-${design.id}`}
+          />
+        </HoverCardTrigger>
+        <HoverCardContent side="right" align="start" className="w-72 p-0 overflow-hidden" data-testid={`design-hover-${design.id}`}>
+          {/* Expanded texture preview */}
+          <div 
+            className="h-32 w-full"
+            style={{ backgroundColor: bgColor }}
+          />
+          {/* Design info */}
+          <div className="p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-manrope font-bold text-sm">{design.design_name}</span>
+            </div>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Product Code</span>
+                <span className="font-mono font-medium">{design.design_code}</span>
+              </div>
+              {design.color_name && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Color</span>
+                  <span className="font-medium">{design.color_name}</span>
+                </div>
+              )}
+              {design.category && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Category</span>
+                  <span className="font-medium">{design.category}</span>
+                </div>
+              )}
+              {design.pattern && (
+                <div className="flex justify-between">
+                  <span className="text-[hsl(215,16%,47%)]">Pattern</span>
+                  <span className="font-medium">{design.pattern}</span>
+                </div>
+              )}
+            </div>
+            {/* Color swatch */}
+            <div className="flex items-center gap-2 pt-2 border-t">
+              <div 
+                className="w-6 h-6 rounded border"
+                style={{ backgroundColor: bgColor }}
+              />
+              <span className="text-xs text-[hsl(215,16%,47%)]">{bgColor}</span>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -453,14 +549,10 @@ const Configurator = () => {
 
         <ScrollArea className="h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
           <div className="p-6 space-y-6">
-            {/* Product Type Selector */}
-            <div className="space-y-2">
+            {/* Product Type Dropdown */}
+            <div className="border rounded-lg px-4 py-3 space-y-2">
               <Label className="section-header">Product Type</Label>
-              <Select 
-                value={selectedProductType?.id} 
-                onValueChange={handleProductTypeChange}
-                data-testid="product-type-select"
-              >
+              <Select value={selectedProductType?.id} onValueChange={handleProductTypeChange}>
                 <SelectTrigger className="w-full" data-testid="product-type-trigger">
                   <SelectValue placeholder="Select product type" />
                 </SelectTrigger>
@@ -479,175 +571,269 @@ const Configurator = () => {
               </Select>
             </div>
 
-            {/* Dynamic Options based on Product Type */}
-            <Accordion type="multiple" defaultValue={["category", "options", "designs"]} className="space-y-2">
-              {/* Category Selector */}
-              {selectedProductType?.categories?.length > 0 && (
-                <AccordionItem value="category" className="border rounded-lg px-4">
-                  <AccordionTrigger className="section-header py-3">
-                    {selectedProductType?.id === "vicstrip" ? "Pattern" : "Category"}
-                  </AccordionTrigger>
-                  <AccordionContent className="pb-4">
-                    <Select 
-                      value={selectedCategory?.id} 
-                      onValueChange={handleCategoryChange}
-                      data-testid="category-select"
-                    >
-                      <SelectTrigger className="w-full" data-testid="category-trigger">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProductType.categories.map((category) => (
-                          <SelectItem 
-                            key={category.id} 
-                            value={category.id}
-                            data-testid={`category-${category.id}`}
-                          >
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            {/* VicStrip Options */}
+            {selectedProductType?.id === "vicstrip" && (
+              <div className="space-y-4">
+                {/* Pattern Selection */}
+                <div className="border rounded-lg px-4 py-3 space-y-2">
+                  <Label className="section-header">Pattern</Label>
+                  <Select value={selectedPattern?.id} onValueChange={handlePatternChange}>
+                    <SelectTrigger className="w-full" data-testid="pattern-trigger">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VICSTRIP_PRODUCT.patterns.map((pattern) => (
+                        <SelectItem key={pattern.id} value={pattern.id} data-testid={`pattern-${pattern.id}`}>
+                          {pattern.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Emboss Toggle (only for emboss-available categories) */}
-                    {selectedCategory?.emboss_available && (
-                      <div className="flex items-center justify-between mt-4 p-3 bg-[hsl(var(--secondary))] rounded-lg">
-                        <Label htmlFor="emboss-toggle" className="text-sm font-medium">
-                          Embossed Finish
-                        </Label>
-                        <Switch
-                          id="emboss-toggle"
-                          checked={isEmbossed}
-                          onCheckedChange={setIsEmbossed}
-                          data-testid="emboss-toggle"
-                        />
-                      </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-
-              {/* Size, Density, Pattern, Thickness Options */}
-              <AccordionItem value="options" className="border rounded-lg px-4">
-                <AccordionTrigger className="section-header py-3">Options</AccordionTrigger>
-                <AccordionContent className="pb-4 space-y-4">
-                  {/* Size */}
-                  {selectedProductType?.sizes?.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Size (mm)</Label>
-                      <Select 
-                        value={selectedSize} 
-                        onValueChange={setSelectedSize}
-                        data-testid="size-select"
-                      >
+                {/* Options Section (Size, Thickness) */}
+                <div className="border rounded-lg px-4 py-3 space-y-2">
+                  <Label className="section-header">Options</Label>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <Label className="text-xs">Size</Label>
+                      <Select value={selectedSize || ""} onValueChange={setSelectedSize}>
                         <SelectTrigger className="w-full" data-testid="size-trigger">
-                          <SelectValue placeholder="Select size" />
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {selectedProductType.sizes.map((size) => (
-                            <SelectItem key={size} value={size} data-testid={`size-${size}`}>
-                              {size}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="600x600">600x600</SelectItem>
+                          <SelectItem value="600x2400">600x2400</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                  )}
-
-                  {/* Density */}
-                  {selectedProductType?.densities?.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Density</Label>
-                      <Select 
-                        value={selectedDensity} 
-                        onValueChange={setSelectedDensity}
-                        data-testid="density-select"
-                      >
-                        <SelectTrigger className="w-full" data-testid="density-trigger">
-                          <SelectValue placeholder="Select density" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedProductType.densities.map((density) => (
-                            <SelectItem key={density} value={density} data-testid={`density-${density}`}>
-                              {density}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* Thickness (VicStrip) */}
-                  {selectedProductType?.thicknesses?.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Thickness</Label>
-                      <Select 
-                        value={selectedThickness} 
-                        onValueChange={setSelectedThickness}
-                        data-testid="thickness-select"
-                      >
+                    <div className="flex-1">
+                      <Label className="text-xs">Thickness</Label>
+                      <Select value={selectedThickness || ""} onValueChange={setSelectedThickness}>
                         <SelectTrigger className="w-full" data-testid="thickness-trigger">
-                          <SelectValue placeholder="Select thickness" />
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {selectedProductType.thicknesses.map((thickness) => (
-                            <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
-                              {thickness}
+                          <SelectItem value="12 mm">12 mm</SelectItem>
+                          <SelectItem value="25 mm">25 mm</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Designs Section (all colors as designs) */}
+                <div className="border rounded-lg px-4 py-3 space-y-2">
+                  <Label className="section-header">Designs</Label>
+                  <div className="thumbnail-grid" data-testid="design-grid">
+                      {(() => {
+                        // Prefer category designs if available, otherwise fall back to pattern colors
+                        const designs = (selectedCategory?.designs && selectedCategory.designs.length > 0)
+                          ? selectedCategory.designs
+                          : (selectedPattern?.colors || []).map((c, i) => ({
+                              id: `vicstrip-color-${c.id || i}`,
+                              product_type: 'vicstrip',
+                              category: selectedPattern?.name,
+                              design_code: `VCS-${(i+1).toString().padStart(4,'0')}`,
+                              design_name: `${selectedPattern?.name} - ${c.name}`,
+                              texture_color: c.hex,
+                              thumbnail_url: null,
+                              color_name: c.name,
+                              pattern: selectedPattern?.name,
+                              color: c, // Pass the full color object here
+                            }));
+
+                        return designs.map((design) => (
+                          <DesignThumbnail
+                            key={design.id}
+                            design={design}
+                            isSelected={selectedDesign?.id === design.id || selectedDesign?.color?.hex === design.texture_color}
+                            onSelect={handleDesignSelect}
+                          />
+                        ));
+                      })()}
+                    </div>
+                  {selectedDesign && (
+                    <div className="p-3 bg-[hsl(var(--secondary))] rounded-lg mt-2">
+                      <p className="font-medium text-sm">{selectedDesign.color.name}</p>
+                      <p className="text-xs text-[hsl(215,16%,47%)]">{selectedDesign.color.hex}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Generic Product Options (VMD, Ombre, etc.) */}
+            {selectedProductType?.id !== "vicstrip" && (
+              <Accordion type="multiple" defaultValue={["category", "options", "designs"]} className="space-y-2">
+                {/* Category Selector */}
+                {selectedProductType?.categories?.length > 0 && (
+                  <AccordionItem value="category" className="border rounded-lg px-4">
+                    <AccordionTrigger className="section-header py-3">
+                      Category
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      <Select 
+                        value={selectedCategory?.id} 
+                        onValueChange={handleCategoryChange}
+                        data-testid="category-select"
+                      >
+                        <SelectTrigger className="w-full" data-testid="category-trigger">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedProductType.categories.map((category) => (
+                            <SelectItem 
+                              key={category.id} 
+                              value={category.id}
+                              data-testid={`category-${category.id}`}
+                            >
+                              {category.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
 
-              {/* Color Swatches (VicStrip) */}
-              {selectedProductType?.colors?.length > 0 && (
-                <AccordionItem value="colors" className="border rounded-lg px-4">
-                  <AccordionTrigger className="section-header py-3">Colors</AccordionTrigger>
-                  <AccordionContent className="pb-4">
-                    <div className="color-grid" data-testid="color-grid">
-                      {selectedProductType.colors.map((color, index) => (
-                        <button
-                          key={index}
-                          className={`color-swatch ${selectedColor === color ? 'selected' : ''}`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => setSelectedColor(color)}
-                          data-testid={`color-swatch-${index}`}
-                          aria-label={`Select color ${color}`}
-                        />
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
+                      {/* Emboss Toggle (only for emboss-available categories) */}
+                      {selectedCategory?.emboss_available && (
+                        <div className="flex items-center justify-between mt-4 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                          <Label htmlFor="emboss-toggle" className="text-sm font-medium">
+                            Embossed Finish
+                          </Label>
+                          <Switch
+                            id="emboss-toggle"
+                            checked={isEmbossed}
+                            onCheckedChange={setIsEmbossed}
+                            data-testid="emboss-toggle"
+                          />
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
 
-              {/* Design Thumbnails */}
-              {selectedCategory?.designs?.length > 0 && (
-                <AccordionItem value="designs" className="border rounded-lg px-4">
-                  <AccordionTrigger className="section-header py-3">Designs</AccordionTrigger>
-                  <AccordionContent className="pb-4">
-                    <div className="thumbnail-grid" data-testid="design-grid">
-                      {selectedCategory.designs.map((design) => (
-                        <DesignThumbnail
-                          key={design.id}
-                          design={design}
-                          isSelected={selectedDesign?.id === design.id}
-                          onSelect={handleDesignSelect}
-                        />
-                      ))}
-                    </div>
-                    {selectedDesign && (
-                      <div className="mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
-                        <p className="font-medium text-sm">{selectedDesign.design_name}</p>
-                        <p className="text-xs text-[hsl(215,16%,47%)]">{selectedDesign.design_code}</p>
+                {/* Size, Density, Pattern, Thickness Options */}
+                <AccordionItem value="options" className="border rounded-lg px-4">
+                  <AccordionTrigger className="section-header py-3">Options</AccordionTrigger>
+                  <AccordionContent className="pb-4 space-y-4">
+                    {/* Size */}
+                    {selectedProductType?.sizes?.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Size (mm)</Label>
+                        <Select 
+                          value={selectedSize || ""} 
+                          onValueChange={setSelectedSize}
+                          data-testid="size-select"
+                        >
+                          <SelectTrigger className="w-full" data-testid="size-trigger">
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.sizes.map((size) => (
+                              <SelectItem key={size} value={size} data-testid={`size-${size}`}>
+                                {size}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Density */}
+                    {selectedProductType?.densities?.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Density</Label>
+                        <Select 
+                          value={selectedDensity || ""} 
+                          onValueChange={setSelectedDensity}
+                          data-testid="density-select"
+                        >
+                          <SelectTrigger className="w-full" data-testid="density-trigger">
+                            <SelectValue placeholder="Select density" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.densities.map((density) => (
+                              <SelectItem key={density} value={density} data-testid={`density-${density}`}>
+                                {density}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Thickness */}
+                    {selectedProductType?.thicknesses?.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Thickness</Label>
+                        <Select 
+                          value={selectedThickness || ""} 
+                          onValueChange={setSelectedThickness}
+                          data-testid="thickness-select"
+                        >
+                          <SelectTrigger className="w-full" data-testid="thickness-trigger">
+                            <SelectValue placeholder="Select thickness" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.thicknesses.map((thickness) => (
+                              <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
+                                {thickness}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
                   </AccordionContent>
                 </AccordionItem>
-              )}
-            </Accordion>
+
+                {/* Color Swatches */}
+                {selectedProductType?.colors?.length > 0 && (
+                  <AccordionItem value="colors" className="border rounded-lg px-4">
+                    <AccordionTrigger className="section-header py-3">Colors</AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      <div className="color-grid" data-testid="color-grid">
+                        {selectedProductType.colors.map((color, index) => (
+                          <button
+                            key={index}
+                            className={`color-swatch ${selectedColor === color ? 'selected' : ''}`}
+                            style={{ backgroundColor: color }}
+                            onClick={() => setSelectedColor(color)}
+                            data-testid={`color-swatch-${index}`}
+                            aria-label={`Select color ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+
+                {/* Design Thumbnails */}
+                {selectedCategory?.designs?.length > 0 && (
+                  <AccordionItem value="designs" className="border rounded-lg px-4">
+                    <AccordionTrigger className="section-header py-3">Designs</AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      <div className="thumbnail-grid" data-testid="design-grid">
+                        {selectedCategory.designs.map((design) => (
+                          <DesignThumbnail
+                            key={design.id}
+                            design={design}
+                            isSelected={selectedDesign?.id === design.id}
+                            onSelect={handleDesignSelect}
+                          />
+                        ))}
+                      </div>
+                      {selectedDesign && (
+                        <div className="mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                          <p className="font-medium text-sm">{selectedDesign.design_name}</p>
+                          <p className="text-xs text-[hsl(215,16%,47%)]">{selectedDesign.design_code}</p>
+                        </div>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+              </Accordion>
+            )}
           </div>
         </ScrollArea>
 
@@ -683,41 +869,54 @@ const Configurator = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl" data-testid="favorites-modal">
               <DialogHeader>
-                <DialogTitle className="font-manrope">Saved Designs</DialogTitle>
+                <DialogTitle className="font-manrope">Saved Configurations</DialogTitle>
               </DialogHeader>
               {favorites.length === 0 ? (
                 <div className="py-12 text-center text-[hsl(215,16%,47%)]">
                   <Heart className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p>No saved designs yet</p>
-                  <p className="text-sm mt-1">Save your favorite configurations to access them later</p>
+                  <p>No saved configurations yet</p>
                 </div>
               ) : (
                 <ScrollArea className="max-h-[60vh]">
-                  <div className="favorites-grid p-1">
+                  <div className="favorites-grid p-1 space-y-2">
                     {favorites.map((favorite) => (
                       <div
                         key={favorite.id}
-                        className="favorite-card"
+                        className="favorite-card p-3 border rounded-lg cursor-pointer hover:bg-[hsl(var(--secondary))] transition-colors"
                         onClick={() => loadFavorite(favorite)}
                         data-testid={`favorite-card-${favorite.id}`}
                       >
-                        <div 
-                          className="aspect-video"
-                          style={{ backgroundColor: favorite.design?.texture_color || "#CCCCCC" }}
-                        />
-                        <div className="p-3">
-                          <p className="font-medium text-sm truncate">{favorite.design?.design_name}</p>
-                          <p className="text-xs text-[hsl(215,16%,47%)] truncate">{favorite.productType}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-[hsl(215,16%,47%)]">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">
+                              {favorite.productTypeId === "vicstrip" 
+                                ? favorite.pattern?.name 
+                                : favorite.design?.design_name || favorite.productType}
+                            </p>
+                            <p className="text-xs text-[hsl(215,16%,47%)]">
+                              {favorite.productTypeId === "vicstrip"
+                                ? favorite.color?.name
+                                : favorite.category || favorite.productType}
+                            </p>
+                            <p className="text-xs text-[hsl(215,16%,47%)] mt-1">
                               {new Date(favorite.timestamp).toLocaleDateString()}
-                            </span>
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-12 h-12 rounded border"
+                              style={{ 
+                                backgroundColor: favorite.productTypeId === "vicstrip" 
+                                  ? favorite.color?.hex 
+                                  : (favorite.design?.texture_color || "#CCCCCC")
+                              }}
+                            />
                             <button
                               onClick={(e) => deleteFavorite(favorite.id, e)}
                               className="p-1 hover:bg-red-100 rounded text-red-500"
                               data-testid={`delete-favorite-${favorite.id}`}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                         </div>
@@ -741,7 +940,7 @@ const Configurator = () => {
             data-testid="save-favorite-btn"
           >
             <Heart className="h-4 w-4 mr-2" />
-            Save Design
+            Save
           </Button>
           <Button
             onClick={downloadImage}
@@ -752,6 +951,7 @@ const Configurator = () => {
             Download
           </Button>
         </div>
+
 
         {/* Technical Specs Button */}
         {selectedDesign && (
@@ -773,7 +973,11 @@ const Configurator = () => {
               <div className="mt-6">
                 <div className="mb-4 p-3 rounded-lg bg-[hsl(var(--secondary))]">
                   <p className="font-manrope font-bold">{selectedProductType?.name}</p>
-                  <p className="text-sm text-[hsl(215,16%,47%)]">{selectedDesign?.design_name}</p>
+                  <p className="text-sm text-[hsl(215,16%,47%)]">
+                    {selectedProductType?.id === "vicstrip"
+                      ? `${selectedPattern?.name} - ${selectedDesign?.color?.name}`
+                      : selectedDesign?.design_name}
+                  </p>
                 </div>
                 <TechSpecsPanel />
               </div>
@@ -783,25 +987,46 @@ const Configurator = () => {
 
         {/* Canvas Component */}
         <CanvasPreview
+          key={`${selectedProductType?.id}-${selectedDesign?.id || selectedDesign?.color?.id || 'default'}`}
           ref={canvasRef}
           backgroundImage={INTERIOR_IMAGE}
-          textureColor={selectedDesign?.texture_color}
-          textureUrl={selectedDesign?.texture_url}
-          selectedColor={selectedColor}
+          textureColor={
+            selectedProductType?.id === "vicstrip"
+              ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
+              : (selectedDesign?.texture_color)
+          }
+          textureUrl={
+            selectedProductType?.id === "vicstrip"
+              ? (selectedPattern?.id && selectedDesign?.color?.id ? getImagePath(selectedPattern.id, selectedDesign.color.id) : null)
+              : (selectedDesign?.texture_url)
+          }
+          selectedColor={
+            selectedProductType?.id === "vicstrip"
+              ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
+              : (selectedColor)
+          }
           size={selectedSize}
           isEmbossed={isEmbossed}
           productType={selectedProductType?.id}
         />
 
         {/* Configuration Summary */}
-        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-xs" data-testid="config-summary">
-          <p className="font-manrope font-bold text-sm text-[hsl(215,25%,27%)]">
-            {selectedDesign?.design_name || "Select a design"}
-          </p>
-          <p className="text-xs text-[hsl(215,16%,47%)] mt-1">
-            {[selectedSize, selectedDensity, selectedThickness, isEmbossed && "Embossed"].filter(Boolean).join(" • ")}
-          </p>
-        </div>
+        {selectedProductType && (
+          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-xs" data-testid="config-summary">
+            <p className="font-manrope font-bold text-sm text-[hsl(215,25%,27%)]">
+              {selectedProductType?.id === "vicstrip"
+                ? (selectedPattern?.name || "Select a pattern")
+                : (selectedDesign?.design_name || "Select a design")}
+            </p>
+            <p className="text-xs text-[hsl(215,16%,47%)] mt-1">
+              {selectedProductType?.id === "vicstrip"
+                ? (selectedDesign?.color?.name 
+                  ? `${selectedDesign?.color?.name} • ${selectedDesign?.color?.hex} • ${selectedSize} • ${selectedThickness}`
+                  : "Select a color")
+                : [selectedSize, selectedDensity, selectedThickness, isEmbossed && "Embossed"].filter(Boolean).join(" • ")}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

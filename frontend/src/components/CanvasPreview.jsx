@@ -13,7 +13,13 @@ const CanvasPreview = forwardRef(({
   const canvasRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [isLoadingNewTexture, setIsLoadingNewTexture] = useState(false);
   const bgImageRef = useRef(null);
+  const currentTextureRef = useRef(null);
+  const newTextureRef = useRef(null);
+  const loadStartRef = useRef(0);
+  const pendingTimerRef = useRef(null);
+  const MIN_LOADING_MS = 400; // minimum spinner time in ms
 
   // Wall mask area - adjusted for the provided interior image
   // The wall is the dark area at the top of the image
@@ -21,7 +27,7 @@ const CanvasPreview = forwardRef(({
     x: 0.0,
     y: 0.0,
     width: 1.0,
-    height: 0.56
+    height: 1.00
   };
 
   // Parse size to get tile dimensions for grid effect
@@ -48,6 +54,67 @@ const CanvasPreview = forwardRef(({
     };
     img.src = backgroundImage;
   }, [backgroundImage]);
+
+  // Load texture image
+  useEffect(() => {
+    if (!textureUrl) {
+      // Clear texture if no URL provided
+      currentTextureRef.current = null;
+      setIsLoadingNewTexture(false);
+      return;
+    }
+
+    // Mark that we're loading a new texture
+    setIsLoadingNewTexture(true);
+    loadStartRef.current = Date.now();
+
+    // clear any previous pending timer
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      // Keep new image cached while enforcing minimum spinner duration
+      newTextureRef.current = img;
+      const elapsed = Date.now() - loadStartRef.current;
+      const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+
+      if (remaining > 0) {
+        pendingTimerRef.current = setTimeout(() => {
+          currentTextureRef.current = img;
+          setIsLoadingNewTexture(false);
+          pendingTimerRef.current = null;
+        }, remaining);
+      } else {
+        currentTextureRef.current = img;
+        setIsLoadingNewTexture(false);
+      }
+    };
+    img.onerror = () => {
+      console.error("Failed to load texture image:", textureUrl);
+      const elapsed = Date.now() - loadStartRef.current;
+      const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+      if (remaining > 0) {
+        pendingTimerRef.current = setTimeout(() => {
+          setIsLoadingNewTexture(false);
+          pendingTimerRef.current = null;
+        }, remaining);
+      } else {
+        setIsLoadingNewTexture(false);
+      }
+    };
+    img.src = textureUrl;
+
+    return () => {
+      if (pendingTimerRef.current) {
+        clearTimeout(pendingTimerRef.current);
+        pendingTimerRef.current = null;
+      }
+    };
+  }, [textureUrl]);
 
   // Render canvas
   const renderCanvas = useCallback(() => {
@@ -78,6 +145,10 @@ const CanvasPreview = forwardRef(({
     // Clear canvas
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
+    // Fill canvas background with white (change this color as needed)
+    ctx.fillStyle = "transparent";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
     // Calculate wall area
     const wallX = canvasWidth * WALL_MASK.x;
     const wallY = canvasHeight * WALL_MASK.y;
@@ -93,29 +164,61 @@ const CanvasPreview = forwardRef(({
     // Draw wall texture/color
     ctx.save();
     
-    // Fill with solid color
-    ctx.fillStyle = wallColor;
-    ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
-
-    // Add tile grid lines for panel effect
-    const tileDims = getTileDimensions();
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
-    ctx.lineWidth = 1;
-
-    // Vertical lines
-    for (let x = wallX; x <= wallX + wallWidth; x += tileDims.width) {
-      ctx.beginPath();
-      ctx.moveTo(x, wallY);
-      ctx.lineTo(x, wallY + wallHeight);
-      ctx.stroke();
+    // Draw texture image if available, otherwise use solid color
+    if (currentTextureRef.current) {
+      const textureImg = currentTextureRef.current;
+      
+      // Calculate dimensions to fit image in wall area while maintaining aspect ratio
+      const imgAspect = textureImg.width / textureImg.height;
+      const wallAspect = wallWidth / wallHeight;
+      
+      let drawWidth, drawHeight, drawX, drawY;
+      
+      // Scale factor - increase this to make image bigger (0.0 to 1.0)
+      const scaleFactor = 1.0;
+      
+      if (imgAspect > wallAspect) {
+        // Image is wider - fit to width
+        drawWidth = wallWidth * scaleFactor;
+        drawHeight = drawWidth / imgAspect;
+      } else {
+        // Image is taller - fit to height
+        drawHeight = wallHeight * scaleFactor;
+        drawWidth = drawHeight * imgAspect;
+      }
+      
+      // Center the image
+      drawX = wallX + (wallWidth - drawWidth) / 2;
+      drawY = wallY + (wallHeight - drawHeight) / 2;
+      
+      ctx.drawImage(textureImg, 0, 0, textureImg.width, textureImg.height, drawX, drawY, drawWidth, drawHeight);
+    } else {
+      // Fallback to solid color
+      ctx.fillStyle = wallColor;
+      ctx.fillRect(wallX, wallY, wallWidth, wallHeight);
     }
 
-    // Horizontal lines
-    for (let y = wallY; y <= wallY + wallHeight; y += tileDims.height) {
-      ctx.beginPath();
-      ctx.moveTo(wallX, y);
-      ctx.lineTo(wallX + wallWidth, y);
-      ctx.stroke();
+    // Add tile grid lines for panel effect (only if no texture image)
+    if (!currentTextureRef.current) {
+      const tileDims = getTileDimensions();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.lineWidth = 1;
+
+      // Vertical lines
+      for (let x = wallX; x <= wallX + wallWidth; x += tileDims.width) {
+        ctx.beginPath();
+        ctx.moveTo(x, wallY);
+        ctx.lineTo(x, wallY + wallHeight);
+        ctx.stroke();
+      }
+
+      // Horizontal lines
+      for (let y = wallY; y <= wallY + wallHeight; y += tileDims.height) {
+        ctx.beginPath();
+        ctx.moveTo(wallX, y);
+        ctx.lineTo(wallX + wallWidth, y);
+        ctx.stroke();
+      }
     }
 
     // Add emboss effect if enabled
@@ -135,19 +238,21 @@ const CanvasPreview = forwardRef(({
       }
     }
 
-    // Add VicStrip groove pattern
-    if (productType === "vicstrip") {
-      ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
-      ctx.lineWidth = 2;
-      
-      // Vertical slat lines
-      const slatWidth = 20;
-      for (let x = wallX + slatWidth; x < wallX + wallWidth; x += slatWidth) {
-        ctx.beginPath();
-        ctx.moveTo(x, wallY);
-        ctx.lineTo(x, wallY + wallHeight);
-        ctx.stroke();
+    // Add VicStrip groove pattern (only if no texture image)
+    if (!currentTextureRef.current) {
+      if (productType === "vicstrip") {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.lineWidth = 2;
+        
+        // Vertical slat lines
+        const slatWidth = 20;
+        for (let x = wallX + slatWidth; x < wallX + wallWidth; x += slatWidth) {
+          ctx.beginPath();
+          ctx.moveTo(x, wallY);
+          ctx.lineTo(x, wallY + wallHeight);
+          ctx.stroke();
+        }
       }
     }
 
@@ -184,23 +289,30 @@ const CanvasPreview = forwardRef(({
 
   }, [bgLoaded, textureColor, selectedColor, size, isEmbossed, productType, getTileDimensions]);
 
-  // Re-render when dependencies change
+  // Re-render when texture finishes loading
   useEffect(() => {
-    if (bgLoaded) {
+    if (bgLoaded && !isLoadingNewTexture) {
       renderCanvas();
     }
-  }, [renderCanvas, bgLoaded, textureColor, selectedColor, size, isEmbossed]);
+  }, [isLoadingNewTexture, renderCanvas, bgLoaded]);
+
+  // Re-render when dependencies change (but not while loading texture)
+  useEffect(() => {
+    if (bgLoaded && !isLoadingNewTexture) {
+      renderCanvas();
+    }
+  }, [renderCanvas, bgLoaded, textureColor, selectedColor, size, isEmbossed, isLoadingNewTexture]);
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      if (bgLoaded) {
+      if (bgLoaded && !isLoadingNewTexture) {
         renderCanvas();
       }
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [renderCanvas, bgLoaded]);
+  }, [renderCanvas, bgLoaded, isLoadingNewTexture]);
 
   // Expose download function
   useImperativeHandle(ref, () => ({
@@ -217,20 +329,21 @@ const CanvasPreview = forwardRef(({
 
   return (
     <div className="relative w-full h-full flex items-center justify-center p-4" data-testid="canvas-container">
-      {loading && (
-        <div className="loading-overlay" data-testid="canvas-loading">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)] mx-auto mb-2" />
-            <p className="text-white/70 text-sm">Loading preview...</p>
+      <div className="relative w-full h-full flex items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          className="max-w-full max-h-full shadow-lg rounded-lg"
+          style={{ background: "transparent" }}
+          data-testid="preview-canvas"
+        />
+        {(loading || isLoadingNewTexture) && (
+          <div className="absolute inset-0 flex items-center justify-center z-10" data-testid="texture-loading">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
+              <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
+            </div>
           </div>
-        </div>
-      )}
-      <canvas
-        ref={canvasRef}
-        className="max-w-full max-h-full shadow-2xl rounded-lg"
-        style={{ background: "#1a1a2e" }}
-        data-testid="preview-canvas"
-      />
+        )}
+      </div>
     </div>
   );
 });
