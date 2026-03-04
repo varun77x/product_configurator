@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
+import { useRenderLog } from "@/hooks/use-render-log";
 import axios from "axios";
 import { toast } from "sonner";
 import { Download, Heart, Trash2, RefreshCw, Eye, Loader2, Shield, Flame, Leaf, Award } from "lucide-react";
@@ -12,7 +13,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
-import { VICSTRIP_PRODUCT, getImagePath } from "@/data/skus";
+import FlatEmbossedPreview from "@/components/FlatEmbossedPreview";
+import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG } from "@/data/skus";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -57,6 +59,156 @@ const DEFAULT_SPECS = {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Module-level components — defined OUTSIDE Configurator so React never
+// unmounts/remounts them on parent re-renders. React.memo skips re-renders
+// when props are shallowly equal.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TechSpecsPanel = memo(({ specs }) => (
+  <div className="space-y-6" data-testid="tech-specs-panel">
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-red-50"><Flame className="h-5 w-5 text-red-500" /></div>
+      <div>
+        <h4 className="font-manrope font-bold text-sm">Fire Rating</h4>
+        <p className="text-sm text-[hsl(215,16%,47%)]">{specs.fire_rating || "N/A"}</p>
+      </div>
+    </div>
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-blue-50">
+        <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div>
+        <h4 className="font-manrope font-bold text-sm">NRC Rating</h4>
+        <p className="text-sm text-[hsl(215,16%,47%)]">{specs.nrc_rating || "N/A"}</p>
+      </div>
+    </div>
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-gray-100">
+        <svg className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 3v18"/>
+        </svg>
+      </div>
+      <div>
+        <h4 className="font-manrope font-bold text-sm">Material</h4>
+        <p className="text-sm text-[hsl(215,16%,47%)]">{specs.material || "N/A"}</p>
+      </div>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
+        <p className="text-xs text-[hsl(215,16%,47%)]">Thickness</p>
+        <p className="font-manrope font-bold text-sm">{specs.thickness_mm || "N/A"}</p>
+      </div>
+      <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
+        <p className="text-xs text-[hsl(215,16%,47%)]">Weight</p>
+        <p className="font-manrope font-bold text-sm">{specs.weight_kg_m2 || "N/A"} kg/m²</p>
+      </div>
+    </div>
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-green-50"><Leaf className="h-5 w-5 text-green-500" /></div>
+      <div className="flex-1">
+        <h4 className="font-manrope font-bold text-sm">Sustainability</h4>
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {(specs.sustainability || []).map((item, i) => (
+            <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">{item}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-amber-50"><Award className="h-5 w-5 text-amber-500" /></div>
+      <div className="flex-1">
+        <h4 className="font-manrope font-bold text-sm">Certifications</h4>
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {(specs.certifications || []).map((item, i) => (
+            <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{item}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+      <div>
+        <p className="text-xs text-[hsl(215,16%,47%)]">Installation</p>
+        <p className="font-medium text-sm">{specs.installation || "N/A"}</p>
+      </div>
+      <div>
+        <p className="text-xs text-[hsl(215,16%,47%)]">Warranty</p>
+        <p className="font-medium text-sm">{specs.warranty || "N/A"}</p>
+      </div>
+    </div>
+  </div>
+));
+TechSpecsPanel.displayName = "TechSpecsPanel";
+
+const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
+  const bgColor = design.texture_color || "#CCCCCC";
+  const thumbUrl = design.thumbnail_url || design.texture_url || null;
+  return (
+    <HoverCard openDelay={200} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <div
+          className={`thumbnail-item ${isSelected ? "selected" : ""}`}
+          style={{
+            backgroundColor: bgColor,
+            backgroundImage: thumbUrl ? `url(${thumbUrl})` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          onClick={() => onSelect(design)}
+          data-testid={`design-thumbnail-${design.id}`}
+        />
+      </HoverCardTrigger>
+      <HoverCardContent side="right" align="start" className="w-72 p-0 overflow-hidden" data-testid={`design-hover-${design.id}`}>
+        <div
+          className="h-32 w-full"
+          style={{
+            backgroundColor: bgColor,
+            backgroundImage: thumbUrl ? `url(${thumbUrl})` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="p-4 space-y-2">
+          <span className="font-manrope font-bold text-sm">{design.design_name}</span>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span className="text-[hsl(215,16%,47%)]">Product Code</span>
+              <span className="font-mono font-medium">{design.design_code}</span>
+            </div>
+            {design.color_name && (
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Color</span>
+                <span className="font-medium">{design.color_name}</span>
+              </div>
+            )}
+            {design.category && (
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Category</span>
+                <span className="font-medium">{design.category}</span>
+              </div>
+            )}
+            {design.pattern && (
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Pattern</span>
+                <span className="font-medium">{design.pattern}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2 pt-2 border-t">
+            <div className="w-6 h-6 rounded border" style={{ backgroundColor: bgColor }} />
+            <span className="text-xs text-[hsl(215,16%,47%)]">{bgColor}</span>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+});
+DesignThumbnail.displayName = "DesignThumbnail";
+
 const Configurator = () => {
   // Products from API
   const [products, setProducts] = useState([]);
@@ -74,6 +226,7 @@ const Configurator = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThickness, setSelectedThickness] = useState(null);
   const [isEmbossed, setIsEmbossed] = useState(false);
+  const [showTpatti, setShowTpatti] = useState(false);
   
   // UI state
   const [favorites, setFavorites] = useState([]);
@@ -81,6 +234,23 @@ const Configurator = () => {
   const [specsOpen, setSpecsOpen] = useState(false);
   const [techSpecs, setTechSpecs] = useState(null);
   const canvasRef = useRef(null);
+
+  // ── Render logging (remove when done profiling) ────────────────────────────
+  useRenderLog("Configurator", {
+    selectedProductType: selectedProductType?.id,
+    selectedCategory: selectedCategory?.id,
+    selectedDesign: selectedDesign?.id ?? selectedDesign?.name,
+    selectedSize,
+    selectedDensity,
+    selectedPattern: selectedPattern?.id ?? selectedPattern?.name,
+    selectedColor: selectedColor?.hex ?? selectedColor,
+    selectedThickness,
+    isEmbossed,
+    showTpatti,
+    loading,
+    favoritesOpen,
+    specsOpen,
+  });
 
   // Load products from API
   useEffect(() => {
@@ -142,19 +312,8 @@ const Configurator = () => {
     fetchSpecs();
   }, [selectedProductType]);
 
-  // Debug: Log state changes
-  useEffect(() => {
-    console.log("=== State Update ===");
-    console.log("Product Type:", selectedProductType?.id);
-    console.log("Selected Design:", selectedDesign);
-    console.log("Selected Pattern:", selectedPattern);
-    console.log("Selected Size:", selectedSize);
-    console.log("Texture Color:", 
-      selectedProductType?.id === "vicstrip"
-        ? selectedDesign?.color?.hex
-        : selectedDesign?.texture_color
-    );
-  }, [selectedProductType, selectedDesign, selectedPattern, selectedSize]);
+  // Debug: API fetch timing
+  // (render-level state diffs are now handled by useRenderLog above)
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -180,6 +339,7 @@ const Configurator = () => {
       setSelectedCategory(null);
       setSelectedDesign(null);
       setIsEmbossed(false);
+      setShowTpatti(false);
       setSelectedPattern(null);
       setSelectedColor(null);
       setSelectedDensity(null);
@@ -218,6 +378,7 @@ const Configurator = () => {
     if (category) {
       setSelectedCategory(category);
       setIsEmbossed(false);
+      setShowTpatti(false);
       if (category.designs?.length > 0) {
         setSelectedDesign(category.designs[0]);
       } else {
@@ -357,173 +518,11 @@ const Configurator = () => {
     }
   };
 
-  // Technical Specs Panel
-  const TechSpecsPanel = () => {
-    const specs = techSpecs || DEFAULT_SPECS[selectedProductType?.id] || {};
-    
-    return (
-      <div className="space-y-6" data-testid="tech-specs-panel">
-        {/* Fire Rating */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-red-50">
-            <Flame className="h-5 w-5 text-red-500" />
-          </div>
-          <div>
-            <h4 className="font-manrope font-bold text-sm">Fire Rating</h4>
-            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.fire_rating || "N/A"}</p>
-          </div>
-        </div>
+  // Technical Specs Panel — defined outside Configurator (see below)
+  // Using the module-level TechSpecsPanel component with specs passed as a prop.
 
-        {/* NRC Rating */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-blue-50">
-            <svg className="h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-          </div>
-          <div>
-            <h4 className="font-manrope font-bold text-sm">NRC Rating</h4>
-            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.nrc_rating || "N/A"}</p>
-          </div>
-        </div>
-
-        {/* Material */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-gray-100">
-            <svg className="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <path d="M3 9h18M9 3v18"/>
-            </svg>
-          </div>
-          <div>
-            <h4 className="font-manrope font-bold text-sm">Material</h4>
-            <p className="text-sm text-[hsl(215,16%,47%)]">{specs.material || "N/A"}</p>
-          </div>
-        </div>
-
-        {/* Thickness & Weight */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
-            <p className="text-xs text-[hsl(215,16%,47%)]">Thickness</p>
-            <p className="font-manrope font-bold text-sm">{specs.thickness_mm || "N/A"}</p>
-          </div>
-          <div className="p-3 rounded-lg bg-[hsl(var(--secondary))]">
-            <p className="text-xs text-[hsl(215,16%,47%)]">Weight</p>
-            <p className="font-manrope font-bold text-sm">{specs.weight_kg_m2 || "N/A"} kg/m²</p>
-          </div>
-        </div>
-
-        {/* Sustainability */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-green-50">
-            <Leaf className="h-5 w-5 text-green-500" />
-          </div>
-          <div className="flex-1">
-            <h4 className="font-manrope font-bold text-sm">Sustainability</h4>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {(specs.sustainability || []).map((item, i) => (
-                <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Certifications */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-amber-50">
-            <Award className="h-5 w-5 text-amber-500" />
-          </div>
-          <div className="flex-1">
-            <h4 className="font-manrope font-bold text-sm">Certifications</h4>
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {(specs.certifications || []).map((item, i) => (
-                <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Installation & Warranty */}
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-          <div>
-            <p className="text-xs text-[hsl(215,16%,47%)]">Installation</p>
-            <p className="font-medium text-sm">{specs.installation || "N/A"}</p>
-          </div>
-          <div>
-            <p className="text-xs text-[hsl(215,16%,47%)]">Warranty</p>
-            <p className="font-medium text-sm">{specs.warranty || "N/A"}</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Design Thumbnail with Hover Card (full metadata)
-  const DesignThumbnail = ({ design, isSelected, onSelect }) => {
-    const bgColor = design.texture_color || "#CCCCCC";
-    return (
-      <HoverCard openDelay={200} closeDelay={100}>
-        <HoverCardTrigger asChild>
-          <div
-            className={`thumbnail-item ${isSelected ? 'selected' : ''}`}
-            style={{ backgroundColor: bgColor }}
-            onClick={() => onSelect(design)}
-            data-testid={`design-thumbnail-${design.id}`}
-          />
-        </HoverCardTrigger>
-        <HoverCardContent side="right" align="start" className="w-72 p-0 overflow-hidden" data-testid={`design-hover-${design.id}`}>
-          {/* Expanded texture preview */}
-          <div 
-            className="h-32 w-full"
-            style={{ backgroundColor: bgColor }}
-          />
-          {/* Design info */}
-          <div className="p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-manrope font-bold text-sm">{design.design_name}</span>
-            </div>
-            <div className="space-y-1 text-xs">
-              <div className="flex justify-between">
-                <span className="text-[hsl(215,16%,47%)]">Product Code</span>
-                <span className="font-mono font-medium">{design.design_code}</span>
-              </div>
-              {design.color_name && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Color</span>
-                  <span className="font-medium">{design.color_name}</span>
-                </div>
-              )}
-              {design.category && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Category</span>
-                  <span className="font-medium">{design.category}</span>
-                </div>
-              )}
-              {design.pattern && (
-                <div className="flex justify-between">
-                  <span className="text-[hsl(215,16%,47%)]">Pattern</span>
-                  <span className="font-medium">{design.pattern}</span>
-                </div>
-              )}
-            </div>
-            {/* Color swatch */}
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <div 
-                className="w-6 h-6 rounded border"
-                style={{ backgroundColor: bgColor }}
-              />
-              <span className="text-xs text-[hsl(215,16%,47%)]">{bgColor}</span>
-            </div>
-          </div>
-        </HoverCardContent>
-      </HoverCard>
-    );
-  };
+  // ── placeholder so JSX below still works ──────────────────────────────────
+  const techSpecsData = techSpecs || DEFAULT_SPECS[selectedProductType?.id] || {};
 
   if (loading) {
     return (
@@ -705,6 +704,23 @@ const Configurator = () => {
                             checked={isEmbossed}
                             onCheckedChange={setIsEmbossed}
                             data-testid="emboss-toggle"
+                          />
+                        </div>
+                      )}
+
+                      {/* T-Patti Toggle (only for flat-embossed-vmd categories that have a tpatti defined) */}
+                      {selectedProductType?.id === "flat-embossed-vmd" &&
+                        selectedCategory?.id &&
+                        FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti && (
+                        <div className="flex items-center justify-between mt-4 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                          <Label htmlFor="tpatti-toggle" className="text-sm font-medium">
+                            T-Patti Overlay
+                          </Label>
+                          <Switch
+                            id="tpatti-toggle"
+                            checked={showTpatti}
+                            onCheckedChange={setShowTpatti}
+                            data-testid="tpatti-toggle"
                           />
                         </div>
                       )}
@@ -979,36 +995,49 @@ const Configurator = () => {
                       : selectedDesign?.design_name}
                   </p>
                 </div>
-                <TechSpecsPanel />
+                <TechSpecsPanel specs={techSpecsData} />
               </div>
             </SheetContent>
           </Sheet>
         )}
 
-        {/* Canvas Component */}
-        <CanvasPreview
-          key={`${selectedProductType?.id}-${selectedDesign?.id || selectedDesign?.color?.id || 'default'}`}
-          ref={canvasRef}
-          backgroundImage={INTERIOR_IMAGE}
-          textureColor={
-            selectedProductType?.id === "vicstrip"
-              ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
-              : (selectedDesign?.texture_color)
-          }
-          textureUrl={
-            selectedProductType?.id === "vicstrip"
-              ? (selectedPattern?.id && selectedDesign?.color?.id ? getImagePath(selectedPattern.id, selectedDesign.color.id) : null)
-              : (selectedDesign?.texture_url)
-          }
-          selectedColor={
-            selectedProductType?.id === "vicstrip"
-              ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
-              : (selectedColor)
-          }
-          size={selectedSize}
-          isEmbossed={isEmbossed}
-          productType={selectedProductType?.id}
-        />
+        {/* Canvas Component — switches between CSS-layer and HTML5 canvas per product type */}
+        {selectedProductType?.id === "flat-embossed-vmd" ? (
+          <FlatEmbossedPreview
+            ref={canvasRef}
+            categoryId={selectedCategory?.id}
+            showTpatti={showTpatti}
+            textureUrl={
+              selectedDesign?.texture_url ||
+              (selectedDesign?.design_code && selectedCategory?.id
+                ? getFlatEmbossedPanelPath(selectedCategory.id, selectedDesign.design_code)
+                : null)
+            }
+          />
+        ) : (
+          <CanvasPreview
+            ref={canvasRef}
+            backgroundImage={INTERIOR_IMAGE}
+            textureColor={
+              selectedProductType?.id === "vicstrip"
+                ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
+                : (selectedDesign?.texture_color)
+            }
+            textureUrl={
+              selectedProductType?.id === "vicstrip"
+                ? (selectedPattern?.id && selectedDesign?.color?.id ? getImagePath(selectedPattern.id, selectedDesign.color.id) : null)
+                : (selectedDesign?.texture_url)
+            }
+            selectedColor={
+              selectedProductType?.id === "vicstrip"
+                ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
+                : (selectedColor)
+            }
+            size={selectedSize}
+            isEmbossed={isEmbossed}
+            productType={selectedProductType?.id}
+          />
+        )}
 
         {/* Configuration Summary */}
         {selectedProductType && (

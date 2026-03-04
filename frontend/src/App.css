@@ -57,19 +57,19 @@
     border-radius: 0.5rem;
     overflow: hidden;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 1px solid hsl(var(--border));
     transition: all 0.2s ease;
     background-size: cover;
     background-position: center;
 }
 
 .thumbnail-item:hover {
-    border-color: hsl(var(--muted-foreground));
+    border: 2px solid hsl(var(--muted-foreground));
     transform: scale(1.02);
 }
 
 .thumbnail-item.selected {
-    border-color: hsl(var(--accent));
+    border: 2px solid hsl(var(--accent));
     box-shadow: 0 0 0 2px hsl(var(--accent) / 0.3);
 }
 

@@ -120,7 +120,7 @@ def generate_mock_products():
     
     vmd_panel = {
         "id": "flat-embossed-vmd",
-        "name": "Flat / Embossed VMD Panels",
+        "name": "Flat / Embossed VMT Panels",
         "active": True,
         "sizes": ["600x600", "1200x600", "1200x1200", "1200x2800"],
         "densities": ["HD (High Density)", "LD (Low Density)"],
@@ -130,29 +130,136 @@ def generate_mock_products():
         "categories": []
     }
     
+    # ── Explicit designs for categories that have real assets ────────────────
+    # To add a design: copy one block, increment the id/code, update the name,
+    # set texture_color as a hex fallback, and point texture_url / thumbnail_url
+    # at the file under frontend/public/images/flat-embossed-vmt/panels/{cat-id}/
+    EXPLICIT_CATEGORY_DESIGNS = {
+        "Line & Texture": [
+            {
+                "id": "vmd-design-lt-001",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-001",
+                "design_name": "Line & Texture Design 1",
+                "texture_color": "#D4A574",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
+                "color_name": "Warm Sand",
+            },
+            {
+                "id": "vmd-design-lt-002",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-002",
+                "design_name": "Line & Texture Design 2",
+                "texture_color": "#8B7355",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
+                "color_name": "Espresso",
+            },
+            {
+                "id": "vmd-design-lt-003",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-003",
+                "design_name": "Line & Texture Design 3",
+                "texture_color": "#A0522D",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
+                "color_name": "Sienna",
+            },
+            {
+                "id": "vmd-design-lt-004",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-004",
+                "design_name": "Line & Texture Design 4",
+                "texture_color": "#CD853F",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
+                "color_name": "Desert Sand",
+            },
+            # ── Add more Line & Texture designs here ──────────────────────
+        ],
+        "Rhythm & Repeat": [
+            {
+                "id": "vmd-design-rr-001",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-001",
+                "design_name": "Rhythm & Repeat Design 1",
+                "texture_color": "#DEB887",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
+                "color_name": "Burlywood",
+            },
+            {
+                "id": "vmd-design-rr-002",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-002",
+                "design_name": "Rhythm & Repeat Design 2",
+                "texture_color": "#BC8F8F",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
+                "color_name": "Rosy Brown",
+            },
+            {
+                "id": "vmd-design-rr-003",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-003",
+                "design_name": "Rhythm & Repeat Design 3",
+                "texture_color": "#F5DEB3",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
+                "color_name": "Wheat",
+            },
+            {
+                "id": "vmd-design-rr-004",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-004",
+                "design_name": "Rhythm & Repeat Design 4",
+                "texture_color": "#D2B48C",
+                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
+                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
+                "color_name": "Sandy",
+            },
+            # ── Add more Rhythm & Repeat designs here ─────────────────────
+        ],
+    }
+
     design_counter = 1
     for cat in vmd_categories_non_emboss:
+        cat_id = f"vmd-{cat.lower().replace(' ', '-').replace('&', 'and')}"
         category = {
-            "id": f"vmd-{cat.lower().replace(' ', '-').replace('&', 'and')}",
+            "id": cat_id,
             "name": cat,
             "product_type": "flat-embossed-vmd",
             "emboss_available": False,
             "designs": []
         }
-        for i in range(4):
-            color = solid_colors[(design_counter - 1) % len(solid_colors)]
-            category["designs"].append({
-                "id": f"vmd-design-{design_counter}",
-                "product_type": "flat-embossed-vmd",
-                "category": cat,
-                "design_code": f"VMD-{design_counter:04d}",
-                "design_name": f"{cat} Design {i+1}",
-                "texture_color": color,
-                "texture_url": None,
-                "thumbnail_url": None,
-                "color_name": ["Warm Tan", "Espresso", "Sienna", "Desert Sand", "Natural Oak", "Rose Clay", "Wheat", "Sandy", "Mocha", "Olive"][i % 10],
-            })
-            design_counter += 1
+        if cat in EXPLICIT_CATEGORY_DESIGNS:
+            # Use hand-crafted design list with real image paths
+            category["designs"] = EXPLICIT_CATEGORY_DESIGNS[cat]
+        else:
+            # Auto-generate placeholder designs for categories without assets yet
+            for i in range(4):
+                color = solid_colors[(design_counter - 1) % len(solid_colors)]
+                category["designs"].append({
+                    "id": f"vmd-design-{design_counter}",
+                    "product_type": "flat-embossed-vmd",
+                    "category": cat,
+                    "design_code": f"VMD-{design_counter:04d}",
+                    "design_name": f"{cat} Design {i+1}",
+                    "texture_color": color,
+                    "texture_url": None,
+                    "thumbnail_url": None,
+                    "color_name": ["Warm Tan", "Espresso", "Sienna", "Desert Sand", "Natural Oak", "Rose Clay", "Wheat", "Sandy", "Mocha", "Olive"][i % 10],
+                })
+                design_counter += 1
         vmd_panel["categories"].append(category)
     
     for cat in vmd_categories_emboss:
@@ -185,7 +292,7 @@ def generate_mock_products():
     # 2. Colored HD VMD Panels (INACTIVE)
     colored_vmd = {
         "id": "colored-hd-vmd",
-        "name": "Colored HD VMD Panels",
+        "name": "Colored HD VMT Panels",
         "active": False,
         "sizes": [],
         "densities": [],

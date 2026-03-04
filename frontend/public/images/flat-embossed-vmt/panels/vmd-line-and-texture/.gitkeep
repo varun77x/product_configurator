@@ -1,0 +1,7 @@
+# Drop panel texture / thumbnail images here for "Line & Texture" category
+# Naming: {design-code}.jpg
+# e.g.  VMD-LT-001.jpg
+#        VMD-LT-002.jpg
+#        VMD-LT-003.jpg
+#        VMD-LT-004.jpg
+# Add more by adding entries to EXPLICIT_CATEGORY_DESIGNS in backend/server.py

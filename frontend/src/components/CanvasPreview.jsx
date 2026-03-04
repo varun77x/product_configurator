@@ -1,5 +1,6 @@
-import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState } from "react";
+import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState, memo } from "react";
 import { Loader2 } from "lucide-react";
+import { useRenderLog, logImageLoad } from "@/hooks/use-render-log";
 
 const CanvasPreview = forwardRef(({ 
   backgroundImage, 
@@ -10,6 +11,8 @@ const CanvasPreview = forwardRef(({
   isEmbossed,
   productType 
 }, ref) => {
+  useRenderLog("CanvasPreview", { backgroundImage, textureColor, textureUrl, selectedColor, size, isEmbossed, productType });
+
   const canvasRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [bgLoaded, setBgLoaded] = useState(false);
@@ -42,13 +45,15 @@ const CanvasPreview = forwardRef(({
   useEffect(() => {
     const img = new Image();
     img.crossOrigin = "anonymous";
+    const { onLoad: bgOnLoad, onError: bgOnError } = logImageLoad("BG image", backgroundImage);
     img.onload = () => {
+      bgOnLoad();
       bgImageRef.current = img;
       setBgLoaded(true);
       setLoading(false);
     };
     img.onerror = () => {
-      console.error("Failed to load background image");
+      bgOnError();
       setLoading(false);
       setBgLoaded(true);
     };
@@ -76,11 +81,14 @@ const CanvasPreview = forwardRef(({
 
     const img = new Image();
     img.crossOrigin = "anonymous";
+    const { onLoad: texOnLoad, onError: texOnError } = logImageLoad("Texture", textureUrl);
     img.onload = () => {
+      texOnLoad();
       // Keep new image cached while enforcing minimum spinner duration
       newTextureRef.current = img;
       const elapsed = Date.now() - loadStartRef.current;
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+      if (remaining > 0) console.log(`%c⏳ [CANVAS] Texture loaded but spinner held for ${remaining}ms more (MIN_LOADING_MS)`, "color:#ffb74d");
 
       if (remaining > 0) {
         pendingTimerRef.current = setTimeout(() => {
@@ -94,7 +102,7 @@ const CanvasPreview = forwardRef(({
       }
     };
     img.onerror = () => {
-      console.error("Failed to load texture image:", textureUrl);
+      texOnError();
       const elapsed = Date.now() - loadStartRef.current;
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
       if (remaining > 0) {
@@ -118,6 +126,7 @@ const CanvasPreview = forwardRef(({
 
   // Render canvas
   const renderCanvas = useCallback(() => {
+    console.log("%c🎨 [CANVAS] renderCanvas()", "color:#ce93d8");
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -303,15 +312,20 @@ const CanvasPreview = forwardRef(({
     }
   }, [renderCanvas, bgLoaded, textureColor, selectedColor, size, isEmbossed, isLoadingNewTexture]);
 
-  // Handle window resize
+  // Handle window resize (debounced to avoid thrashing on every pixel)
   useEffect(() => {
+    let debounceTimer = null;
     const handleResize = () => {
-      if (bgLoaded && !isLoadingNewTexture) {
-        renderCanvas();
-      }
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (bgLoaded && !isLoadingNewTexture) renderCanvas();
+      }, 150);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   }, [renderCanvas, bgLoaded, isLoadingNewTexture]);
 
   // Expose download function
@@ -332,15 +346,13 @@ const CanvasPreview = forwardRef(({
       <div className="relative w-full h-full flex items-center justify-center">
         <canvas
           ref={canvasRef}
-          className="max-w-full max-h-full shadow-lg rounded-lg"
+          className={`max-w-full max-h-full shadow-lg rounded-lg ${loading ? "invisible" : ""}`}
           style={{ background: "transparent" }}
           data-testid="preview-canvas"
         />
         {(loading || isLoadingNewTexture) && (
           <div className="absolute inset-0 flex items-center justify-center z-10" data-testid="texture-loading">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
-              <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
-            </div>
+            <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
           </div>
         )}
       </div>
@@ -350,4 +362,6 @@ const CanvasPreview = forwardRef(({
 
 CanvasPreview.displayName = "CanvasPreview";
 
-export default CanvasPreview;
+// Wrap with memo so parent re-renders don't re-render the canvas
+// unless its own props actually changed.
+export default memo(CanvasPreview);

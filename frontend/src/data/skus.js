@@ -49,7 +49,66 @@ export const VICSTRIP_PRODUCT = {
   patterns: PATTERNS,
 };
 
-// Helper function to get image path
+// Helper function to get VicStrip image path
 export const getImagePath = (patternId, colorId) => {
   return `/images/texture_images/${patternId}/${colorId}.jpg`;
+};
+
+// ─── Flat / Embossed VMT Panels ──────────────────────────────────────────────
+
+/**
+ * Per-category config for the Flat Embossed VMT layered preview.
+ * Keys must match the category IDs returned by the backend API
+ * (generated as: "vmd-" + category.toLowerCase().replace(/ /g,"-").replace(/&/g,"and"))
+ *
+ * How to add a new category:
+ *   1. Add an entry below with the correct backend category ID as the key.
+ *   2. Place assets in the corresponding folders:
+ *        furniture : /images/flat-embossed-vmt/furniture/{categoryId}.png
+ *        tpatti    : /images/flat-embossed-vmt/tpatti/{categoryId}.png  (optional)
+ *        panels    : /images/flat-embossed-vmt/panels/{categoryId}/{designCode}.jpg
+ */
+export const FLAT_EMBOSSED_VMT_CONFIG = {
+  "vmd-line-and-texture": {
+    /** PNG with transparent wall cutout — furniture drives canvas height */
+    furniture: "/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png",
+    /** Optional decorative overlay PNG. Set to null if none. */
+    tpatti: "/images/flat-embossed-vmt/tpatti/vmd-line-and-texture.png",
+    renderMode: "portrait",
+    /** Number of panel columns shown side-by-side */
+    repeat: 3,
+    /** Real physical dimensions (mm) — used for CSS aspect-ratio */
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+  "vmd-rhythm-and-repeat": {
+    furniture: "/images/flat-embossed-vmt/furniture/vmd-rhythm-and-repeat.png",
+    tpatti: "/images/flat-embossed-vmt/tpatti/vmd-rhythm-and-repeat.png",
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+};
+
+/**
+ * Fallback config used when categoryId is not found in FLAT_EMBOSSED_VMT_CONFIG.
+ * Falls back to "Line & Texture" furniture so the preview is never blank.
+ */
+export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
+  furniture: "/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png",
+  tpatti: null,
+  renderMode: "portrait",
+  repeat: 3,
+  panelWidth: 1200,
+  panelHeight: 2800,
+};
+
+/**
+ * Returns the local public path for a panel texture image.
+ * @param {string} categoryId  - e.g. "vmd-line-and-texture"
+ * @param {string} designCode  - e.g. "VMD-0001"
+ */
+export const getFlatEmbossedPanelPath = (categoryId, designCode) => {
+  return `/images/flat-embossed-vmt/panels/${categoryId}/${designCode}.jpg`;
 };
