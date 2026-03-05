@@ -81,8 +81,10 @@ const CanvasPreview = forwardRef(({
 
     const img = new Image();
     img.crossOrigin = "anonymous";
+    let cancelled = false;
     const { onLoad: texOnLoad, onError: texOnError } = logImageLoad("Texture", textureUrl);
     img.onload = () => {
+      if (cancelled) return; // a newer selection came in, discard this load
       texOnLoad();
       // Keep new image cached while enforcing minimum spinner duration
       newTextureRef.current = img;
@@ -102,6 +104,7 @@ const CanvasPreview = forwardRef(({
       }
     };
     img.onerror = () => {
+      if (cancelled) return;
       texOnError();
       const elapsed = Date.now() - loadStartRef.current;
       const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
@@ -117,6 +120,9 @@ const CanvasPreview = forwardRef(({
     img.src = textureUrl;
 
     return () => {
+      // Cancel this load — prevents stale images from overwriting newer selection
+      cancelled = true;
+      img.src = ""; // aborts the network request, releases browser memory
       if (pendingTimerRef.current) {
         clearTimeout(pendingTimerRef.current);
         pendingTimerRef.current = null;

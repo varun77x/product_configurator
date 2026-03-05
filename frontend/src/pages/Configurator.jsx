@@ -14,7 +14,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview from "@/components/FlatEmbossedPreview";
-import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG } from "@/data/skus";
+import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl } from "@/data/skus";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -146,7 +146,7 @@ TechSpecsPanel.displayName = "TechSpecsPanel";
 
 const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
   const bgColor = design.texture_color || "#CCCCCC";
-  const thumbUrl = design.thumbnail_url || design.texture_url || null;
+  const thumbUrl = resolveAssetUrl(design.thumbnail_url || design.texture_url || null);
   return (
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
@@ -1008,10 +1008,12 @@ const Configurator = () => {
             categoryId={selectedCategory?.id}
             showTpatti={showTpatti}
             textureUrl={
-              selectedDesign?.texture_url ||
-              (selectedDesign?.design_code && selectedCategory?.id
-                ? getFlatEmbossedPanelPath(selectedCategory.id, selectedDesign.design_code)
-                : null)
+              resolveAssetUrl(
+                selectedDesign?.texture_url ||
+                (selectedDesign?.design_code && selectedCategory?.id
+                  ? getFlatEmbossedPanelPath(selectedCategory.id, selectedDesign.design_code)
+                  : null)
+              )
             }
           />
         ) : (
@@ -1026,7 +1028,7 @@ const Configurator = () => {
             textureUrl={
               selectedProductType?.id === "vicstrip"
                 ? (selectedPattern?.id && selectedDesign?.color?.id ? getImagePath(selectedPattern.id, selectedDesign.color.id) : null)
-                : (selectedDesign?.texture_url)
+                : resolveAssetUrl(selectedDesign?.texture_url)
             }
             selectedColor={
               selectedProductType?.id === "vicstrip"

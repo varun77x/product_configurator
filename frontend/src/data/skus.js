@@ -49,9 +49,11 @@ export const VICSTRIP_PRODUCT = {
   patterns: PATTERNS,
 };
 
-// Helper function to get VicStrip image path
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
+
+// Helper function to get VicStrip image path (served from backend)
 export const getImagePath = (patternId, colorId) => {
-  return `/images/texture_images/${patternId}/${colorId}.jpg`;
+  return `${BACKEND_URL}/static/images/vicstrip/${patternId}/${colorId}.jpg`;
 };
 
 // ─── Flat / Embossed VMT Panels ──────────────────────────────────────────────
@@ -71,9 +73,9 @@ export const getImagePath = (patternId, colorId) => {
 export const FLAT_EMBOSSED_VMT_CONFIG = {
   "vmd-line-and-texture": {
     /** PNG with transparent wall cutout — furniture drives canvas height */
-    furniture: "/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png",
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png`,
     /** Optional decorative overlay PNG. Set to null if none. */
-    tpatti: "/images/flat-embossed-vmt/tpatti/vmd-line-and-texture.png",
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-line-and-texture.png`,
     renderMode: "portrait",
     /** Number of panel columns shown side-by-side */
     repeat: 3,
@@ -82,8 +84,16 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
     panelHeight: 2800,
   },
   "vmd-rhythm-and-repeat": {
-    furniture: "/images/flat-embossed-vmt/furniture/vmd-rhythm-and-repeat.png",
-    tpatti: "/images/flat-embossed-vmt/tpatti/vmd-rhythm-and-repeat.png",
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-rhythm-and-repeat.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-rhythm-and-repeat.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+  "vmd-quiet-bloom": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-quiet-bloom.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-quiet-bloom.png`,
     renderMode: "portrait",
     repeat: 3,
     panelWidth: 1200,
@@ -96,7 +106,7 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
  * Falls back to "Line & Texture" furniture so the preview is never blank.
  */
 export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
-  furniture: "/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png",
+  furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-line-and-texture.png`,
   tpatti: null,
   renderMode: "portrait",
   repeat: 3,
@@ -105,10 +115,21 @@ export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
 };
 
 /**
+ * Converts a relative backend asset path (e.g. "/static/images/...")
+ * to a fully-qualified URL using the backend base URL.
+ * Already-absolute URLs (http/https) are returned unchanged.
+ */
+export const resolveAssetUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http")) return path;
+  return `${BACKEND_URL}${path}`;
+};
+
+/**
  * Returns the local public path for a panel texture image.
  * @param {string} categoryId  - e.g. "vmd-line-and-texture"
  * @param {string} designCode  - e.g. "VMD-0001"
  */
 export const getFlatEmbossedPanelPath = (categoryId, designCode) => {
-  return `/images/flat-embossed-vmt/panels/${categoryId}/${designCode}.jpg`;
+  return `${BACKEND_URL}/static/images/flat-embossed-vmt/panels/${categoryId}/${designCode}.jpg`;
 };

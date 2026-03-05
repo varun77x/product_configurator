@@ -63,11 +63,15 @@ const FlatEmbossedPreview = forwardRef(
     // everything is revealed atomically when the loader drops.
     const [displayedCategoryId, setDisplayedCategoryId] = useState(categoryId);
     const [displayedTextureUrl, setDisplayedTextureUrl] = useState(null);
+    const [displayedShowTpatti, setDisplayedShowTpatti] = useState(showTpatti);
 
     // Whether the preloader is visible
     const [isLoading, setIsLoading] = useState(false);
 
     const pendingTimerRef = useRef(null);
+    // Called by the tpatti <img> onLoad/onError once it's truly painted;
+    // set during transitions where tpatti is being introduced/replaced.
+    const tpattiRevealCallbackRef = useRef(null);
 
     // ── Render logging (remove when done profiling) ────────────────────────
     useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, showTpatti, displayedCategoryId, displayedTextureUrl, isLoading });
@@ -78,21 +82,25 @@ const FlatEmbossedPreview = forwardRef(
       FLAT_EMBOSSED_VMT_DEFAULT_CONFIG;
 
     // ── Double-buffer transition ───────────────────────────────────────────
-    // Fires when either the category or the texture prop changes.
+    // Fires when category, texture, or showTpatti changes.
     // 1. Show loader immediately — displayed state stays frozen.
-    // 2. Silently decode all incoming assets (furniture + panel texture).
+    // 2. Silently decode all incoming assets (furniture + panel texture + tpatti).
     // 3. Wait for decoding + minimum hold time in parallel.
-    // 4. After POST_LOAD_HOLD_MS extra hold, atomically:
-    //      setDisplayedCategoryId + setDisplayedTextureUrl + setIsLoading(false)
-    //    → one React render, old content → new content, loader gone, no blur leak.
+    // 4. After POST_LOAD_HOLD_MS extra hold, atomically reveal everything.
     useEffect(() => {
+      // Cancellation flag — set to true in cleanup so stale async callbacks
+      // from a previous effect run cannot modify state after the effect is gone.
+      let cancelled = false;
+
       const targetCategoryId = categoryId;
       const targetTextureUrl = textureUrl;
+      const targetShowTpatti = showTpatti;
 
       // Nothing changed from what is displayed — skip entirely
       if (
         targetCategoryId === displayedCategoryId &&
-        targetTextureUrl === displayedTextureUrl
+        targetTextureUrl === displayedTextureUrl &&
+        targetShowTpatti === displayedShowTpatti
       ) return;
 
       // If there's genuinely nothing to show, clear immediately (no loader)
@@ -103,6 +111,7 @@ const FlatEmbossedPreview = forwardRef(
         }
         setDisplayedCategoryId(null);
         setDisplayedTextureUrl(null);
+        setDisplayedShowTpatti(targetShowTpatti);
         setIsLoading(false);
         return;
       }
@@ -142,36 +151,66 @@ const FlatEmbossedPreview = forwardRef(
         decodePromises.push(decodeImage(targetTextureUrl));
       }
 
+      // Decode tpatti if it's being turned on (and hasn't been shown yet)
+      if (targetShowTpatti && !displayedShowTpatti && newCfg.tpatti) {
+        decodePromises.push(decodeImage(newCfg.tpatti));
+      }
+
       const _decodeStart = performance.now();
       const minTimePromise = new Promise((resolve) =>
         setTimeout(resolve, MIN_LOADING_MS)
       );
 
       Promise.all([...decodePromises, minTimePromise]).then(() => {
+        if (cancelled) return;
         const _decodeMs = (performance.now() - _decodeStart).toFixed(0);
         console.log(
           `%c🖼 [FEP] Assets decoded in ${_decodeMs}ms — holding ${POST_LOAD_HOLD_MS}ms more (POST_LOAD_HOLD_MS)`,
           "color:#80cbc4"
         );
-        // All assets are decoded. Hold for one more beat, then reveal atomically.
+        // All assets are decoded. Hold for one more beat, then reveal.
         pendingTimerRef.current = setTimeout(() => {
-          // Single React render: displayed state jumps from old → new
-          // and the loader disappears — no intermediate state ever visible.
-          setDisplayedCategoryId(targetCategoryId);
-          setDisplayedTextureUrl(targetTextureUrl);
-          setIsLoading(false);
+          if (cancelled) return;
           pendingTimerRef.current = null;
+
+          // Determine whether tpatti is being newly introduced/replaced:
+          // if so, we must wait for the DOM <img> onLoad before dropping the loader.
+          const tpattiIsEntering =
+            targetShowTpatti &&
+            newCfg.tpatti &&
+            (targetCategoryId !== displayedCategoryId || !displayedShowTpatti);
+
+          if (tpattiIsEntering) {
+            // Step 1: Commit all display state (tpatti <img> enters the DOM behind
+            // the loader — the loader's blur keeps it invisible while it paints).
+            setDisplayedCategoryId(targetCategoryId);
+            setDisplayedTextureUrl(targetTextureUrl);
+            setDisplayedShowTpatti(targetShowTpatti);
+            // Step 2: Register the callback that the tpatti <img> onLoad will fire.
+            tpattiRevealCallbackRef.current = () => {
+              if (!cancelled) setIsLoading(false);
+              tpattiRevealCallbackRef.current = null;
+            };
+          } else {
+            // No tpatti waiting — reveal everything atomically in one render.
+            setDisplayedCategoryId(targetCategoryId);
+            setDisplayedTextureUrl(targetTextureUrl);
+            setDisplayedShowTpatti(targetShowTpatti);
+            setIsLoading(false);
+          }
         }, POST_LOAD_HOLD_MS);
       });
 
       return () => {
+        cancelled = true;
+        tpattiRevealCallbackRef.current = null;
         if (pendingTimerRef.current) {
           clearTimeout(pendingTimerRef.current);
           pendingTimerRef.current = null;
         }
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [categoryId, textureUrl]);
+    }, [categoryId, textureUrl, showTpatti]);
 
     // ── Download: capture the wall-canvas DOM node to a PNG ──────────────
     useImperativeHandle(ref, () => ({
@@ -192,7 +231,7 @@ const FlatEmbossedPreview = forwardRef(
     }));
 
     // ── Computed style values ─────────────────────────────────────────────
-    const hasTpatti = Boolean(cfg.tpatti);
+    const hasTpatti = Boolean(cfg.tpatti) && displayedShowTpatti;
 
     return (
       <div
@@ -264,10 +303,22 @@ const FlatEmbossedPreview = forwardRef(
           </div>
 
           {/* ── Layer 2: T-Patti overlay (z-index 3) ── */}
-          {showTpatti && hasTpatti && (
+          {hasTpatti && (
             <img
               src={cfg.tpatti}
               alt="T-Patti decorative overlay"
+              onLoad={() => {
+                // Signal the loader to drop once the image is truly painted.
+                if (tpattiRevealCallbackRef.current) {
+                  tpattiRevealCallbackRef.current();
+                }
+              }}
+              onError={() => {
+                // Don't leave the loader stuck if the image fails to load.
+                if (tpattiRevealCallbackRef.current) {
+                  tpattiRevealCallbackRef.current();
+                }
+              }}
               style={{
                 position: "absolute",
                 inset: 0,

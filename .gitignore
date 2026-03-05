@@ -66,7 +66,11 @@ chainlit.md
 # Data and databases
 agenthub/agents/youtube/db
 
+
 # Archive files and large assets
+# Backend static assets — served at runtime, not stored in repo
+backend/static/
+
 **/*.zip
 **/*.tar.gz
 **/*.tar

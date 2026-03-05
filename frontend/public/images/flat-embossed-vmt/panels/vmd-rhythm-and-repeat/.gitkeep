@@ -1,7 +1,0 @@
-# Drop panel texture / thumbnail images here for "Rhythm & Repeat" category
-# Naming: {design-code}.jpg
-# e.g.  VMD-RR-001.jpg
-#        VMD-RR-002.jpg
-#        VMD-RR-003.jpg
-#        VMD-RR-004.jpg
-# Add more by adding entries to EXPLICIT_CATEGORY_DESIGNS in backend/server.py
