@@ -126,10 +126,25 @@ export const resolveAssetUrl = (path) => {
 };
 
 /**
- * Returns the local public path for a panel texture image.
- * @param {string} categoryId  - e.g. "vmd-line-and-texture"
- * @param {string} designCode  - e.g. "VMD-0001"
+ * Returns the backend path(s) for a panel texture.
+ *
+ * - "single"     (default) → returns a string:  …/{designCode}.jpg
+ * - "continuous"           → returns a string[]: …/{designCode}-1.jpg, -2.jpg, -3.jpg
+ *
+ * File-naming convention for continuous panels:
+ *   panels/{categoryId}/{designCode}-1.jpg   ← left column
+ *   panels/{categoryId}/{designCode}-2.jpg   ← centre column
+ *   panels/{categoryId}/{designCode}-3.jpg   ← right column
+ *
+ * @param {string} categoryId     - e.g. "vmd-line-and-texture"
+ * @param {string} designCode     - e.g. "VMD-LT-009"
+ * @param {"single"|"continuous"} [panelVariant="single"]
+ * @param {number} [count=3]      - number of slices for continuous designs (3, 4, …)
  */
-export const getFlatEmbossedPanelPath = (categoryId, designCode) => {
-  return `${BACKEND_URL}/static/images/flat-embossed-vmt/panels/${categoryId}/${designCode}.jpg`;
+export const getFlatEmbossedPanelPath = (categoryId, designCode, panelVariant = "single", count = 3) => {
+  const base = `${BACKEND_URL}/static/images/flat-embossed-vmt/panels/${categoryId}`;
+  if (panelVariant === "continuous") {
+    return Array.from({ length: count }, (_, i) => `${base}/${designCode}-${i + 1}.jpg`);
+  }
+  return `${base}/${designCode}.jpg`;
 };

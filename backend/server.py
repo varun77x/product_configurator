@@ -74,6 +74,11 @@ class ProductDesign(BaseModel):
     color: Optional[str] = None
     thickness: Optional[str] = None
     emboss: Optional[bool] = None
+    # "single" → one texture repeated across all columns (default)
+    # "continuous" → each column gets its own texture slice ({code}-1.jpg, -2.jpg, -3.jpg)
+    panel_variant: str = "single"
+    # Populated only when panel_variant == "continuous"
+    texture_urls: Optional[List[str]] = None
 
 class ProductCategory(BaseModel):
     id: str
@@ -429,6 +434,48 @@ def generate_mock_products():
                 "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-023.jpg",
                 "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-023.jpg",
                 "color_name": "Bleached Wood",
+            },
+            {
+                "id": "vmd-design-lt-024",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-024",
+                "design_name": "Line & Texture Design 24",
+                "texture_color": "#C0A882",
+                # panel_variant = "continuous": each column uses a different slice
+                # so the three panels together form one seamless pattern.
+                "panel_variant": "continuous",
+                # thumbnail shown in the sidebar — use the left slice as the preview
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-024-1.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-024-1.jpg",
+                # one URL per column, left → centre → right
+                "texture_urls": [
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-024-1.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-024-2.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-024-3.jpg",
+                ],
+                "color_name": "Continuous Pattern",
+            },
+            {
+                "id": "vmd-design-lt-025",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-025",
+                "design_name": "Line & Texture Design 25",
+                "texture_color": "#C0A882",
+                # panel_variant = "continuous": each column uses a different slice
+                # so the three panels together form one seamless pattern.
+                "panel_variant": "continuous",
+                # thumbnail shown in the sidebar — use the left slice as the preview
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-025-1.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-025-1.jpg",
+                # one URL per column, left → centre → right
+                "texture_urls": [
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-025-1.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-025-2.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-025-3.jpg"
+                ],
+                "color_name": "Continuous Pattern",
             },
             # ── Add more Line & Texture designs here ──────────────────────
         ],

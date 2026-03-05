@@ -48,8 +48,17 @@ const FlatEmbossedPreview = forwardRef(
     {
       /** backend category id, e.g. "vmd-line-and-texture" */
       categoryId,
-      /** resolved texture URL for the currently selected panel design */
-      textureUrl,
+      /**
+       * Single-texture designs: pass a string URL — it is repeated across every column.
+       * Continuous-pattern designs: pass textureUrls (array) instead and leave this null.
+       */
+      textureUrl = null,
+      /**
+       * Continuous-pattern designs: array of per-column URLs.
+       * Length must equal cfg.repeat (typically 3).
+       * e.g. ["…VMD-LT-009-1.jpg", "…VMD-LT-009-2.jpg", "…VMD-LT-009-3.jpg"]
+       */
+      textureUrls = null,
       /** controlled from the sidebar Switch — mirrors the Embossed Finish toggle pattern */
       showTpatti = false,
     },
@@ -57,12 +66,20 @@ const FlatEmbossedPreview = forwardRef(
   ) => {
     const wallCanvasRef = useRef(null);
 
+    // ── Stable key for the incoming textureUrls array (avoids array-as-dep issues) ──
+    // textureUrls can be null (single designs) or string[] (continuous designs).
+    // textureUrl (legacy string prop) is normalised into a single-element array.
+    const textureUrlsJson = JSON.stringify(
+      textureUrls?.length ? textureUrls : textureUrl ? [textureUrl] : null
+    );
+
     // ── Double-buffer display state ────────────────────────────────────────
     // These are what the render actually uses. They stay FROZEN while the
     // preloader is on screen. New assets decode silently in the background;
     // everything is revealed atomically when the loader drops.
     const [displayedCategoryId, setDisplayedCategoryId] = useState(categoryId);
-    const [displayedTextureUrl, setDisplayedTextureUrl] = useState(null);
+    // string[] | null — each element is the URL for one column, or null for placeholder
+    const [displayedTextureUrls, setDisplayedTextureUrls] = useState(null);
     const [displayedShowTpatti, setDisplayedShowTpatti] = useState(showTpatti);
 
     // Whether the preloader is visible
@@ -74,7 +91,7 @@ const FlatEmbossedPreview = forwardRef(
     const tpattiRevealCallbackRef = useRef(null);
 
     // ── Render logging (remove when done profiling) ────────────────────────
-    useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, showTpatti, displayedCategoryId, displayedTextureUrl, isLoading });
+    useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, textureUrls, showTpatti, displayedCategoryId, displayedTextureUrls, isLoading });
 
     // ── Config is derived from DISPLAYED (frozen) category, not the live prop
     const cfg =
@@ -93,24 +110,32 @@ const FlatEmbossedPreview = forwardRef(
       let cancelled = false;
 
       const targetCategoryId = categoryId;
-      const targetTextureUrl = textureUrl;
       const targetShowTpatti = showTpatti;
+
+      // Normalise incoming URLs to string[] | null (works for both single and continuous)
+      const targetTextureUrls = textureUrls?.length
+        ? textureUrls
+        : textureUrl
+        ? [textureUrl]
+        : null;
+      const targetTextureUrlsJson = JSON.stringify(targetTextureUrls);
+      const displayedTextureUrlsJson = JSON.stringify(displayedTextureUrls);
 
       // Nothing changed from what is displayed — skip entirely
       if (
         targetCategoryId === displayedCategoryId &&
-        targetTextureUrl === displayedTextureUrl &&
+        targetTextureUrlsJson === displayedTextureUrlsJson &&
         targetShowTpatti === displayedShowTpatti
       ) return;
 
       // If there's genuinely nothing to show, clear immediately (no loader)
-      if (!targetTextureUrl && !targetCategoryId) {
+      if (!targetTextureUrls?.length && !targetCategoryId) {
         if (pendingTimerRef.current) {
           clearTimeout(pendingTimerRef.current);
           pendingTimerRef.current = null;
         }
         setDisplayedCategoryId(null);
-        setDisplayedTextureUrl(null);
+        setDisplayedTextureUrls(null);
         setDisplayedShowTpatti(targetShowTpatti);
         setIsLoading(false);
         return;
@@ -146,9 +171,10 @@ const FlatEmbossedPreview = forwardRef(
         decodePromises.push(decodeImage(newCfg.furniture));
       }
 
-      // Decode new panel texture if it's changing
-      if (targetTextureUrl && targetTextureUrl !== displayedTextureUrl) {
-        decodePromises.push(decodeImage(targetTextureUrl));
+      // Decode new panel textures if they're changing (deduplicate URLs to avoid redundant fetches)
+      if (targetTextureUrls?.length && targetTextureUrlsJson !== displayedTextureUrlsJson) {
+        const uniqueUrls = [...new Set(targetTextureUrls)];
+        uniqueUrls.forEach((url) => decodePromises.push(decodeImage(url)));
       }
 
       // Decode tpatti if it's being turned on (and hasn't been shown yet)
@@ -184,7 +210,7 @@ const FlatEmbossedPreview = forwardRef(
             // Step 1: Commit all display state (tpatti <img> enters the DOM behind
             // the loader — the loader's blur keeps it invisible while it paints).
             setDisplayedCategoryId(targetCategoryId);
-            setDisplayedTextureUrl(targetTextureUrl);
+            setDisplayedTextureUrls(targetTextureUrls);
             setDisplayedShowTpatti(targetShowTpatti);
             // Step 2: Register the callback that the tpatti <img> onLoad will fire.
             tpattiRevealCallbackRef.current = () => {
@@ -194,7 +220,7 @@ const FlatEmbossedPreview = forwardRef(
           } else {
             // No tpatti waiting — reveal everything atomically in one render.
             setDisplayedCategoryId(targetCategoryId);
-            setDisplayedTextureUrl(targetTextureUrl);
+            setDisplayedTextureUrls(targetTextureUrls);
             setDisplayedShowTpatti(targetShowTpatti);
             setIsLoading(false);
           }
@@ -210,7 +236,7 @@ const FlatEmbossedPreview = forwardRef(
         }
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [categoryId, textureUrl, showTpatti]);
+    }, [categoryId, textureUrlsJson, showTpatti]);
 
     // ── Download: capture the wall-canvas DOM node to a PNG ──────────────
     useImperativeHandle(ref, () => ({
@@ -278,27 +304,36 @@ const FlatEmbossedPreview = forwardRef(
                 alignItems: "stretch",
               }}
             >
-              {Array.from({ length: cfg.repeat }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flat-embossed-panel"
-                  style={{
-                    width: `calc(100% / ${cfg.repeat})`,
-                    height: "100%",
-                    flexShrink: 0,
-                    backgroundImage: displayedTextureUrl
-                      ? `url(${displayedTextureUrl})`
-                      : undefined,
-                    backgroundColor: displayedTextureUrl
-                      ? undefined
-                      : "hsl(215 20% 88%)",
-                    backgroundSize: "100% auto",
-                    backgroundPosition: "top left",
-                    backgroundRepeat: "no-repeat",
-                  }}
-                  data-testid={`panel-column-${i}`}
-                />
-              ))}
+{(() => {
+                  // Continuous designs (>1 slice): column count = number of slices (3, 4, …)
+                  // Single designs (1 url):         column count = cfg.repeat so they tile correctly
+                  const columnCount =
+                    displayedTextureUrls?.length > 1
+                      ? displayedTextureUrls.length
+                      : cfg.repeat;
+                  return Array.from({ length: columnCount }).map((_, i) => {
+                    const colUrl = displayedTextureUrls
+                      ? displayedTextureUrls[i % displayedTextureUrls.length]
+                      : null;
+                    return (
+                      <div
+                        key={i}
+                        className="flat-embossed-panel"
+                        style={{
+                          width: `calc(100% / ${columnCount})`,
+                          height: "100%",
+                          flexShrink: 0,
+                          backgroundImage: colUrl ? `url(${colUrl})` : undefined,
+                          backgroundColor: colUrl ? undefined : "hsl(215 20% 88%)",
+                          backgroundSize: "100% auto",
+                          backgroundPosition: "top left",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                        data-testid={`panel-column-${i}`}
+                      />
+                    );
+                  });
+                })()}
             </div>
           </div>
 

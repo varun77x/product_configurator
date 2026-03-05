@@ -1008,13 +1008,23 @@ const Configurator = () => {
             ref={canvasRef}
             categoryId={selectedCategory?.id}
             showTpatti={showTpatti}
+            textureUrls={
+              // Continuous-pattern: backend sets panel_variant="continuous" and
+              // populates texture_urls with 3 paths (-1.jpg, -2.jpg, -3.jpg).
+              selectedDesign?.panel_variant === "continuous" && selectedDesign?.texture_urls?.length
+                ? selectedDesign.texture_urls.map((u) => resolveAssetUrl(u))
+                : null
+            }
             textureUrl={
-              resolveAssetUrl(
-                selectedDesign?.texture_url ||
-                (selectedDesign?.design_code && selectedCategory?.id
-                  ? getFlatEmbossedPanelPath(selectedCategory.id, selectedDesign.design_code)
-                  : null)
-              )
+              // Single-texture: one URL repeated across all columns.
+              selectedDesign?.panel_variant !== "continuous"
+                ? resolveAssetUrl(
+                    selectedDesign?.texture_url ||
+                    (selectedDesign?.design_code && selectedCategory?.id
+                      ? getFlatEmbossedPanelPath(selectedCategory.id, selectedDesign.design_code)
+                      : null)
+                  )
+                : null
             }
           />
         ) : selectedProductType?.id === "vicstrip" ? (
