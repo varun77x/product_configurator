@@ -14,6 +14,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview from "@/components/FlatEmbossedPreview";
+import VicStripPreview from "@/components/VicStripPreview";
 import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl } from "@/data/skus";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -1001,7 +1002,7 @@ const Configurator = () => {
           </Sheet>
         )}
 
-        {/* Canvas Component — switches between CSS-layer and HTML5 canvas per product type */}
+        {/* Preview Component — routes by product type */}
         {selectedProductType?.id === "flat-embossed-vmd" ? (
           <FlatEmbossedPreview
             ref={canvasRef}
@@ -1016,25 +1017,24 @@ const Configurator = () => {
               )
             }
           />
+        ) : selectedProductType?.id === "vicstrip" ? (
+          <VicStripPreview
+            ref={canvasRef}
+            textureUrl={
+              selectedPattern?.id && selectedDesign?.color?.id
+                ? getImagePath(selectedPattern.id, selectedDesign.color.id)
+                : null
+            }
+            fallbackColor={selectedDesign?.color?.hex || "#CCCCCC"}
+            designLabel={`${selectedPattern?.id || "vicstrip"}-${selectedDesign?.color?.id || "design"}`}
+          />
         ) : (
           <CanvasPreview
             ref={canvasRef}
             backgroundImage={INTERIOR_IMAGE}
-            textureColor={
-              selectedProductType?.id === "vicstrip"
-                ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
-                : (selectedDesign?.texture_color)
-            }
-            textureUrl={
-              selectedProductType?.id === "vicstrip"
-                ? (selectedPattern?.id && selectedDesign?.color?.id ? getImagePath(selectedPattern.id, selectedDesign.color.id) : null)
-                : resolveAssetUrl(selectedDesign?.texture_url)
-            }
-            selectedColor={
-              selectedProductType?.id === "vicstrip"
-                ? (selectedDesign?.color?.hex || selectedDesign?.texture_color)
-                : (selectedColor)
-            }
+            textureColor={selectedDesign?.texture_color}
+            textureUrl={resolveAssetUrl(selectedDesign?.texture_url)}
+            selectedColor={selectedColor}
             size={selectedSize}
             isEmbossed={isEmbossed}
             productType={selectedProductType?.id}
@@ -1043,7 +1043,7 @@ const Configurator = () => {
 
         {/* Configuration Summary */}
         {selectedProductType && (
-          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-xs" data-testid="config-summary">
+          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-xs z-[20]" data-testid="config-summary">
             <p className="font-manrope font-bold text-sm text-[hsl(215,25%,27%)]">
               {selectedProductType?.id === "vicstrip"
                 ? (selectedPattern?.name || "Select a pattern")
