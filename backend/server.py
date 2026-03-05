@@ -1,4 +1,6 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
@@ -7,6 +9,13 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 
+try:
+    from PIL import Image, ImageOps
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    logging.warning("Pillow not installed — /thumb/ endpoint will serve originals. Run: pip install Pillow")
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -14,9 +23,41 @@ load_dotenv(ROOT_DIR / '.env')
 # Create the main app without a prefix
 app = FastAPI()
 
+# Serve static assets (images) from backend/static/
+app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
+
+THUMB_CACHE_DIR = ROOT_DIR / "static" / "_thumbcache"
+THUMB_SIZE = (200, 200)
+
+@app.get("/thumb/{path:path}")
+def serve_thumbnail(path: str):
+    """
+    Serves a resized thumbnail for any image under /static/images/.
+    First call resizes + caches to static/_thumbcache/; subsequent calls
+    return the cached file immediately.
+    """
+    source = ROOT_DIR / "static" / "images" / path
+    if not source.exists():
+        raise HTTPException(status_code=404, detail=f"Image not found: {path}")
+
+    cached = THUMB_CACHE_DIR / path
+
+    if not cached.exists():
+        if not PIL_AVAILABLE:
+            # Pillow missing — fall back to serving the original
+            return FileResponse(source)
+        cached.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(source) as img:
+            # Convert to RGB so JPEG save never fails on RGBA/palette images
+            img = img.convert("RGB")
+            # Center-crop + resize to exact square — mirrors CSS background-size:cover
+            thumb = ImageOps.fit(img, THUMB_SIZE, Image.LANCZOS)
+            thumb.save(cached, format="JPEG", quality=82, optimize=True)
+
+    return FileResponse(cached, media_type="image/jpeg")
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
-
 
 # Define Models
 class ProductDesign(BaseModel):
@@ -133,7 +174,7 @@ def generate_mock_products():
     # ── Explicit designs for categories that have real assets ────────────────
     # To add a design: copy one block, increment the id/code, update the name,
     # set texture_color as a hex fallback, and point texture_url / thumbnail_url
-    # at the file under frontend/public/images/flat-embossed-vmt/panels/{cat-id}/
+    # at the file under backend/static/images/flat-embossed-vmt/panels/{cat-id}/
     EXPLICIT_CATEGORY_DESIGNS = {
         "Line & Texture": [
             {
@@ -143,8 +184,8 @@ def generate_mock_products():
                 "design_code": "VMD-LT-001",
                 "design_name": "Line & Texture Design 1",
                 "texture_color": "#D4A574",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-001.jpg",
                 "color_name": "Warm Sand",
             },
             {
@@ -154,8 +195,8 @@ def generate_mock_products():
                 "design_code": "VMD-LT-002",
                 "design_name": "Line & Texture Design 2",
                 "texture_color": "#8B7355",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-002.jpg",
                 "color_name": "Espresso",
             },
             {
@@ -165,8 +206,8 @@ def generate_mock_products():
                 "design_code": "VMD-LT-003",
                 "design_name": "Line & Texture Design 3",
                 "texture_color": "#A0522D",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-003.jpg",
                 "color_name": "Sienna",
             },
             {
@@ -176,9 +217,218 @@ def generate_mock_products():
                 "design_code": "VMD-LT-004",
                 "design_name": "Line & Texture Design 4",
                 "texture_color": "#CD853F",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-004.jpg",
                 "color_name": "Desert Sand",
+            },
+            {
+                "id": "vmd-design-lt-005",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-005",
+                "design_name": "Line & Texture Design 5",
+                "texture_color": "#6B8E6B",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-005.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-005.jpg",
+                "color_name": "Sage Green",
+            },
+            {
+                "id": "vmd-design-lt-006",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-006",
+                "design_name": "Line & Texture Design 6",
+                "texture_color": "#4A7260",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-006.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-006.jpg",
+                "color_name": "Forest Green",
+            },
+            {
+                "id": "vmd-design-lt-007",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-007",
+                "design_name": "Line & Texture Design 7",
+                "texture_color": "#7A9E7E",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-007.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-007.jpg",
+                "color_name": "Fern Green",
+            },
+            {
+                "id": "vmd-design-lt-008",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-008",
+                "design_name": "Line & Texture Design 8",
+                "texture_color": "#9E9E9E",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-008.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-008.jpg",
+                "color_name": "Stone Grey",
+            },
+            {
+                "id": "vmd-design-lt-009",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-009",
+                "design_name": "Line & Texture Design 9",
+                "texture_color": "#757575",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-009.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-009.jpg",
+                "color_name": "Slate Grey",
+            },
+            {
+                "id": "vmd-design-lt-010",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-010",
+                "design_name": "Line & Texture Design 10",
+                "texture_color": "#BDBDBD",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-010.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-010.jpg",
+                "color_name": "Silver Grey",
+            },
+            {
+                "id": "vmd-design-lt-011",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-011",
+                "design_name": "Line & Texture Design 11",
+                "texture_color": "#C2956C",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-011.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-011.jpg",
+                "color_name": "Natural Clay",
+            },
+            {
+                "id": "vmd-design-lt-012",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-012",
+                "design_name": "Line & Texture Design 12",
+                "texture_color": "#B5895A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-012.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-012.jpg",
+                "color_name": "Rustic Clay",
+            },
+            {
+                "id": "vmd-design-lt-013",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-013",
+                "design_name": "Line & Texture Design 13",
+                "texture_color": "#C8A882",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-013.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-013.jpg",
+                "color_name": "Fossil Beige",
+            },
+            {
+                "id": "vmd-design-lt-014",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-014",
+                "design_name": "Line & Texture Design 14",
+                "texture_color": "#B09070",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-014.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-014.jpg",
+                "color_name": "Fossil Tan",
+            },
+            {
+                "id": "vmd-design-lt-015",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-015",
+                "design_name": "Line & Texture Design 15",
+                "texture_color": "#D4B896",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-015.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-015.jpg",
+                "color_name": "Fossil Sand",
+            },
+            {
+                "id": "vmd-design-lt-016",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-016",
+                "design_name": "Line & Texture Design 16",
+                "texture_color": "#A89070",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-016.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-016.jpg",
+                "color_name": "Stone Natural",
+            },
+            {
+                "id": "vmd-design-lt-017",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-017",
+                "design_name": "Line & Texture Design 17",
+                "texture_color": "#B8A080",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-017.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-017.jpg",
+                "color_name": "Parchment",
+            },
+            {
+                "id": "vmd-design-lt-018",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-018",
+                "design_name": "Line & Texture Design 18",
+                "texture_color": "#C0A882",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-018.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-018.jpg",
+                "color_name": "Hemp",
+            },
+            {
+                "id": "vmd-design-lt-019",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-019",
+                "design_name": "Line & Texture Design 19",
+                "texture_color": "#9A8060",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-019.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-019.jpg",
+                "color_name": "Linen",
+            },
+            {
+                "id": "vmd-design-lt-020",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-020",
+                "design_name": "Line & Texture Design 20",
+                "texture_color": "#C8B090",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-020.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-020.jpg",
+                "color_name": "Oatmeal",
+            },
+            {
+                "id": "vmd-design-lt-021",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-021",
+                "design_name": "Line & Texture Design 21",
+                "texture_color": "#D0B898",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-021.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-021.jpg",
+                "color_name": "Sand Stone",
+            },
+            {
+                "id": "vmd-design-lt-022",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-022",
+                "design_name": "Line & Texture Design 22",
+                "texture_color": "#BFA882",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-022.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-022.jpg",
+                "color_name": "Driftwood",
+            },
+            {
+                "id": "vmd-design-lt-023",
+                "product_type": "flat-embossed-vmd",
+                "category": "Line & Texture",
+                "design_code": "VMD-LT-023",
+                "design_name": "Line & Texture Design 23",
+                "texture_color": "#D4C8A8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-023.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-line-and-texture/VMD-LT-023.jpg",
+                "color_name": "Bleached Wood",
             },
             # ── Add more Line & Texture designs here ──────────────────────
         ],
@@ -190,8 +440,8 @@ def generate_mock_products():
                 "design_code": "VMD-RR-001",
                 "design_name": "Rhythm & Repeat Design 1",
                 "texture_color": "#DEB887",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-001.jpg",
                 "color_name": "Burlywood",
             },
             {
@@ -201,8 +451,8 @@ def generate_mock_products():
                 "design_code": "VMD-RR-002",
                 "design_name": "Rhythm & Repeat Design 2",
                 "texture_color": "#BC8F8F",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-002.jpg",
                 "color_name": "Rosy Brown",
             },
             {
@@ -212,8 +462,8 @@ def generate_mock_products():
                 "design_code": "VMD-RR-003",
                 "design_name": "Rhythm & Repeat Design 3",
                 "texture_color": "#F5DEB3",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-003.jpg",
                 "color_name": "Wheat",
             },
             {
@@ -223,11 +473,344 @@ def generate_mock_products():
                 "design_code": "VMD-RR-004",
                 "design_name": "Rhythm & Repeat Design 4",
                 "texture_color": "#D2B48C",
-                "texture_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
-                "thumbnail_url": "/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-004.jpg",
                 "color_name": "Sandy",
             },
+            {
+                "id": "vmd-design-rr-005",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-005",
+                "design_name": "Rhythm & Repeat Design 5",
+                "texture_color": "#6B8E6B",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-005.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-005.jpg",
+                "color_name": "Sage Green",
+            },
+            {
+                "id": "vmd-design-rr-006",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-006",
+                "design_name": "Rhythm & Repeat Design 6",
+                "texture_color": "#4A7260",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-006.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-006.jpg",
+                "color_name": "Forest Green",
+            },
+            {
+                "id": "vmd-design-rr-007",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-007",
+                "design_name": "Rhythm & Repeat Design 7",
+                "texture_color": "#7A9E7E",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-007.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-007.jpg",
+                "color_name": "Fern Green",
+            },
+            {
+                "id": "vmd-design-rr-008",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-008",
+                "design_name": "Rhythm & Repeat Design 8",
+                "texture_color": "#9E9E9E",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-008.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-008.jpg",
+                "color_name": "Stone Grey",
+            },
+            {
+                "id": "vmd-design-rr-009",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-009",
+                "design_name": "Rhythm & Repeat Design 9",
+                "texture_color": "#757575",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-009.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-009.jpg",
+                "color_name": "Slate Grey",
+            },
+            {
+                "id": "vmd-design-rr-010",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-010",
+                "design_name": "Rhythm & Repeat Design 10",
+                "texture_color": "#BDBDBD",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-010.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-010.jpg",
+                "color_name": "Silver Grey",
+            },
+            {
+                "id": "vmd-design-rr-011",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-011",
+                "design_name": "Rhythm & Repeat Design 11",
+                "texture_color": "#C2956C",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-011.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-011.jpg",
+                "color_name": "Natural Clay",
+            },
+            {
+                "id": "vmd-design-rr-012",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-012",
+                "design_name": "Rhythm & Repeat Design 12",
+                "texture_color": "#D4A876",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-012.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-012.jpg",
+                "color_name": "Warm Clay",
+            },
+            {
+                "id": "vmd-design-rr-013",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-013",
+                "design_name": "Rhythm & Repeat Design 13",
+                "texture_color": "#B5895A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-013.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-013.jpg",
+                "color_name": "Rustic Clay",
+            },
+            {
+                "id": "vmd-design-rr-014",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-014",
+                "design_name": "Rhythm & Repeat Design 14",
+                "texture_color": "#A0856B",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-014.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-014.jpg",
+                "color_name": "Earth Brown",
+            },
+            {
+                "id": "vmd-design-rr-015",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-015",
+                "design_name": "Rhythm & Repeat Design 15",
+                "texture_color": "#E07B39",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-015.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-015.jpg",
+                "color_name": "Burnt Orange",
+            },
+            {
+                "id": "vmd-design-rr-016",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-016",
+                "design_name": "Rhythm & Repeat Design 16",
+                "texture_color": "#D4651A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-016.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-016.jpg",
+                "color_name": "Deep Orange",
+            },
+            {
+                "id": "vmd-design-rr-017",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-017",
+                "design_name": "Rhythm & Repeat Design 17",
+                "texture_color": "#F4A55A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-017.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-017.jpg",
+                "color_name": "Amber Orange",
+            },
+            {
+                "id": "vmd-design-rr-018",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-018",
+                "design_name": "Rhythm & Repeat Design 18",
+                "texture_color": "#8B7BA8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-018.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-018.jpg",
+                "color_name": "Dusty Lavender",
+            },
+            {
+                "id": "vmd-design-rr-019",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-019",
+                "design_name": "Rhythm & Repeat Design 19",
+                "texture_color": "#5A7A5A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-019.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-019.jpg",
+                "color_name": "Olive Green",
+            },
+            {
+                "id": "vmd-design-rr-020",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-020",
+                "design_name": "Rhythm & Repeat Design 20",
+                "texture_color": "#BFA882",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-020.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-020.jpg",
+                "color_name": "Driftwood",
+            },
+            {
+                "id": "vmd-design-rr-021",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-021",
+                "design_name": "Rhythm & Repeat Design 21",
+                "texture_color": "#CC7722",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-021.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-021.jpg",
+                "color_name": "Golden Oak",
+            },
+            {
+                "id": "vmd-design-rr-022",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-022",
+                "design_name": "Rhythm & Repeat Design 22",
+                "texture_color": "#D4A0A0",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-022.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-022.jpg",
+                "color_name": "Blush",
+            },
+            {
+                "id": "vmd-design-rr-023",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-023",
+                "design_name": "Rhythm & Repeat Design 23",
+                "texture_color": "#8B3A3A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-023.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-023.jpg",
+                "color_name": "Crimson",
+            },
+            {
+                "id": "vmd-design-rr-024",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-024",
+                "design_name": "Rhythm & Repeat Design 24",
+                "texture_color": "#A0522D",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-024.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-024.jpg",
+                "color_name": "Rust Red",
+            },
+            {
+                "id": "vmd-design-rr-025",
+                "product_type": "flat-embossed-vmd",
+                "category": "Rhythm & Repeat",
+                "design_code": "VMD-RR-025",
+                "design_name": "Rhythm & Repeat Design 25",
+                "texture_color": "#D4C26A",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-025.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/VMD-RR-025.jpg",
+                "color_name": "Harvest Gold",
+            },
             # ── Add more Rhythm & Repeat designs here ─────────────────────
+        ],
+        "Quiet Bloom": [
+            {
+                "id": "vmd-design-qb-001",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-001",
+                "design_name": "Quiet Bloom Design 1",
+                "texture_color": "#C8D8B8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-001.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-001.jpg",
+                "color_name": "Soft Sage",
+            },
+            {
+                "id": "vmd-design-qb-002",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-002",
+                "design_name": "Quiet Bloom Design 2",
+                "texture_color": "#D4C8B0",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-002.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-002.jpg",
+                "color_name": "Petal Ivory",
+            },
+            {
+                "id": "vmd-design-qb-003",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-003",
+                "design_name": "Quiet Bloom Design 3",
+                "texture_color": "#C0B8A8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-003.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-003.jpg",
+                "color_name": "Mist Grey",
+            },
+            {
+                "id": "vmd-design-qb-004",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-004",
+                "design_name": "Quiet Bloom Design 4",
+                "texture_color": "#D8C0B0",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-004.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-004.jpg",
+                "color_name": "Blush Cream",
+            },
+            {
+                "id": "vmd-design-qb-005",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-005",
+                "design_name": "Quiet Bloom Design 5",
+                "texture_color": "#B8C8C0",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-005.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-005.jpg",
+                "color_name": "Sea Mist",
+            },
+            {
+                "id": "vmd-design-qb-006",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-006",
+                "design_name": "Quiet Bloom Design 6",
+                "texture_color": "#C8B8C8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-006.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-006.jpg",
+                "color_name": "Lilac Mist",
+            },
+            {
+                "id": "vmd-design-qb-007",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-007",
+                "design_name": "Quiet Bloom Design 7",
+                "texture_color": "#D0C8B8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-007.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-007.jpg",
+                "color_name": "Warm Parchment",
+            },
+            {
+                "id": "vmd-design-qb-008",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-008",
+                "design_name": "Quiet Bloom Design 8",
+                "texture_color": "#B8C0C8",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-008.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-008.jpg",
+                "color_name": "Frost Blue",
+            },
+            {
+                "id": "vmd-design-qb-009",
+                "product_type": "flat-embossed-vmd",
+                "category": "Quiet Bloom",
+                "design_code": "VMD-QB-009",
+                "design_name": "Quiet Bloom Design 9",
+                "texture_color": "#C0D0C0",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-009.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-quiet-bloom/VMD-QB-009.jpg",
+                "color_name": "Meadow Mist",
+            },
+            # ── Add more Quiet Bloom designs here ─────────────────────────
         ],
     }
 
