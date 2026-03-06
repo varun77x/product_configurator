@@ -99,6 +99,14 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
     panelWidth: 1200,
     panelHeight: 2800,
   },
+  "vmd-fun-and-fantasy": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-fun-and-fantasy.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-fun-and-fantasy.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
 };
 
 /**

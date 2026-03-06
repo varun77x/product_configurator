@@ -859,6 +859,60 @@ def generate_mock_products():
             },
             # ── Add more Quiet Bloom designs here ─────────────────────────
         ],
+        "Fun & Fantasy": [
+            {
+                "id": "vmd-design-ff-001",
+                "product_type": "flat-embossed-vmd",
+                "category": "Fun & Fantasy",
+                "design_code": "VMD-FF-001",
+                "design_name": "Fun & Fantasy Design 1",
+                "texture_color": "#C0A882",
+                "panel_variant": "continuous",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-001-A.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-001-A.jpg",
+                "texture_urls": [
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-001-A.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-001-B.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-001-C.jpg",
+                ],
+                "color_name": "Continuous Pattern",
+            },
+            {
+                "id": "vmd-design-ff-002",
+                "product_type": "flat-embossed-vmd",
+                "category": "Fun & Fantasy",
+                "design_code": "VMD-FF-002",
+                "design_name": "Fun & Fantasy Design 2",
+                "texture_color": "#B09070",
+                "panel_variant": "continuous",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-002-A.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-002-A.jpg",
+                "texture_urls": [
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-002-A.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-002-B.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-002-C.jpg",
+                ],
+                "color_name": "Continuous Pattern",
+            },
+            {
+                "id": "vmd-design-ff-003",
+                "product_type": "flat-embossed-vmd",
+                "category": "Fun & Fantasy",
+                "design_code": "VMD-FF-003",
+                "design_name": "Fun & Fantasy Design 3",
+                "texture_color": "#A88060",
+                "panel_variant": "continuous",
+                "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-003-A.jpg",
+                "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-003-A.jpg",
+                "texture_urls": [
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-003-A.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-003-B.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/VMD-FF-003-C.jpg",
+                ],
+                "color_name": "Continuous Pattern",
+            },
+            # ── Add more Fun & Fantasy designs here ───────────────────────
+        ],
     }
 
     design_counter = 1
