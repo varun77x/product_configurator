@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview from "@/components/FlatEmbossedPreview";
 import VicStripPreview from "@/components/VicStripPreview";
-import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl } from "@/data/skus";
+import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS } from "@/data/skus";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -210,6 +210,21 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
 });
 DesignThumbnail.displayName = "DesignThumbnail";
 
+const EmbossThumbnail = memo(({ pattern, isSelected, onSelect }) => (
+  <div
+    className={`thumbnail-item ${isSelected ? "selected" : ""}`}
+    style={{
+      backgroundImage: pattern.thumbnailUrl ? `url(${pattern.thumbnailUrl})` : undefined,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundColor: "#E5E7EB",
+    }}
+    onClick={() => onSelect(pattern)}
+    data-testid={`emboss-thumbnail-${pattern.id}`}
+  />
+));
+EmbossThumbnail.displayName = "EmbossThumbnail";
+
 const Configurator = () => {
   // Products from API
   const [products, setProducts] = useState([]);
@@ -226,6 +241,7 @@ const Configurator = () => {
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedThickness, setSelectedThickness] = useState(null);
+  const [selectedEmbossPattern, setSelectedEmbossPattern] = useState(null);
   const [isEmbossed, setIsEmbossed] = useState(false);
   const [showTpatti, setShowTpatti] = useState(false);
   
@@ -324,6 +340,16 @@ const Configurator = () => {
     }
   }, []);
 
+  // Reset emboss selection if the current pattern is not available for the new size
+  useEffect(() => {
+    if (selectedEmbossPattern && selectedSize) {
+      if (!selectedEmbossPattern.availableSizes.includes(selectedSize)) {
+        setSelectedEmbossPattern(null);
+        toast.info("Configuration changed");
+      }
+    }
+  }, [selectedSize, selectedEmbossPattern]);
+
   // Save favorites to localStorage
   const saveFavorites = useCallback((newFavorites) => {
     localStorage.setItem("univicoustic_favorites", JSON.stringify(newFavorites));
@@ -346,6 +372,7 @@ const Configurator = () => {
       setSelectedDensity(null);
       setSelectedSize(null);
       setSelectedThickness(null);
+      setSelectedEmbossPattern(null);
       
       // Reset options based on new product type
       if (product.id === "vicstrip") {
@@ -380,6 +407,7 @@ const Configurator = () => {
       setSelectedCategory(category);
       setIsEmbossed(false);
       setShowTpatti(false);
+      setSelectedEmbossPattern(null);
       if (category.designs?.length > 0) {
         setSelectedDesign(category.designs[0]);
       } else {
@@ -419,6 +447,14 @@ const Configurator = () => {
     }
   };
 
+  // Toggle emboss pattern selection (clicking the selected pattern deselects it)
+  const handleEmbossPatternSelect = (pattern) => {
+    setSelectedEmbossPattern(prev => prev?.id === pattern.id ? null : pattern);
+  };
+
+  // Reset emboss selection if the current pattern is not available for the new size
+  // (placed here so it's defined before the JSX; effect runs after state change)
+
   // Save current configuration to favorites
   const saveToFavorites = () => {
     if (!selectedDesign) {
@@ -447,6 +483,7 @@ const Configurator = () => {
         pattern: selectedPattern,
         color: selectedColor,
         isEmbossed: isEmbossed,
+        embossPattern: selectedProductType?.id === "flat-embossed-vmd" ? selectedEmbossPattern : null,
       }),
       
       // Common
@@ -490,6 +527,7 @@ const Configurator = () => {
         setSelectedColor(favorite.color);
         setSelectedThickness(favorite.thickness);
         setIsEmbossed(favorite.isEmbossed);
+        if (favorite.embossPattern) setSelectedEmbossPattern(favorite.embossPattern);
       }
     }
     setFavoritesOpen(false);
@@ -548,9 +586,9 @@ const Configurator = () => {
         </div>
 
         <ScrollArea className="h-[calc(100vh-200px)] md:h-[calc(100vh-180px)]">
-          <div className="p-6 space-y-6">
+          <div className="p-6 flex flex-col gap-6" data-testid="config-options">
             {/* Product Type Dropdown */}
-            <div className="border rounded-lg px-4 py-3 space-y-2">
+            <div className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg px-4 py-3 space-y-2">
               <Label className="section-header">Product Type</Label>
               <Select value={selectedProductType?.id} onValueChange={handleProductTypeChange}>
                 <SelectTrigger className="w-full" data-testid="product-type-trigger">
@@ -663,8 +701,137 @@ const Configurator = () => {
               </div>
             )}
             
-            {/* Generic Product Options (VMD, Ombre, etc.) */}
-            {selectedProductType?.id !== "vicstrip" && (
+            {/* Flat Embossed VMT Options */}
+            {selectedProductType?.id === "flat-embossed-vmd" && (
+              <div className="flex flex-col gap-6">
+                {/* 1. Size */}
+                {selectedProductType?.sizes?.length > 0 && (
+                  <div className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg px-4 py-3 space-y-2">
+                    <Label className="section-header">Size</Label>
+                    <Select value={selectedSize || ""} onValueChange={setSelectedSize} data-testid="size-select">
+                      <SelectTrigger className="w-full" data-testid="size-trigger">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.sizes.map((size) => (
+                          <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* 2. Category */}
+                {selectedProductType?.categories?.length > 0 && (
+                  <div className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg px-4 py-3 space-y-2">
+                    <Label className="section-header">Category</Label>
+                    <Select value={selectedCategory?.id} onValueChange={handleCategoryChange} data-testid="category-select">
+                      <SelectTrigger className="w-full" data-testid="category-trigger">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id} data-testid={`category-${category.id}`}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {/* T-Patti toggle */}
+                    {selectedCategory?.id && FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti && (
+                      <div className="flex items-center justify-between mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                        <Label htmlFor="tpatti-toggle" className="text-sm font-medium">T-Patti Overlay</Label>
+                        <Switch id="tpatti-toggle" checked={showTpatti} onCheckedChange={setShowTpatti} data-testid="tpatti-toggle" />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. Print (collapsible) */}
+                {selectedCategory?.designs?.length > 0 && (
+                  <Accordion type="single" collapsible defaultValue="print" className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg">
+                    <AccordionItem value="print" className="border-0 px-4">
+                      <AccordionTrigger className="section-header py-3">Print</AccordionTrigger>
+                      <AccordionContent className="pb-4">
+                        <div className="thumbnail-grid" data-testid="design-grid">
+                          {selectedCategory.designs.map((design) => (
+                            <DesignThumbnail
+                              key={design.id}
+                              design={design}
+                              isSelected={selectedDesign?.id === design.id}
+                              onSelect={handleDesignSelect}
+                            />
+                          ))}
+                        </div>
+                        {selectedDesign && (
+                          <div className="mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                            <p className="font-medium text-sm">{selectedDesign.design_name}</p>
+                            <p className="text-xs text-[hsl(215,16%,47%)]">{selectedDesign.design_code}</p>
+                          </div>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+
+                {/* 4. Emboss — only when category supports it AND a print is selected */}
+                {selectedCategory?.emboss_available && selectedDesign && (() => {
+                  return (
+                    <div className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg px-4 py-3 space-y-2">
+                      <Label className="section-header">Emboss</Label>
+                      <div className="thumbnail-grid" data-testid="emboss-grid">
+                        {FLAT_EMBOSSED_EMBOSS_PATTERNS.map((pattern) => {
+                          const unavailable = selectedSize && !pattern.availableSizes.includes(selectedSize);
+                          return (
+                            <div
+                              key={pattern.id}
+                              style={{ opacity: unavailable ? 0.35 : 1, pointerEvents: unavailable ? "none" : undefined }}
+                              title={unavailable ? `Not available for ${selectedSize}` : undefined}
+                            >
+                              <EmbossThumbnail
+                                pattern={pattern}
+                                isSelected={selectedEmbossPattern?.id === pattern.id}
+                                onSelect={handleEmbossPatternSelect}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {FLAT_EMBOSSED_EMBOSS_PATTERNS.length === 0 && (
+                        <p className="text-xs text-[hsl(215,16%,47%)]">No emboss patterns available yet.</p>
+                      )}
+                      {selectedEmbossPattern && (
+                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                          <p className="font-medium text-sm">{selectedEmbossPattern.name}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* 5. Thickness */}
+                {selectedProductType?.thicknesses?.length > 0 && (
+                  <div className="border-l-2 border-l-[hsl(24,95%,53%)] border border-[hsl(var(--border))] rounded-lg px-4 py-3 space-y-2">
+                    <Label className="section-header">Thickness</Label>
+                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="thickness-select">
+                      <SelectTrigger className="w-full" data-testid="thickness-trigger">
+                        <SelectValue placeholder="Select thickness" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.thicknesses.map((thickness) => (
+                          <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
+                            {thickness}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Generic Product Options (non-VicStrip, non-flat-embossed-vmd) */}
+            {selectedProductType?.id !== "vicstrip" && selectedProductType?.id !== "flat-embossed-vmd" && (
               <Accordion type="multiple" defaultValue={["category", "options", "designs"]} className="space-y-2">
                 {/* Category Selector */}
                 {selectedProductType?.categories?.length > 0 && (
@@ -1008,6 +1175,7 @@ const Configurator = () => {
             ref={canvasRef}
             categoryId={selectedCategory?.id}
             showTpatti={showTpatti}
+            embossUrl={selectedEmbossPattern ? resolveAssetUrl(selectedEmbossPattern.thumbnailUrl) : null}
             textureUrls={
               // Continuous-pattern: backend sets panel_variant="continuous" and
               // populates texture_urls with 3 paths (-1.jpg, -2.jpg, -3.jpg).
@@ -1064,7 +1232,7 @@ const Configurator = () => {
                 ? (selectedDesign?.color?.name 
                   ? `${selectedDesign?.color?.name} • ${selectedDesign?.color?.hex} • ${selectedSize} • ${selectedThickness}`
                   : "Select a color")
-                : [selectedSize, selectedDensity, selectedThickness, isEmbossed && "Embossed"].filter(Boolean).join(" • ")}
+                : [selectedSize, selectedDensity, selectedThickness, selectedEmbossPattern?.name && `Emboss: ${selectedEmbossPattern.name}`].filter(Boolean).join(" • ")}
             </p>
           </div>
         )}

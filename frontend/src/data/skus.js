@@ -107,6 +107,22 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
     panelWidth: 1200,
     panelHeight: 2800,
   },
+  "vmd-indian-modern": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-indian-modern.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-indian-modern.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+  "vmd-color-block": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-color-block.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-color-block.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
 };
 
 /**
@@ -121,6 +137,28 @@ export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
   panelWidth: 1200,
   panelHeight: 2800,
 };
+
+/**
+ * Emboss pattern overlays for Flat Embossed VMT panels.
+ * Each entry mirrors what the backend API will eventually return:
+ *   id           — unique pattern identifier
+ *   name         — display name
+ *   thumbnailUrl — absolute CDN/backend URL for the overlay PNG
+ *   availableSizes — which panel sizes support this pattern
+ *
+ * Rendered as a layer between the panels layer and the T-Patti layer.
+ * To add a pattern: drop the PNG in /images/flat-embossed-vmt/emboss/
+ * and add an entry here.
+ */
+export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
+  // No patterns added yet. Example entry:
+  // {
+  //   id: "wave",
+  //   name: "Wave",
+  //   thumbnailUrl: `${BACKEND_URL}/static/images/flat-embossed-vmt/emboss/wave.png`,
+  //   availableSizes: ["1200x2400", "1200x2800"],
+  // },
+];
 
 /**
  * Converts a relative backend asset path (e.g. "/static/images/...")

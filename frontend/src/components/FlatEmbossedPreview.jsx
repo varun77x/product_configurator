@@ -5,8 +5,9 @@
  *
  * Layer stack (bottom → top, z-index order):
  *   2  Pattern layer  — repeating panel columns (portrait mode)
- *   3  Tpatti layer   — optional decorative overlay PNG
- *   4  Furniture      — room photo with transparent wall cutout (DRIVES SIZING)
+ *   3  Emboss layer   — optional emboss pattern overlay PNG (behind T-Patti)
+ *   4  Tpatti layer   — optional decorative overlay PNG
+ *   5  Furniture      — room photo with transparent wall cutout (DRIVES SIZING)
  *  10  Preloader      — spinner + blur during texture transitions
  *
  * Sizing principle:
@@ -39,8 +40,9 @@ import {
 // ─── Transition timings ───────────────────────────────────────────────────────
 /** Minimum ms the preloader is shown after a texture/category change */
 const MIN_LOADING_MS = 400;
-/** Extra ms the preloader holds after the image is ready (avoids hard cut) */
-const POST_LOAD_HOLD_MS = 150;
+/** Extra ms the loader holds AFTER ghost drops + new image is visible beneath.
+ *  Gives the browser time to fully composite all layers before revealing. */
+const POST_REVEAL_HOLD_MS = 1000;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const FlatEmbossedPreview = forwardRef(
@@ -61,6 +63,8 @@ const FlatEmbossedPreview = forwardRef(
       textureUrls = null,
       /** controlled from the sidebar Switch — mirrors the Embossed Finish toggle pattern */
       showTpatti = false,
+      /** URL for the emboss pattern overlay PNG; null = no emboss */
+      embossUrl = null,
     },
     ref
   ) => {
@@ -81,17 +85,25 @@ const FlatEmbossedPreview = forwardRef(
     // string[] | null — each element is the URL for one column, or null for placeholder
     const [displayedTextureUrls, setDisplayedTextureUrls] = useState(null);
     const [displayedShowTpatti, setDisplayedShowTpatti] = useState(showTpatti);
+    const [displayedEmbossUrl, setDisplayedEmbossUrl] = useState(embossUrl);
 
     // Whether the preloader is visible
     const [isLoading, setIsLoading] = useState(false);
 
-    const pendingTimerRef = useRef(null);
-    // Called by the tpatti <img> onLoad/onError once it's truly painted;
-    // set during transitions where tpatti is being introduced/replaced.
-    const tpattiRevealCallbackRef = useRef(null);
+    // ── Ghost layer state ──────────────────────────────────────────────────
+    // When a transition starts we immediately snapshot the currently-displayed
+    // state here.  The ghost layer re-renders those old images (already in the
+    // browser's memory cache, so zero-latency) at z-index 9, sitting above all
+    // live content layers but below the preloader at z-index 10.  The loader's
+    // blur covers the ghost, hiding it from the user.  When the new content is
+    // fully decoded the ghost + loader drop together → clean atomic reveal.
+    const [ghostCategoryId, setGhostCategoryId] = useState(null);
+    const [ghostTextureUrls, setGhostTextureUrls] = useState(null);
+    const [ghostShowTpatti, setGhostShowTpatti] = useState(false);
+    const [ghostVisible, setGhostVisible] = useState(false);
 
     // ── Render logging (remove when done profiling) ────────────────────────
-    useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, textureUrls, showTpatti, displayedCategoryId, displayedTextureUrls, isLoading });
+    useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, textureUrls, showTpatti, embossUrl, displayedCategoryId, displayedTextureUrls, displayedEmbossUrl, isLoading });
 
     // ── Config is derived from DISPLAYED (frozen) category, not the live prop
     const cfg =
@@ -100,10 +112,11 @@ const FlatEmbossedPreview = forwardRef(
 
     // ── Double-buffer transition ───────────────────────────────────────────
     // Fires when category, texture, or showTpatti changes.
-    // 1. Show loader immediately — displayed state stays frozen.
-    // 2. Silently decode all incoming assets (furniture + panel texture + tpatti).
-    // 3. Wait for decoding + minimum hold time in parallel.
-    // 4. After POST_LOAD_HOLD_MS extra hold, atomically reveal everything.
+    // 1. Freeze current display into ghost layer (instant cache re-render).
+    // 2. Commit new display state immediately — new <img> elements mount
+    //    and start painting *behind* the ghost (invisible to user).
+    // 3. img.decode() the new assets + MIN_LOADING_MS in parallel.
+    // 4. When both done → drop ghost + loader in one React batch → no white flash.
     useEffect(() => {
       // Cancellation flag — set to true in cleanup so stale async callbacks
       // from a previous effect run cannot modify state after the effect is gone.
@@ -111,6 +124,7 @@ const FlatEmbossedPreview = forwardRef(
 
       const targetCategoryId = categoryId;
       const targetShowTpatti = showTpatti;
+      const targetEmbossUrl = embossUrl;
 
       // Normalise incoming URLs to string[] | null (works for both single and continuous)
       const targetTextureUrls = textureUrls?.length
@@ -125,28 +139,39 @@ const FlatEmbossedPreview = forwardRef(
       if (
         targetCategoryId === displayedCategoryId &&
         targetTextureUrlsJson === displayedTextureUrlsJson &&
-        targetShowTpatti === displayedShowTpatti
+        targetShowTpatti === displayedShowTpatti &&
+        targetEmbossUrl === displayedEmbossUrl
       ) return;
 
       // If there's genuinely nothing to show, clear immediately (no loader)
       if (!targetTextureUrls?.length && !targetCategoryId) {
-        if (pendingTimerRef.current) {
-          clearTimeout(pendingTimerRef.current);
-          pendingTimerRef.current = null;
-        }
+        setGhostVisible(false);
         setDisplayedCategoryId(null);
         setDisplayedTextureUrls(null);
         setDisplayedShowTpatti(targetShowTpatti);
+        setDisplayedEmbossUrl(targetEmbossUrl);
         setIsLoading(false);
         return;
       }
 
+      const categoryChanging = targetCategoryId !== displayedCategoryId;
+
+      // Step 1: Freeze current view into ghost layer + show loader immediately.
+      setGhostCategoryId(displayedCategoryId);
+      setGhostTextureUrls(displayedTextureUrls);
+      setGhostShowTpatti(displayedShowTpatti);
+      setGhostVisible(true);
       setIsLoading(true);
 
-      // Cancel any previously scheduled reveal
-      if (pendingTimerRef.current) {
-        clearTimeout(pendingTimerRef.current);
-        pendingTimerRef.current = null;
+      // Step 2: For same-category switches only, commit the new panel URLs immediately.
+      // The furniture img stays the same → no size-collapse → ghost covers the flash.
+      // For category switches we MUST NOT commit displayedCategoryId yet — the new
+      // furniture <img> is the size-defining element; committing it before it has
+      // loaded collapses the wall-canvas to zero height, taking the ghost with it.
+      if (!categoryChanging) {
+        setDisplayedTextureUrls(targetTextureUrls);
+        setDisplayedShowTpatti(targetShowTpatti);
+        setDisplayedEmbossUrl(targetEmbossUrl);
       }
 
       // Helper: decode an image URL silently (background prefetch)
@@ -182,61 +207,41 @@ const FlatEmbossedPreview = forwardRef(
         decodePromises.push(decodeImage(newCfg.tpatti));
       }
 
+      // Decode emboss if it's being introduced or changed
+      if (targetEmbossUrl && targetEmbossUrl !== displayedEmbossUrl) {
+        decodePromises.push(decodeImage(targetEmbossUrl));
+      }
+
       const _decodeStart = performance.now();
       const minTimePromise = new Promise((resolve) =>
         setTimeout(resolve, MIN_LOADING_MS)
       );
 
+      let revealTimer = null;
+
       Promise.all([...decodePromises, minTimePromise]).then(() => {
         if (cancelled) return;
-        const _decodeMs = (performance.now() - _decodeStart).toFixed(0);
-        console.log(
-          `%c🖼 [FEP] Assets decoded in ${_decodeMs}ms — holding ${POST_LOAD_HOLD_MS}ms more (POST_LOAD_HOLD_MS)`,
-          "color:#80cbc4"
-        );
-        // All assets are decoded. Hold for one more beat, then reveal.
-        pendingTimerRef.current = setTimeout(() => {
-          if (cancelled) return;
-          pendingTimerRef.current = null;
-
-          // Determine whether tpatti is being newly introduced/replaced:
-          // if so, we must wait for the DOM <img> onLoad before dropping the loader.
-          const tpattiIsEntering =
-            targetShowTpatti &&
-            newCfg.tpatti &&
-            (targetCategoryId !== displayedCategoryId || !displayedShowTpatti);
-
-          if (tpattiIsEntering) {
-            // Step 1: Commit all display state (tpatti <img> enters the DOM behind
-            // the loader — the loader's blur keeps it invisible while it paints).
-            setDisplayedCategoryId(targetCategoryId);
-            setDisplayedTextureUrls(targetTextureUrls);
-            setDisplayedShowTpatti(targetShowTpatti);
-            // Step 2: Register the callback that the tpatti <img> onLoad will fire.
-            tpattiRevealCallbackRef.current = () => {
-              if (!cancelled) setIsLoading(false);
-              tpattiRevealCallbackRef.current = null;
-            };
-          } else {
-            // No tpatti waiting — reveal everything atomically in one render.
-            setDisplayedCategoryId(targetCategoryId);
-            setDisplayedTextureUrls(targetTextureUrls);
-            setDisplayedShowTpatti(targetShowTpatti);
+        // All assets decoded. Commit display state and drop the ghost so the
+        // new image renders beneath the loader blur.
+        setDisplayedCategoryId(targetCategoryId);
+        setDisplayedTextureUrls(targetTextureUrls);
+        setDisplayedShowTpatti(targetShowTpatti);
+        setDisplayedEmbossUrl(targetEmbossUrl);
+        // Wait POST_REVEAL_HOLD_MS, then drop ghost and loader together.
+        revealTimer = setTimeout(() => {
+          if (!cancelled) {
+            setGhostVisible(false);
             setIsLoading(false);
           }
-        }, POST_LOAD_HOLD_MS);
+        }, POST_REVEAL_HOLD_MS);
       });
 
       return () => {
         cancelled = true;
-        tpattiRevealCallbackRef.current = null;
-        if (pendingTimerRef.current) {
-          clearTimeout(pendingTimerRef.current);
-          pendingTimerRef.current = null;
-        }
+        if (revealTimer) clearTimeout(revealTimer);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [categoryId, textureUrlsJson, showTpatti]);
+    }, [categoryId, textureUrlsJson, showTpatti, embossUrl]);
 
     // ── Download: capture the wall-canvas DOM node to a PNG ──────────────
     useImperativeHandle(ref, () => ({
@@ -258,6 +263,14 @@ const FlatEmbossedPreview = forwardRef(
 
     // ── Computed style values ─────────────────────────────────────────────
     const hasTpatti = Boolean(cfg.tpatti) && displayedShowTpatti;
+    const hasEmboss = Boolean(displayedEmbossUrl);
+
+    // Ghost layer config (derived from frozen ghost category)
+    const ghostCfg =
+      (ghostCategoryId && FLAT_EMBOSSED_VMT_CONFIG[ghostCategoryId]) ||
+      FLAT_EMBOSSED_VMT_DEFAULT_CONFIG;
+    const ghostColumnCount =
+      ghostTextureUrls?.length > 1 ? ghostTextureUrls.length : ghostCfg.repeat;
 
     return (
       <div
@@ -320,46 +333,71 @@ const FlatEmbossedPreview = forwardRef(
                         key={i}
                         className="flat-embossed-panel"
                         style={{
+                          position: "relative",
                           width: `calc(100% / ${columnCount})`,
                           height: "100%",
                           flexShrink: 0,
-                          backgroundImage: colUrl ? `url(${colUrl})` : undefined,
+                          overflow: "hidden",
                           backgroundColor: colUrl ? undefined : "hsl(215 20% 88%)",
-                          backgroundSize: "100% auto",
-                          backgroundPosition: "top left",
-                          backgroundRepeat: "no-repeat",
                         }}
                         data-testid={`panel-column-${i}`}
-                      />
+                      >
+                        {colUrl && (
+                          <img
+                            key={colUrl}
+                            src={colUrl}
+                            alt=""
+                            draggable={false}
+                            style={{
+                              width: "100%",
+                              height: "auto",
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              pointerEvents: "none",
+                              userSelect: "none",
+                            }}
+                          />
+                        )}
+                      </div>
                     );
                   });
                 })()}
             </div>
           </div>
 
-          {/* ── Layer 2: T-Patti overlay (z-index 3) ── */}
-          {hasTpatti && (
+          {/* ── Layer 2: Emboss overlay (z-index 3) ── */}
+          {hasEmboss && (
             <img
-              src={cfg.tpatti}
-              alt="T-Patti decorative overlay"
-              onLoad={() => {
-                // Signal the loader to drop once the image is truly painted.
-                if (tpattiRevealCallbackRef.current) {
-                  tpattiRevealCallbackRef.current();
-                }
-              }}
-              onError={() => {
-                // Don't leave the loader stuck if the image fails to load.
-                if (tpattiRevealCallbackRef.current) {
-                  tpattiRevealCallbackRef.current();
-                }
-              }}
+              src={displayedEmbossUrl}
+              alt="Emboss pattern overlay"
               style={{
                 position: "absolute",
                 inset: 0,
                 width: "100%",
                 height: "100%",
                 zIndex: 3,
+                objectFit: "contain",
+                background: "transparent",
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+              data-testid="emboss-layer"
+            />
+          )}
+
+          {/* ── Layer 3: T-Patti overlay (z-index 4) ── */}
+          {hasTpatti && (
+            <img
+              src={cfg.tpatti}
+              alt="T-Patti decorative overlay"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: 4,
                 objectFit: "contain",
                 background: "transparent",
                 pointerEvents: "none",
@@ -379,6 +417,7 @@ const FlatEmbossedPreview = forwardRef(
            * are visible so the layers beneath show through.
            */}
           <img
+            key={cfg.furniture}
             src={cfg.furniture}
             alt="Room interior with furniture"
             style={{
@@ -386,7 +425,7 @@ const FlatEmbossedPreview = forwardRef(
               display: "block",
               maxWidth: "calc(100vw - 420px)",
               maxHeight: "calc(100vh - 80px)",
-              zIndex: 4,
+              zIndex: 5,
               userSelect: "none",
               pointerEvents: "none",
             }}
@@ -412,6 +451,98 @@ const FlatEmbossedPreview = forwardRef(
               <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
             </div>
           )}
+
+          {/*
+           * ── Ghost layer (z-index 9) ──────────────────────────────────────
+           * Re-renders the previously-displayed images (already in browser
+           * memory cache → instant, zero-latency) directly above all live
+           * content layers.  The preloader blur at z-index 10 covers it so
+           * the user just sees a blurred image while new content loads below.
+           * Dropped together with the loader once img.decode() resolves.
+           */}
+          {ghostVisible && (() => {
+            return (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 9,
+                  overflow: "hidden",
+                  pointerEvents: "none",
+                  // Fallback background — if ghost images miss cache and take time
+                  // to reload, this neutral tone fills the space instead of white.
+                  background: "hsl(215 20% 88%)",
+                }}
+                data-testid="ghost-layer"
+              >
+                {/* Ghost panels */}
+                {ghostTextureUrls?.length > 0 && (
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "stretch" }}>
+                    {Array.from({ length: ghostColumnCount }).map((_, i) => {
+                      const url = ghostTextureUrls[i % ghostTextureUrls.length];
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            position: "relative",
+                            width: `calc(100% / ${ghostColumnCount})`,
+                            height: "100%",
+                            overflow: "hidden",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <img
+                            src={url}
+                            alt=""
+                            style={{
+                              width: "100%",
+                              height: "auto",
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              display: "block",
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Ghost tpatti */}
+                {ghostShowTpatti && ghostCfg.tpatti && (
+                  <img
+                    src={ghostCfg.tpatti}
+                    alt=""
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      zIndex: 1,
+                    }}
+                  />
+                )}
+                {/* Ghost furniture — sits on top to perfectly replicate the scene.
+                    onError: if furniture fails to load from cache, hide the ghost
+                    entirely so the loader blur covers live content cleanly. */}
+                <img
+                  src={ghostCfg.furniture}
+                  alt=""
+                  onError={() => setGhostVisible(false)}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    objectPosition: "center top",
+                    zIndex: 2,
+                  }}
+                />
+              </div>
+            );
+          })()}
         </div>
       </div>
     );
