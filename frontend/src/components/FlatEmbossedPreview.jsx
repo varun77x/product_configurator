@@ -367,25 +367,56 @@ const FlatEmbossedPreview = forwardRef(
             </div>
           </div>
 
-          {/* ── Layer 2: Emboss overlay (z-index 3) ── */}
-          {hasEmboss && (
-            <img
-              src={displayedEmbossUrl}
-              alt="Emboss pattern overlay"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                zIndex: 3,
-                objectFit: "contain",
-                background: "transparent",
-                pointerEvents: "none",
-                userSelect: "none",
-              }}
-              data-testid="emboss-layer"
-            />
-          )}
+          {/* ── Layer 2: Emboss overlay (z-index 3) — between print and T-Patti ── */}
+          {hasEmboss && (() => {
+            const columnCount =
+              displayedTextureUrls?.length > 1
+                ? displayedTextureUrls.length
+                : cfg.repeat;
+            return (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 3,
+                  display: "flex",
+                  alignItems: "stretch",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                }}
+                data-testid="emboss-layer"
+              >
+                {Array.from({ length: columnCount }).map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: "relative",
+                      width: `calc(100% / ${columnCount})`,
+                      height: "100%",
+                      flexShrink: 0,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={displayedEmbossUrl}
+                      alt=""
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                        display: "block",
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        pointerEvents: "none",
+                        userSelect: "none",
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* ── Layer 3: T-Patti overlay (z-index 4) ── */}
           {hasTpatti && (
@@ -406,6 +437,8 @@ const FlatEmbossedPreview = forwardRef(
               data-testid="tpatti-layer"
             />
           )}
+
+
 
           {/*
            * ── Layer 3: Furniture image (z-index 4) ────────────────────────

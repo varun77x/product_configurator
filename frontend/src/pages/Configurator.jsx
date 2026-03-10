@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useRenderLog } from "@/hooks/use-render-log";
 import axios from "axios";
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, Eye, Loader2, Shield, Flame, Leaf, Award } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Eye, Loader2, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -155,7 +155,7 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
           className={`thumbnail-item ${isSelected ? "selected" : ""}`}
           style={{
             backgroundColor: bgColor,
-            backgroundImage: thumbUrl ? `url(${thumbUrl})` : undefined,
+            backgroundImage: thumbUrl ? `url("${thumbUrl}")` : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -168,7 +168,7 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
           className="h-32 w-full"
           style={{
             backgroundColor: bgColor,
-            backgroundImage: thumbUrl ? `url(${thumbUrl})` : undefined,
+            backgroundImage: thumbUrl ? `url("${thumbUrl}")` : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -214,7 +214,7 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect }) => (
   <div
     className={`thumbnail-item ${isSelected ? "selected" : ""}`}
     style={{
-      backgroundImage: pattern.thumbnailUrl ? `url(${pattern.thumbnailUrl})` : undefined,
+      backgroundImage: pattern.thumbnailUrl ? `url("${pattern.thumbnailUrl}")` : undefined,
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundColor: "#E5E7EB",
@@ -251,6 +251,12 @@ const Configurator = () => {
   const [specsOpen, setSpecsOpen] = useState(false);
   const [techSpecs, setTechSpecs] = useState(null);
   const canvasRef = useRef(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const ZOOM_STEP = 0.25;
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 5.0;
+  const zoomIn = () => setZoomLevel(prev => Math.min(parseFloat((prev + ZOOM_STEP).toFixed(2)), ZOOM_MAX));
+  const zoomOut = () => setZoomLevel(prev => Math.max(parseFloat((prev - ZOOM_STEP).toFixed(2)), ZOOM_MIN));
 
   // ── Render logging (remove when done profiling) ────────────────────────────
   useRenderLog("Configurator", {
@@ -1169,7 +1175,44 @@ const Configurator = () => {
           </Sheet>
         )}
 
+        {/* Zoom Controls */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10" data-testid="zoom-controls">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={zoomIn}
+            disabled={zoomLevel >= ZOOM_MAX}
+            className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white h-8 w-8"
+            data-testid="zoom-in-btn"
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <div className="text-xs text-center text-[hsl(215,16%,47%)] bg-white/90 backdrop-blur-sm rounded px-1 py-0.5 shadow font-medium">
+            {Math.round(zoomLevel * 100)}%
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={zoomOut}
+            disabled={zoomLevel <= ZOOM_MIN}
+            className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white h-8 w-8"
+            data-testid="zoom-out-btn"
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+        </div>
+
         {/* Preview Component — routes by product type */}
+        <div
+          style={{
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: "center",
+            transition: "transform 0.2s ease",
+          }}
+          data-testid="preview-zoom-wrapper"
+        >
         {selectedProductType?.id === "flat-embossed-vmd" ? (
           <FlatEmbossedPreview
             ref={canvasRef}
@@ -1218,6 +1261,7 @@ const Configurator = () => {
             productType={selectedProductType?.id}
           />
         )}
+        </div>
 
         {/* Configuration Summary */}
         {selectedProductType && (

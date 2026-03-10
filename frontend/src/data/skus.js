@@ -123,6 +123,30 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
     panelWidth: 1200,
     panelHeight: 2800,
   },
+  "vmd-marble": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-marble.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-marble.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+  "vmd-luxury-textures": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-luxury-textures.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-luxury-textures.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
+  "vmd-leather": {
+    furniture: `${BACKEND_URL}/static/images/flat-embossed-vmt/furniture/vmd-leather.png`,
+    tpatti: `${BACKEND_URL}/static/images/flat-embossed-vmt/tpatti/vmd-leather.png`,
+    renderMode: "portrait",
+    repeat: 3,
+    panelWidth: 1200,
+    panelHeight: 2800,
+  },
 };
 
 /**
@@ -151,13 +175,24 @@ export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
  * and add an entry here.
  */
 export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
-  // No patterns added yet. Example entry:
+  // To add a pattern: drop the PNG in /images/flat-embossed-vmt/emboss/
+  // and add an entry here.
+  //
+  // Example:
   // {
   //   id: "wave",
   //   name: "Wave",
   //   thumbnailUrl: `${BACKEND_URL}/static/images/flat-embossed-vmt/emboss/wave.png`,
   //   availableSizes: ["1200x2400", "1200x2800"],
   // },
+  //
+  // TEMP: placeholder entry — replace thumbnailUrl once the real PNG is dropped in the emboss folder
+  {
+    id: "diamond",
+    name: "Diamond",
+    thumbnailUrl: `${BACKEND_URL}/static/images/flat-embossed-vmt/emboss/diamond.png`,
+    availableSizes: ["1200x2400", "1200x2800"],
+  },
 ];
 
 /**
