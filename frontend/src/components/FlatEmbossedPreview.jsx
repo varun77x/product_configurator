@@ -5,8 +5,8 @@
  *
  * Layer stack (bottom → top, z-index order):
  *   2  Pattern layer  — repeating panel columns (portrait mode)
- *   3  Emboss layer   — optional emboss pattern overlay PNG (behind T-Patti)
- *   4  Tpatti layer   — optional decorative overlay PNG
+ *   3  Tpatti layer   — optional decorative overlay PNG (below emboss)
+ *   4  Emboss layer   — optional emboss/groove overlay PNG (above T-Patti)
  *   5  Furniture      — room photo with transparent wall cutout (DRIVES SIZING)
  *  10  Preloader      — spinner + blur during texture transitions
  *
@@ -30,7 +30,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
 import { useRenderLog } from "@/hooks/use-render-log";
 import {
   FLAT_EMBOSSED_VMT_CONFIG,
@@ -40,9 +40,27 @@ import {
 // ─── Transition timings ───────────────────────────────────────────────────────
 /** Minimum ms the preloader is shown after a texture/category change */
 const MIN_LOADING_MS = 400;
+/** Solid color shown over the preview while a transition is loading.
+ *  Swap to any CSS color value — e.g. "#f5f5f5", "rgba(255,255,255,0.9)", etc. */
+const TRANSITION_OVERLAY_COLOR = "#ffffff";
 /** Extra ms the loader holds AFTER ghost drops + new image is visible beneath.
  *  Gives the browser time to fully composite all layers before revealing. */
 const POST_REVEAL_HOLD_MS = 1000;
+
+/**
+ * Kicks off background loading for an array of image URLs so they are
+ * browser-cached before the user explicitly needs them.
+ * Safe to call at any time — duplicates are silently ignored by the browser.
+ *
+ * @param {string[]} urls
+ */
+export function preloadImages(urls) {
+  urls.forEach((url) => {
+    if (!url) return;
+    const img = new Image();
+    img.src = url;
+  });
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const FlatEmbossedPreview = forwardRef(
@@ -65,6 +83,14 @@ const FlatEmbossedPreview = forwardRef(
       showTpatti = false,
       /** URL for the emboss pattern overlay PNG; null = no emboss */
       embossUrl = null,
+      /** whether to flip the center column image horizontally */
+      flipCenter = false,
+      /** called with (isLoading: boolean) whenever the loading state changes */
+      onLoadingChange = null,
+      /** override the number of vertical panel rows (default: 2 when emboss active, else 1) */
+      panelRows = null,
+      /** solid CSS color to fill panel columns when no texture is loaded (e.g. ombre base color) */
+      panelFallbackColor = null,
     },
     ref
   ) => {
@@ -90,17 +116,10 @@ const FlatEmbossedPreview = forwardRef(
     // Whether the preloader is visible
     const [isLoading, setIsLoading] = useState(false);
 
-    // ── Ghost layer state ──────────────────────────────────────────────────
-    // When a transition starts we immediately snapshot the currently-displayed
-    // state here.  The ghost layer re-renders those old images (already in the
-    // browser's memory cache, so zero-latency) at z-index 9, sitting above all
-    // live content layers but below the preloader at z-index 10.  The loader's
-    // blur covers the ghost, hiding it from the user.  When the new content is
-    // fully decoded the ghost + loader drop together → clean atomic reveal.
-    const [ghostCategoryId, setGhostCategoryId] = useState(null);
-    const [ghostTextureUrls, setGhostTextureUrls] = useState(null);
-    const [ghostShowTpatti, setGhostShowTpatti] = useState(false);
-    const [ghostVisible, setGhostVisible] = useState(false);
+    // Notify parent when loading state changes
+    useEffect(() => {
+      onLoadingChange?.(isLoading);
+    }, [isLoading, onLoadingChange]);
 
     // ── Render logging (remove when done profiling) ────────────────────────
     useRenderLog("FlatEmbossedPreview", { categoryId, textureUrl, textureUrls, showTpatti, embossUrl, displayedCategoryId, displayedTextureUrls, displayedEmbossUrl, isLoading });
@@ -145,7 +164,6 @@ const FlatEmbossedPreview = forwardRef(
 
       // If there's genuinely nothing to show, clear immediately (no loader)
       if (!targetTextureUrls?.length && !targetCategoryId) {
-        setGhostVisible(false);
         setDisplayedCategoryId(null);
         setDisplayedTextureUrls(null);
         setDisplayedShowTpatti(targetShowTpatti);
@@ -156,23 +174,13 @@ const FlatEmbossedPreview = forwardRef(
 
       const categoryChanging = targetCategoryId !== displayedCategoryId;
 
-      // Step 1: Freeze current view into ghost layer + show loader immediately.
-      setGhostCategoryId(displayedCategoryId);
-      setGhostTextureUrls(displayedTextureUrls);
-      setGhostShowTpatti(displayedShowTpatti);
-      setGhostVisible(true);
+      // Freeze the display completely — nothing is committed until all assets
+      // are decoded (see Promise.all below).  The old panels, furniture and
+      // tpatti remain painted in the DOM and stay visible under the blur
+      // overlay.  Previously an early setDisplayedTextureUrls() was done for
+      // same-category switches which caused new (not-yet-decoded) <img>
+      // elements to mount immediately, making panels go blank under the blur.
       setIsLoading(true);
-
-      // Step 2: For same-category switches only, commit the new panel URLs immediately.
-      // The furniture img stays the same → no size-collapse → ghost covers the flash.
-      // For category switches we MUST NOT commit displayedCategoryId yet — the new
-      // furniture <img> is the size-defining element; committing it before it has
-      // loaded collapses the wall-canvas to zero height, taking the ghost with it.
-      if (!categoryChanging) {
-        setDisplayedTextureUrls(targetTextureUrls);
-        setDisplayedShowTpatti(targetShowTpatti);
-        setDisplayedEmbossUrl(targetEmbossUrl);
-      }
 
       // Helper: decode an image URL silently (background prefetch)
       const decodeImage = (src) => {
@@ -227,10 +235,9 @@ const FlatEmbossedPreview = forwardRef(
         setDisplayedTextureUrls(targetTextureUrls);
         setDisplayedShowTpatti(targetShowTpatti);
         setDisplayedEmbossUrl(targetEmbossUrl);
-        // Wait POST_REVEAL_HOLD_MS, then drop ghost and loader together.
+        // Wait POST_REVEAL_HOLD_MS, then drop snapshot and loader together.
         revealTimer = setTimeout(() => {
           if (!cancelled) {
-            setGhostVisible(false);
             setIsLoading(false);
           }
         }, POST_REVEAL_HOLD_MS);
@@ -249,7 +256,6 @@ const FlatEmbossedPreview = forwardRef(
         const node = wallCanvasRef.current;
         if (!node) return;
         try {
-          const { toPng } = await import("html-to-image");
           const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
           const link = document.createElement("a");
           link.download = `univicoustic-design-${Date.now()}.png`;
@@ -264,13 +270,11 @@ const FlatEmbossedPreview = forwardRef(
     // ── Computed style values ─────────────────────────────────────────────
     const hasTpatti = Boolean(cfg.tpatti) && displayedShowTpatti;
     const hasEmboss = Boolean(displayedEmbossUrl);
-
-    // Ghost layer config (derived from frozen ghost category)
-    const ghostCfg =
-      (ghostCategoryId && FLAT_EMBOSSED_VMT_CONFIG[ghostCategoryId]) ||
-      FLAT_EMBOSSED_VMT_DEFAULT_CONFIG;
-    const ghostColumnCount =
-      ghostTextureUrls?.length > 1 ? ghostTextureUrls.length : ghostCfg.repeat;
+    // Always render 2 rows so the pattern (and emboss/groove) fills the full wall height
+    // regardless of panel aspect ratio. Each row repeats the same column layout:
+    //   AAA → AAA / ABA → ABA / ABC → ABC
+    // panelRows prop allows callers to override (e.g. small 600x600 tiles need more rows).
+    const panelRowCount = panelRows ?? 2;
 
     return (
       <div
@@ -324,10 +328,12 @@ const FlatEmbossedPreview = forwardRef(
                     displayedTextureUrls?.length > 1
                       ? displayedTextureUrls.length
                       : cfg.repeat;
+                  const centerIndex = Math.floor(columnCount / 2);
                   return Array.from({ length: columnCount }).map((_, i) => {
                     const colUrl = displayedTextureUrls
                       ? displayedTextureUrls[i % displayedTextureUrls.length]
                       : null;
+                    const isCenter = i === centerIndex;
                     return (
                       <div
                         key={i}
@@ -338,27 +344,37 @@ const FlatEmbossedPreview = forwardRef(
                           height: "100%",
                           flexShrink: 0,
                           overflow: "hidden",
-                          backgroundColor: colUrl ? undefined : "hsl(215 20% 88%)",
+                          backgroundColor: panelFallbackColor || (colUrl ? undefined : "hsl(215 20% 88%)"),
                         }}
                         data-testid={`panel-column-${i}`}
                       >
                         {colUrl && (
-                          <img
-                            key={colUrl}
-                            src={colUrl}
-                            alt=""
-                            draggable={false}
+                          <div
                             style={{
-                              width: "100%",
-                              height: "auto",
-                              display: "block",
                               position: "absolute",
-                              top: 0,
-                              left: 0,
-                              pointerEvents: "none",
-                              userSelect: "none",
+                              inset: 0,
+                              display: "flex",
+                              flexDirection: "column",
                             }}
-                          />
+                          >
+                            {Array.from({ length: panelRowCount }).map((__, rowIndex) => (
+                              <img
+                                key={`${colUrl}-${rowIndex}-${isCenter && flipCenter ? "flipped" : "normal"}`}
+                                src={colUrl}
+                                alt=""
+                                draggable={false}
+                                style={{
+                                  width: "100%",
+                                  height: "auto",
+                                  display: "block",
+                                  pointerEvents: "none",
+                                  userSelect: "none",
+                                  transform: isCenter && flipCenter ? "scaleX(-1)" : undefined,
+                                  transformOrigin: "center",
+                                }}
+                              />
+                            ))}
+                          </div>
                         )}
                       </div>
                     );
@@ -367,7 +383,27 @@ const FlatEmbossedPreview = forwardRef(
             </div>
           </div>
 
-          {/* ── Layer 2: Emboss overlay (z-index 3) — between print and T-Patti ── */}
+          {/* ── Layer 2: T-Patti overlay (z-index 3) — below emboss ── */}
+          {hasTpatti && (
+            <img
+              src={cfg.tpatti}
+              alt="T-Patti decorative overlay"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: 3,
+                objectFit: "contain",
+                background: "transparent",
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+              data-testid="tpatti-layer"
+            />
+          )}
+
+          {/* ── Layer 3: Emboss overlay (z-index 4) — above T-Patti ── */}
           {hasEmboss && (() => {
             const columnCount =
               displayedTextureUrls?.length > 1
@@ -378,7 +414,7 @@ const FlatEmbossedPreview = forwardRef(
                 style={{
                   position: "absolute",
                   inset: 0,
-                  zIndex: 3,
+                  zIndex: 4,
                   display: "flex",
                   alignItems: "stretch",
                   pointerEvents: "none",
@@ -386,62 +422,62 @@ const FlatEmbossedPreview = forwardRef(
                 }}
                 data-testid="emboss-layer"
               >
-                {Array.from({ length: columnCount }).map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      position: "relative",
-                      width: `calc(100% / ${columnCount})`,
-                      height: "100%",
-                      flexShrink: 0,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <img
-                      src={displayedEmbossUrl}
-                      alt=""
-                      draggable={false}
+                {Array.from({ length: columnCount }).map((_, i) => {
+                  const centerIndex = Math.floor(columnCount / 2);
+                  const isCenter = i === centerIndex;
+                  return (
+                    <div
+                      key={i}
                       style={{
-                        width: "100%",
-                        height: "auto",
-                        display: "block",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        pointerEvents: "none",
-                        userSelect: "none",
+                        position: "relative",
+                        width: `calc(100% / ${columnCount})`,
+                        height: "100%",
+                        flexShrink: 0,
+                        overflow: "hidden",
                       }}
-                    />
-                  </div>
-                ))}
+                    >
+                      <img
+                        src={displayedEmbossUrl}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          display: "block",
+                          pointerEvents: "none",
+                          userSelect: "none",
+                          transform: isCenter && flipCenter ? "scaleX(-1)" : undefined,
+                          transformOrigin: "center",
+                        }}
+                      />
+                      {Array.from({ length: panelRowCount - 1 }).map((_, rowIndex) => (
+                        <img
+                          key={`emboss-${i}-${rowIndex}`}
+                          src={displayedEmbossUrl}
+                          alt=""
+                          draggable={false}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                            pointerEvents: "none",
+                            userSelect: "none",
+                            transform: isCenter && flipCenter ? "scaleX(-1)" : undefined,
+                            transformOrigin: "center",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
 
-          {/* ── Layer 3: T-Patti overlay (z-index 4) ── */}
-          {hasTpatti && (
-            <img
-              src={cfg.tpatti}
-              alt="T-Patti decorative overlay"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                zIndex: 4,
-                objectFit: "contain",
-                background: "transparent",
-                pointerEvents: "none",
-                userSelect: "none",
-              }}
-              data-testid="tpatti-layer"
-            />
-          )}
-
 
 
           {/*
-           * ── Layer 3: Furniture image (z-index 4) ────────────────────────
+           * ── Layer 4: Furniture image (z-index 5) ────────────────────────
            * THE SIZE-DEFINING ELEMENT.
            * position: relative keeps it in normal document flow so the
            * inline-block wall-canvas shrink-wraps to its dimensions.
@@ -456,7 +492,7 @@ const FlatEmbossedPreview = forwardRef(
             style={{
               position: "relative",
               display: "block",
-              maxWidth: "calc(100vw - 420px)",
+              maxWidth: "calc(100vw - 360px)",
               maxHeight: "calc(100vh - 80px)",
               zIndex: 5,
               userSelect: "none",
@@ -467,115 +503,55 @@ const FlatEmbossedPreview = forwardRef(
 
           {/* ── Layer 4: Preloader (z-index 10) ── */}
           {isLoading && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backdropFilter: "blur(2px)",
-                WebkitBackdropFilter: "blur(2px)",
-                background: "transparent",
-              }}
-              data-testid="flat-embossed-preloader"
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
-            </div>
-          )}
-
-          {/*
-           * ── Ghost layer (z-index 9) ──────────────────────────────────────
-           * Re-renders the previously-displayed images (already in browser
-           * memory cache → instant, zero-latency) directly above all live
-           * content layers.  The preloader blur at z-index 10 covers it so
-           * the user just sees a blurred image while new content loads below.
-           * Dropped together with the loader once img.decode() resolves.
-           */}
-          {ghostVisible && (() => {
-            return (
+            <>
+              <style>{`
+                .fep-loader {
+                  display: inline-flex;
+                  width: 90px;
+                  aspect-ratio: 2;
+                  animation: fep-l10-0 1s linear infinite;
+                }
+                .fep-loader:before,
+                .fep-loader:after {
+                  content: "";
+                  flex: 1;
+                  background: #574951;
+                  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+                  animation: fep-l10-1 1s linear infinite;
+                  transform-origin: right;
+                }
+                .fep-loader:after {
+                  scale: -1 1;
+                  translate: -100% 0;
+                  animation-direction: reverse;
+                }
+                @keyframes fep-l10-0 {
+                  0%   { translate: 0 -35.35%; }
+                  100% { translate: 0  35.35%; }
+                }
+                @keyframes fep-l10-1 {
+                  0%   { rotate: -45deg; }
+                  100% { rotate:  45deg; }
+                }
+              `}</style>
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
-                  zIndex: 9,
-                  overflow: "hidden",
-                  pointerEvents: "none",
-                  // Fallback background — if ghost images miss cache and take time
-                  // to reload, this neutral tone fills the space instead of white.
-                  background: "hsl(215 20% 88%)",
+                  zIndex: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: TRANSITION_OVERLAY_COLOR,
                 }}
-                data-testid="ghost-layer"
+                data-testid="flat-embossed-preloader"
               >
-                {/* Ghost panels */}
-                {ghostTextureUrls?.length > 0 && (
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "stretch" }}>
-                    {Array.from({ length: ghostColumnCount }).map((_, i) => {
-                      const url = ghostTextureUrls[i % ghostTextureUrls.length];
-                      return (
-                        <div
-                          key={i}
-                          style={{
-                            position: "relative",
-                            width: `calc(100% / ${ghostColumnCount})`,
-                            height: "100%",
-                            overflow: "hidden",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <img
-                            src={url}
-                            alt=""
-                            style={{
-                              width: "100%",
-                              height: "auto",
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              display: "block",
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {/* Ghost tpatti */}
-                {ghostShowTpatti && ghostCfg.tpatti && (
-                  <img
-                    src={ghostCfg.tpatti}
-                    alt=""
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      zIndex: 1,
-                    }}
-                  />
-                )}
-                {/* Ghost furniture — sits on top to perfectly replicate the scene.
-                    onError: if furniture fails to load from cache, hide the ghost
-                    entirely so the loader blur covers live content cleanly. */}
-                <img
-                  src={ghostCfg.furniture}
-                  alt=""
-                  onError={() => setGhostVisible(false)}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    objectPosition: "center top",
-                    zIndex: 2,
-                  }}
-                />
+                <div className="fep-loader" />
               </div>
-            );
-          })()}
+            </>
+          )}
+
+
         </div>
       </div>
     );

@@ -19,7 +19,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
 import { useRenderLog } from "@/hooks/use-render-log";
 
 // ─── Transition timings ───────────────────────────────────────────────────────
@@ -27,6 +27,8 @@ import { useRenderLog } from "@/hooks/use-render-log";
 const MIN_LOADING_MS = 400;
 /** Extra ms the preloader holds after the image is ready (avoids hard cut) */
 const POST_LOAD_HOLD_MS = 150;
+/** Solid color shown over the preview while a transition is loading */
+const TRANSITION_OVERLAY_COLOR = "#ffffff";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const VicStripPreview = forwardRef(
@@ -38,6 +40,8 @@ const VicStripPreview = forwardRef(
       fallbackColor = "#CCCCCC",
       /** Human-readable label for download filename */
       designLabel = "vicstrip",
+      /** called with (isLoading: boolean) whenever the loading state changes */
+      onLoadingChange = null,
     },
     ref
   ) => {
@@ -50,6 +54,11 @@ const VicStripPreview = forwardRef(
 
     const [isLoading, setIsLoading] = useState(false);
     const pendingTimerRef = useRef(null);
+
+    // Notify parent when loading state changes
+    useEffect(() => {
+      onLoadingChange?.(isLoading);
+    }, [isLoading, onLoadingChange]);
 
     // ── Render logging ─────────────────────────────────────────────────────
     useRenderLog("VicStripPreview", {
@@ -121,6 +130,8 @@ const VicStripPreview = forwardRef(
         pendingTimerRef.current = setTimeout(() => {
           if (cancelled) return;
           pendingTimerRef.current = null;
+
+
           setDisplayedTextureUrl(targetTextureUrl);
           setDisplayedFallbackColor(targetFallbackColor);
           setIsLoading(false);
@@ -143,7 +154,6 @@ const VicStripPreview = forwardRef(
         const node = previewRef.current;
         if (!node) return;
         try {
-          const { toPng } = await import("html-to-image");
           const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
           const link = document.createElement("a");
           link.download = `univicoustic-${designLabel}-${Date.now()}.png`;
@@ -204,22 +214,52 @@ const VicStripPreview = forwardRef(
 
           {/* ── Preloader overlay (z-index 10) ── */}
           {isLoading && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                zIndex: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backdropFilter: "blur(2px)",
-                WebkitBackdropFilter: "blur(2px)",
-                background: "rgba(255,255,255,0.05)",
-              }}
-              data-testid="vicstrip-preloader"
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
-            </div>
+            <>
+              <style>{`
+                .vsp-loader {
+                  display: inline-flex;
+                  width: 90px;
+                  aspect-ratio: 2;
+                  animation: vsp-l10-0 1s linear infinite;
+                }
+                .vsp-loader:before,
+                .vsp-loader:after {
+                  content: "";
+                  flex: 1;
+                  background: #574951;
+                  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+                  animation: vsp-l10-1 1s linear infinite;
+                  transform-origin: right;
+                }
+                .vsp-loader:after {
+                  scale: -1 1;
+                  translate: -100% 0;
+                  animation-direction: reverse;
+                }
+                @keyframes vsp-l10-0 {
+                  0%   { translate: 0 -35.35%; }
+                  100% { translate: 0  35.35%; }
+                }
+                @keyframes vsp-l10-1 {
+                  0%   { rotate: -45deg; }
+                  100% { rotate:  45deg; }
+                }
+              `}</style>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: TRANSITION_OVERLAY_COLOR,
+                }}
+                data-testid="vicstrip-preloader"
+              >
+                <div className="vsp-loader" />
+              </div>
+            </>
           )}
         </div>
       </div>

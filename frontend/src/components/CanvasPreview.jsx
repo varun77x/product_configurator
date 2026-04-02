@@ -1,5 +1,4 @@
 import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useState, memo } from "react";
-import { Loader2 } from "lucide-react";
 import { useRenderLog, logImageLoad } from "@/hooks/use-render-log";
 
 const CanvasPreview = forwardRef(({ 
@@ -9,7 +8,8 @@ const CanvasPreview = forwardRef(({
   selectedColor, 
   size, 
   isEmbossed,
-  productType 
+  productType,
+  onLoadingChange = null,
 }, ref) => {
   useRenderLog("CanvasPreview", { backgroundImage, textureColor, textureUrl, selectedColor, size, isEmbossed, productType });
 
@@ -23,6 +23,11 @@ const CanvasPreview = forwardRef(({
   const loadStartRef = useRef(0);
   const pendingTimerRef = useRef(null);
   const MIN_LOADING_MS = 400; // minimum spinner time in ms
+
+  // Notify parent when loading state changes
+  useEffect(() => {
+    onLoadingChange?.(loading || isLoadingNewTexture);
+  }, [loading, isLoadingNewTexture, onLoadingChange]);
 
   // Wall mask area - adjusted for the provided interior image
   // The wall is the dark area at the top of the image
@@ -357,9 +362,41 @@ const CanvasPreview = forwardRef(({
           data-testid="preview-canvas"
         />
         {(loading || isLoadingNewTexture) && (
-          <div className="absolute inset-0 flex items-center justify-center z-10" data-testid="texture-loading">
-            <Loader2 className="h-8 w-8 animate-spin text-[hsl(24,95%,53%)]" />
-          </div>
+          <>
+            <style>{`
+              .cvp-loader {
+                display: inline-flex;
+                width: 90px;
+                aspect-ratio: 2;
+                animation: cvp-l10-0 1s linear infinite;
+              }
+              .cvp-loader:before,
+              .cvp-loader:after {
+                content: "";
+                flex: 1;
+                background: #574951;
+                clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+                animation: cvp-l10-1 1s linear infinite;
+                transform-origin: right;
+              }
+              .cvp-loader:after {
+                scale: -1 1;
+                translate: -100% 0;
+                animation-direction: reverse;
+              }
+              @keyframes cvp-l10-0 {
+                0%   { translate: 0 -35.35%; }
+                100% { translate: 0  35.35%; }
+              }
+              @keyframes cvp-l10-1 {
+                0%   { rotate: -45deg; }
+                100% { rotate:  45deg; }
+              }
+            `}</style>
+            <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: "#ffffff" }} data-testid="texture-loading">
+              <div className="cvp-loader" />
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -1,13 +1,40 @@
 /* UniVicoustic Configurator Styles */
 
-.configurator-layout {
+/* Root: full-height column (header on top, content row below) */
+.configurator-root {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Top header bar */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 1.5rem;
+    background: white;
+    border-bottom: 1px solid hsl(var(--border));
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+}
+
+/* Content row: sidebar + preview */
+.configurator-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    min-height: 0;
+    overflow: hidden;
 }
 
 @media (min-width: 768px) {
-    .configurator-layout {
+    .configurator-content {
         flex-direction: row;
     }
 }
@@ -17,32 +44,56 @@
     width: 100%;
     background: white;
     border-right: 1px solid hsl(var(--border));
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 @media (min-width: 768px) {
     .config-sidebar {
-        width: 400px;
-        max-height: 100vh;
+        width: 320px;
+        flex-shrink: 0;
+        height: 100%;
     }
+}
+
+/* Flat section — replaces the old card-border style */
+.config-section {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Accordion wrapper — flat, no card border */
+.config-accordion-wrapper {
+    border-bottom: 1px solid hsl(var(--border));
+}
+
+.config-accordion-wrapper [data-radix-collection-item] {
+    border: none;
+}
+
+/* Generic product accordion items */
+.config-accordion {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-bottom: 1px solid hsl(var(--border)) !important;
+    border-radius: 0;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
 }
 
 /* Canvas Area */
 .canvas-area {
     flex: 1;
-    background: #ffffff;
+    background: transparent;
     position: relative;
-    min-height: 60vh;
+    height: 100%;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-}
-
-@media (min-width: 768px) {
-    .canvas-area {
-        min-height: 100vh;
-    }
 }
 
 /* Thumbnail Grid */
@@ -58,14 +109,38 @@
     overflow: hidden;
     cursor: pointer;
     border: 1px solid hsl(var(--border));
-    transition: all 0.2s ease;
     background-size: cover;
     background-position: center;
 }
 
 .thumbnail-item:hover {
     border: 2px solid hsl(var(--muted-foreground));
-    transform: scale(1.02);
+}
+
+.thumbnail-item.disabled:hover {
+    border: 1px solid hsl(var(--border));
+    transform: none;
+}
+
+/* Emboss thumbnail hover name label */
+.emboss-thumbnail-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 3px 4px;
+    pointer-events: none;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+}
+
+.emboss-thumbnail:hover .emboss-thumbnail-label {
+    opacity: 1;
 }
 
 .thumbnail-item.selected {
@@ -158,8 +233,11 @@
 
 /* Logo */
 .brand-logo {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800;
+    font-family: 'Bitcount Grid Double', system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "slnt" 0, "CRSV" 0.5, "ELSH" 0, "ELXP" 0;
     letter-spacing: -0.02em;
 }
 
@@ -171,4 +249,35 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: hsl(var(--muted-foreground));
+}
+
+/* Boot loader (easy to remove/re-theme without touching JSX) */
+.boot-loader {
+    width: 60px;
+    height: 25px;
+    border: 2px solid;
+    box-sizing: border-box;
+    border-radius: 50%;
+    display: grid;
+    animation: boot-loader-spin 2s infinite linear;
+}
+
+.boot-loader:before,
+.boot-loader:after {
+    content: "";
+    grid-area: 1/1;
+    border: inherit;
+    border-radius: 50%;
+    animation: inherit;
+    animation-duration: 3s;
+}
+
+.boot-loader:after {
+    --s: -1;
+}
+
+@keyframes boot-loader-spin {
+    100% {
+        transform: rotate(calc(var(--s, 1) * 1turn));
+    }
 }
