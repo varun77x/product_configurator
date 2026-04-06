@@ -32,6 +32,7 @@ import {
 } from "react";
 import { toPng } from "html-to-image";
 import { useRenderLog } from "@/hooks/use-render-log";
+import { useBlobPanel } from "@/hooks/use-blob-panel";
 import {
   FLAT_EMBOSSED_VMT_CONFIG,
   FLAT_EMBOSSED_VMT_DEFAULT_CONFIG,
@@ -128,6 +129,12 @@ const FlatEmbossedPreview = forwardRef(
     const cfg =
       (displayedCategoryId && FLAT_EMBOSSED_VMT_CONFIG[displayedCategoryId]) ||
       FLAT_EMBOSSED_VMT_DEFAULT_CONFIG;
+
+    // ── Fetch furniture + tpatti as blob URLs so html-to-image can inline them ──
+    // Without this, toPng's internal fetch() hits CORS when the backend is on a
+    // different host/IP than the frontend (e.g. LAN IP vs localhost).
+    const { blobUrl: furnitureBlobUrl } = useBlobPanel(cfg.furniture ?? null);
+    const { blobUrl: tpattiBlobUrl } = useBlobPanel(cfg.tpatti ?? null);
 
     // ── Double-buffer transition ───────────────────────────────────────────
     // Fires when category, texture, or showTpatti changes.
@@ -256,7 +263,11 @@ const FlatEmbossedPreview = forwardRef(
         const node = wallCanvasRef.current;
         if (!node) return;
         try {
-          const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
+          // cacheBust: true appends query params to every url() value, which
+          // corrupts blob: URLs (they don't support query strings) and causes
+          // ERR_FILE_NOT_FOUND. skipFonts silences the cross-origin
+          // Google Fonts SecurityError from html-to-image's CSS rule walk.
+          const dataUrl = await toPng(node, { pixelRatio: 2, skipFonts: true });
           const link = document.createElement("a");
           link.download = `univicoustic-design-${Date.now()}.png`;
           link.href = dataUrl;
@@ -367,6 +378,7 @@ const FlatEmbossedPreview = forwardRef(
                                   width: "100%",
                                   height: "auto",
                                   display: "block",
+                                  flexShrink: 0,
                                   pointerEvents: "none",
                                   userSelect: "none",
                                   transform: isCenter && flipCenter ? "scaleX(-1)" : undefined,
@@ -386,7 +398,7 @@ const FlatEmbossedPreview = forwardRef(
           {/* ── Layer 2: T-Patti overlay (z-index 3) — below emboss ── */}
           {hasTpatti && (
             <img
-              src={cfg.tpatti}
+              src={tpattiBlobUrl ?? cfg.tpatti}
               alt="T-Patti decorative overlay"
               style={{
                 position: "absolute",
@@ -487,13 +499,13 @@ const FlatEmbossedPreview = forwardRef(
            */}
           <img
             key={cfg.furniture}
-            src={cfg.furniture}
+            src={furnitureBlobUrl ?? cfg.furniture}
             alt="Room interior with furniture"
             style={{
               position: "relative",
               display: "block",
               maxWidth: "calc(100vw - 360px)",
-              maxHeight: "calc(100vh - 80px)",
+              maxHeight: "calc(100vh - 64px)",
               zIndex: 5,
               userSelect: "none",
               pointerEvents: "none",

@@ -18,6 +18,9 @@ import VicStripPreview from "@/components/VicStripPreview";
 import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS, WOOD_PERFORATION_SIZES, WOOD_PERFORATION_PATTERNS, WOOD_PERFORATION_EXCLUSIONS, COLOR_CORE_COLORS, COLOR_CORE_FABRIC_STRUCTURES, getColorCorePanelUrl, getColorCoreThumbnailUrl, COLOR_CORE_EMBOSS_PATTERNS, COLOR_CORE_SIZES, getColorCoreEmbossUrl, OMBRE_COLOR_CORE_BASE_COLORS, OMBRE_COLOR_CORE_OVERLAYS, getOmbreColorCorePanelUrl, OMBRE_COLOR_CORE_EMBOSS_PATTERNS, getOmbreEmbossPanelUrl, OMBRE_COLOR_CORE_GROOVE_PATTERNS, getOmbreGroovePanelUrl, DESIGNER_TEXTILE_COLOR_GROUPS, DESIGNER_TEXTILE_FABRICS, DESIGNER_TEXTILE_SIZES, DESIGNER_TEXTILE_THICKNESSES, getDesignerTextileThumbnailUrl, DESIGNER_TEXTILE_EMBOSS_PATTERNS, getDesignerTextileEmbossUrl } from "@/data/skus";
 import { useBlobPanel, useMultiBlobPanels } from "@/hooks/use-blob-panel";
 import { downloadPanelImages } from "@/lib/downloadPanelImages";
+import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
+import SignatureOmbreLightRing from "@/components/SignatureOmbreLightRing";
+import { OmbreEmbossEngine } from "@/lib/OmbreEmbossEngine";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -28,6 +31,24 @@ const BOOT_OVERLAY_EXTRA_MS = 500;
 
 // Interior background image (user provided)
 const INTERIOR_IMAGE = "https://customer-assets.emergentagent.com/job_74835dcc-aa13-4905-afe8-adfb41a5c38e/artifacts/drq6tblo_UniVic%20Strip_AO%20Map.png";
+
+// ── Signature Ombre: 6 emboss patterns with OBJ models ──────────────────────
+const SO_PATTERNS = [
+  { id: 'ribbed-25',   name: 'Ribbed 25',   modelUrl: '/models/emboss/ribbed-25.obj' },
+  { id: 'ribbed-45',   name: 'Ribbed 45',   modelUrl: '/models/emboss/ribbed-45.obj' },
+  { id: 'ribbed-60',   name: 'Ribbed 60',   modelUrl: '/models/emboss/ribbed-60.obj' },
+  { id: 'ribbed-duo',  name: 'Ribbed Duo',  modelUrl: '/models/emboss/ribbed-duo.obj' },
+  { id: 'tapered',     name: 'Tapered',     modelUrl: '/models/emboss/tapered.obj' },
+  { id: 'flux-ribbed', name: 'Flux Ribbed', modelUrl: '/models/emboss/flux-ribbed.obj' },
+];
+const SO_PAT_ICONS = {
+  'ribbed-25':   'M4,2v20M8,2v20M12,2v20M16,2v20M20,2v20',
+  'ribbed-45':   'M3,2v20M7,2v20M11,2v20M15,2v20M19,2v20M21,2v20',
+  'ribbed-60':   'M2,2v20M6,2v20M10,2v20M18,2v20M22,2v20',
+  'ribbed-duo':  'M3,2v20M5,2v20M10,2v20M12,2v20M17,2v20M19,2v20',
+  'tapered':     'M4,2v20M8,4v16M12,6v12M16,4v16M20,2v20',
+  'flux-ribbed': 'M3,2v20M6,2v20M10,2v20M14,2v20M17,2v20M21,2v20',
+};
 
 // Technical specs data (fallback)
 const DEFAULT_SPECS = {
@@ -308,7 +329,17 @@ const Configurator = () => {
   const [selectedOmbreEmbossPattern, setSelectedOmbreEmbossPattern] = useState(null);
   const [selectedOmbreGroovePattern, setSelectedOmbreGroovePattern] = useState(null);
   const [ombreFinishType, setOmbreFinishType] = useState("emboss"); // "emboss" | "groove"
-  
+  // Signature Ombre real-time 3D configurator state
+  const [soBaseColor, setSoBaseColor] = useState('#C47A4A');
+  const [soOverlayColor, setSoOverlayColor] = useState('#6B3A2A');
+  const [soBlend, setSoBlend] = useState(50);
+  const [soLightRotation, setSoLightRotation] = useState(0);
+  const [soSelectedPattern, setSoSelectedPattern] = useState(SO_PATTERNS[0].id);
+  const [soPanelImage, setSoPanelImage] = useState(null);
+  const [soIsLoading, setSoIsLoading] = useState(false);
+  const soEngineRef = useRef(null);
+  const soDebounceRef = useRef(null);
+
   // UI state
   const [favorites, setFavorites] = useState([]);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
@@ -435,6 +466,75 @@ const Configurator = () => {
       setZoomLevel(prev => Math.min(prev, 1.5));
     }
   }, [selectedProductType?.id]);
+
+  // ── Signature Ombre engine lifecycle & rendering ───────────────────────────
+  // Init engine + preload all OBJ models when Signature Ombre category is first selected
+  useEffect(() => {
+    if (selectedProductType?.id !== 'ombre' || selectedCategory?.id !== 'signature-ombre') return;
+    if (soEngineRef.current) return; // already initialised
+    const engine = new OmbreEmbossEngine();
+    soEngineRef.current = engine;
+    setSoIsLoading(true);
+    engine.preloadAll(SO_PATTERNS).then(() => {
+      setSoIsLoading(false);
+    });
+  }, [selectedProductType?.id, selectedCategory?.id]);
+
+  // Dispose engine when user leaves the Ombre product entirely
+  useEffect(() => {
+    if (selectedProductType?.id === 'ombre') return;
+    if (soEngineRef.current) {
+      soEngineRef.current.dispose();
+      soEngineRef.current = null;
+      setSoPanelImage(null);
+    }
+  }, [selectedProductType?.id]);
+
+  // Dispose on component unmount
+  useEffect(() => {
+    return () => {
+      if (soEngineRef.current) { soEngineRef.current.dispose(); soEngineRef.current = null; }
+      if (soDebounceRef.current) clearTimeout(soDebounceRef.current);
+    };
+  }, []);
+
+  // Re-render panel whenever Signature Ombre config changes
+  useEffect(() => {
+    if (selectedProductType?.id !== 'ombre' || selectedCategory?.id !== 'signature-ombre') return;
+    const engine = soEngineRef.current;
+    if (!soSelectedPattern) {
+      // No emboss selected — render a plain 2D ombre gradient (same as HTML prototype)
+      const cv = document.createElement('canvas');
+      cv.width = 512; cv.height = 1024;
+      const ctx2 = cv.getContext('2d');
+      const pct = Math.min(0.95, Math.max(0.05, soBlend / 100));
+      const transStart = 1 - pct;
+      const g = ctx2.createLinearGradient(0, 0, 0, cv.height);
+      g.addColorStop(0, soBaseColor);
+      g.addColorStop(transStart, soBaseColor);
+      g.addColorStop(1, soOverlayColor);
+      ctx2.fillStyle = g;
+      ctx2.fillRect(0, 0, cv.width, cv.height);
+      setSoPanelImage(cv.toDataURL('image/png'));
+      return;
+    }
+    if (!engine || soIsLoading || !engine.isLoaded(soSelectedPattern)) return;
+    if (soDebounceRef.current) clearTimeout(soDebounceRef.current);
+    soDebounceRef.current = setTimeout(() => {
+      try {
+        const result = engine.render({
+          baseColor: soBaseColor,
+          overlayColor: soOverlayColor,
+          ombrePercent: soBlend,
+          patternId: soSelectedPattern,
+          lightRotation: soLightRotation,
+        });
+        setSoPanelImage(result.dataUrl);
+      } catch (err) {
+        console.error('Signature Ombre render failed:', err);
+      }
+    }, 80);
+  }, [soBaseColor, soOverlayColor, soBlend, soSelectedPattern, soLightRotation, soIsLoading, selectedProductType?.id, selectedCategory?.id]);
 
   // ── Render logging (remove when done profiling) ────────────────────────────
   useRenderLog("Configurator", {
@@ -654,6 +754,15 @@ const Configurator = () => {
         setSelectedOmbreGroovePattern(null);
         setOmbreFinishType("emboss");
         setSelectedDesign(null);
+      } else if (category.id === "signature-ombre") {
+        // Signature Ombre: reset to defaults; engine inits via useEffect
+        setSoPanelImage(null);
+        setSoBaseColor('#C47A4A');
+        setSoOverlayColor('#6B3A2A');
+        setSoBlend(50);
+        setSoLightRotation(0);
+        setSoSelectedPattern(SO_PATTERNS[0].id);
+        setSelectedDesign(null);
       } else if (category.designs?.length > 0) {
         setSelectedDesign(category.designs[0]);
       } else {
@@ -808,6 +917,21 @@ const Configurator = () => {
 
   // Download rendered image
   const downloadImage = () => {
+    // Signature Ombre: composite wall canvas + room overlay
+    if (selectedProductType?.id === 'ombre' && selectedCategory?.id === 'signature-ombre') {
+      const wallCanvas = document.querySelector('.so-room canvas');
+      const overlayImg = document.querySelector('.so-room img');
+      if (!wallCanvas) return;
+      const out = document.createElement('canvas'); out.width = 2000; out.height = 2000;
+      const ctx = out.getContext('2d');
+      ctx.drawImage(wallCanvas, 0, 0, 2000, 2000);
+      if (overlayImg?.complete && overlayImg.naturalWidth) ctx.drawImage(overlayImg, 0, 0, 2000, 2000);
+      const url = out.toDataURL('image/png');
+      const a = document.createElement('a'); a.href = url;
+      a.download = `SignatureOmbre_${soSelectedPattern}_${soBaseColor.replace('#', '')}_${soOverlayColor.replace('#', '')}.png`;
+      a.click();
+      return;
+    }
     if (canvasRef.current) {
       canvasRef.current.downloadImage();
     }
@@ -867,7 +991,7 @@ const Configurator = () => {
           <Button
             size="sm"
             onClick={downloadImage}
-            className="bg-[hsl(215,25%,27%)] hover:bg-[hsl(215,25%,20%)] text-white"
+            className="bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
             data-testid="download-btn"
           >
             <Download className="h-4 w-4 mr-1.5" />
@@ -889,6 +1013,10 @@ const Configurator = () => {
                     ? "Flat Panel VMT (PET WOOL).pdf"
                     : "Flat Panel VMT (PET).pdf";
                 }
+              } else if (selectedProductType?.id === "ombre" && selectedCategory?.id === "ombre-color-core-ombre") {
+                pdfFile = selectedThickness === "25mm (PET Panel)"
+                  ? "Embossed VMT Series (PET).pdf"
+                  : "Flat Panel VMT (PET).pdf";
               } else {
                 pdfFile = "ts_001.pdf";
               }
@@ -1101,7 +1229,7 @@ const Configurator = () => {
                             onClick={() => setSelectedColorCoreColor(color)}
                             className={`relative aspect-square rounded border-2 transition-colors ${
                               selectedColorCoreColor?.id === color.id
-                                ? "border-[hsl(24,95%,53%)]"
+                                ? "border-[hsl(30,40%,46%)]"
                                 : "border-transparent hover:border-[hsl(215,16%,47%)]"
                             }`}
                             style={{ backgroundColor: color.hex }}
@@ -1131,7 +1259,7 @@ const Configurator = () => {
                                   <HoverCardTrigger asChild>
                                     <button
                                       onClick={() => setSelectedFabricStructure(structure)}
-                                      className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? "border-[hsl(24,95%,53%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
+                                      className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                       data-testid={`fabric-structure-${structure.id}`}
                                     >
                                       <img
@@ -1243,7 +1371,7 @@ const Configurator = () => {
                                 }}
                                 className={`w-6 h-6 rounded border-2 transition-colors ${
                                   selectedDTShade?.id === shade.id
-                                    ? "border-[hsl(24,95%,53%)] scale-110"
+                                    ? "border-[hsl(30,40%,46%)] scale-110"
                                     : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                 }`}
                                 style={{ backgroundColor: shade.hex }}
@@ -1274,7 +1402,7 @@ const Configurator = () => {
                                 title={fabric.name}
                                 onClick={() => setSelectedDTFabric(fabric)}
                                 className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
-                                  isSelected ? "border-[hsl(24,95%,53%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                  isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                 }`}
                                 data-testid={`dt-fabric-${fabric.id}`}
                               >
@@ -1415,7 +1543,7 @@ const Configurator = () => {
                                 <HoverCardTrigger asChild>
                                   <button
                                     onClick={() => setSelectedPerforation(prev => prev?.id === p.id ? null : p)}
-                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${selectedPerforation?.id === p.id ? "border-[hsl(24,95%,53%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
+                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${selectedPerforation?.id === p.id ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                     data-testid={`perforation-${p.id}`}
                                   >
                                       {/* White background so transparent PNG holes are clearly visible */}
@@ -1499,22 +1627,114 @@ const Configurator = () => {
                   </div>
                 )}
 
-                {/* 1. Size */}
-                {selectedProductType?.sizes?.length > 0 && (
-                  <div className="config-section space-y-2">
-                    <Label className="section-header">Size</Label>
-                    <Select value={selectedSize || ""} onValueChange={handleOmbreSizeChange} data-testid="ombre-size-select">
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProductType.sizes.map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {/* ── Signature Ombre: real-time 3D configurator ── */}
+                {selectedCategory?.id === "signature-ombre" ? (
+                  <>
+                    {/* Product info */}
+                    <div className="config-section">
+                      <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Signature Ombre</div>
+                      <div style={{ fontSize: 11, color: '#8a8480' }}>1200 × 2800 mm · 3-Panel Wall Setup</div>
+                    </div>
+
+                    {/* Ombre Colors */}
+                    <div className="config-section space-y-3">
+                      <Label className="section-header">Ombre Colors</Label>
+                      <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          <span style={{ fontSize: 11, color: '#8a8480', fontWeight: 500 }}>Base Color</span>
+                          <div style={{ height: 52, borderRadius: 10, border: '2px solid #e2ddd7', background: soBaseColor, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+                            <input type="color" value={soBaseColor} onChange={(e) => setSoBaseColor(e.target.value)}
+                              style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
+                          </div>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#8a8480', textAlign: 'center', textTransform: 'uppercase' }}>{soBaseColor}</div>
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          <span style={{ fontSize: 11, color: '#8a8480', fontWeight: 500 }}>Overlay Color</span>
+                          <div style={{ height: 52, borderRadius: 10, border: '2px solid #e2ddd7', background: soOverlayColor, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+                            <input type="color" value={soOverlayColor} onChange={(e) => setSoOverlayColor(e.target.value)}
+                              style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
+                          </div>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#8a8480', textAlign: 'center', textTransform: 'uppercase' }}>{soOverlayColor}</div>
+                        </div>
+                      </div>
+                      {/* Ombre preview bar */}
+                      <div style={{ height: 28, borderRadius: 8, border: '1px solid #e2ddd7', marginBottom: 8,
+                        background: `linear-gradient(to bottom, ${soBaseColor} 0%, ${soBaseColor} ${soBlend}%, ${soOverlayColor} 100%)` }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#8a8480', marginBottom: 4 }}>
+                        <span>Ombre Blend</span>
+                        <span style={{ color: '#c4956a', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{soBlend}%</span>
+                      </div>
+                      <input type="range" min={10} max={90} step={1} value={soBlend}
+                        onChange={(e) => setSoBlend(parseInt(e.target.value))}
+                        style={{ width: '100%', accentColor: '#c4956a', cursor: 'pointer' }} />
+                    </div>
+
+                    {/* Emboss Pattern */}
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Emboss Pattern</Label>
+                      {soIsLoading ? (
+                        <p style={{ fontSize: 11, color: '#8a8480' }}>Loading 3D patterns…</p>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+                          {SO_PATTERNS.map((p) => {
+                            const isSel = soSelectedPattern === p.id;
+                            return (
+                              <button key={p.id} type="button" onClick={() => setSoSelectedPattern(prev => prev === p.id ? null : p.id)}
+                                style={{
+                                  background: isSel ? 'rgba(196,149,106,0.06)' : '#f5f2ee',
+                                  border: `2px solid ${isSel ? '#c4956a' : '#e2ddd7'}`,
+                                  borderRadius: 10, padding: '10px 6px', cursor: 'pointer',
+                                  textAlign: 'center', position: 'relative',
+                                  boxShadow: isSel ? '0 0 0 1px #c4956a' : 'none',
+                                  fontFamily: 'inherit',
+                                }}
+                              >
+                                {isSel && (
+                                  <div style={{ position: 'absolute', top: 5, right: 5, width: 14, height: 14,
+                                    background: '#c4956a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" width="8" height="8"><polyline points="20 6 9 17 4 12" /></svg>
+                                  </div>
+                                )}
+                                <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke={isSel ? '#c4956a' : '#8a8480'} strokeWidth="1" width="26" height="26">
+                                    <path d={SO_PAT_ICONS[p.id]} />
+                                  </svg>
+                                </div>
+                                <div style={{ fontSize: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: isSel ? '#c4956a' : '#8a8480' }}>
+                                  {p.name}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* HDRI Lighting */}
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">HDRI Lighting</Label>
+                      <SignatureOmbreLightRing rotation={soLightRotation} onChange={setSoLightRotation} />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* ── Color Core Ombre controls (existing) ── */}
+                    {/* 1. Size */}
+                    {selectedProductType?.sizes?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Size</Label>
+                        <Select value={selectedSize || ""} onValueChange={handleOmbreSizeChange} data-testid="ombre-size-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.sizes.map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                 {/* 2. Base Colors */}
                 <div className="config-section space-y-2">
@@ -1534,7 +1754,7 @@ const Configurator = () => {
                         }}
                         className={`relative aspect-square rounded border-2 transition-colors ${
                           selectedOmbreBaseColor?.id === color.id
-                            ? "border-[hsl(24,95%,53%)]"
+                            ? "border-[hsl(30,40%,46%)]"
                             : "border-transparent hover:border-[hsl(215,16%,47%)]"
                         }`}
                         style={{ backgroundColor: color.hex }}
@@ -1569,7 +1789,7 @@ const Configurator = () => {
                           }}
                           className={`relative aspect-square rounded border-2 transition-colors ${
                             selectedOmbreOverlay?.filename === overlay.filename
-                              ? "border-[hsl(24,95%,53%)]"
+                              ? "border-[hsl(30,40%,46%)]"
                               : "border-transparent hover:border-[hsl(215,16%,47%)]"
                           }`}
                           style={{ backgroundColor: overlay.hex }}
@@ -1608,7 +1828,7 @@ const Configurator = () => {
                         selectedSize === "1200x2400"
                           ? "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] opacity-50 cursor-not-allowed"
                           : ombreFinishType === "emboss"
-                            ? "bg-[hsl(24,95%,53%)] text-white"
+                            ? "bg-[hsl(30,40%,46%)] text-white"
                             : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]"
                       }`}
                       data-testid="ombre-finish-emboss"
@@ -1622,7 +1842,7 @@ const Configurator = () => {
                       }}
                       className={`flex-1 py-1.5 text-sm font-medium border-l border-[hsl(var(--border))] transition-colors ${
                         ombreFinishType === "groove"
-                          ? "bg-[hsl(24,95%,53%)] text-white"
+                          ? "bg-[hsl(30,40%,46%)] text-white"
                           : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]"
                       }`}
                       data-testid="ombre-finish-groove"
@@ -1643,7 +1863,7 @@ const Configurator = () => {
                           )}
                           className={`relative aspect-square rounded border-2 overflow-hidden transition-colors ${
                             selectedOmbreEmbossPattern?.id === pattern.id
-                              ? "border-[hsl(24,95%,53%)]"
+                              ? "border-[hsl(30,40%,46%)]"
                               : "border-transparent hover:border-[hsl(215,16%,47%)]"
                           }`}
                           data-testid={`ombre-emboss-${pattern.id}`}
@@ -1666,7 +1886,7 @@ const Configurator = () => {
                           )}
                           className={`relative aspect-square rounded border-2 overflow-hidden transition-colors ${
                             selectedOmbreGroovePattern?.id === pattern.id
-                              ? "border-[hsl(24,95%,53%)]"
+                              ? "border-[hsl(30,40%,46%)]"
                               : "border-transparent hover:border-[hsl(215,16%,47%)]"
                           }`}
                           data-testid={`ombre-groove-${pattern.id}`}
@@ -1699,6 +1919,8 @@ const Configurator = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                )}
+                  </>
                 )}
               </div>
             )}
@@ -1918,7 +2140,7 @@ const Configurator = () => {
                 <Heart className="h-4 w-4 mr-2" />
                 Saved
                 {favorites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-[hsl(24,95%,53%)] text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-[hsl(30,40%,46%)] text-white text-xs rounded-full flex items-center justify-center">
                     {favorites.length}
                   </span>
                 )}
@@ -2028,13 +2250,19 @@ const Configurator = () => {
           }}
           data-testid="preview-zoom-wrapper"
         >
-        {(selectedProductType?.id === "flat-embossed-vmd" || selectedProductType?.id === "wood" || selectedProductType?.id === "fabrics" || selectedProductType?.id === "ombre") ? (
+        {selectedProductType?.id === "ombre" && selectedCategory?.id === "signature-ombre" ? (
+          <SignatureOmbreRoomPreview
+            panelImage={soPanelImage}
+            panelCount={3}
+            style={{ width: '100%', height: '100%' }}
+          />
+        ) : (selectedProductType?.id === "flat-embossed-vmd" || selectedProductType?.id === "wood" || selectedProductType?.id === "fabrics" || selectedProductType?.id === "ombre") ? (
           <FlatEmbossedPreview
             ref={canvasRef}
             onLoadingChange={handleLoadingChange}
             categoryId={selectedCategory?.id}
             showTpatti={showTpatti}
-            panelRows={selectedCategory?.id === "fabrics-designer-textile" ? (selectedDTEmboss?.panelRows ?? null) : (selectedColorCoreEmboss?.panelRows ?? null)}
+            panelRows={selectedCategory?.id === "fabrics-designer-textile" ? (selectedDTEmboss?.panelRows ?? null) : selectedProductType?.id === "ombre" ? (FLAT_EMBOSSED_VMT_CONFIG[selectedCategory?.id]?.panelRows ?? null) : (selectedColorCoreEmboss?.panelRows ?? null)}
             panelFallbackColor={selectedProductType?.id === "ombre" ? (selectedOmbreBaseColor?.hex ?? null) : null}
             embossUrl={
               selectedProductType?.id === "ombre"

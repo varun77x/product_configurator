@@ -256,11 +256,13 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
   // Ombre product — Color Core Ombre category
   "ombre-color-core-ombre": {
     furniture: `${BACKEND_URL}/static/images/ombre/color-core-ombre/furniture/color-core-ombre.png`,
-    tpatti: `${BACKEND_URL}/static/images/ombre/color-core-ombre/tpatti/color-core-ombre.png`,
+    // tpatti: `${BACKEND_URL}/static/images/ombre/color-core-ombre/tpatti/color-core-ombre.png`,
+    tpatti: null,
     renderMode: "portrait",
     repeat: 3,
     panelWidth: 1200,
     panelHeight: 2800,
+    panelRows: 2,
   },
 };
 

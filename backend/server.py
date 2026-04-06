@@ -2323,7 +2323,7 @@ def generate_mock_products():
         "densities": [],
         "patterns": [],
         "colors": [],
-        "thicknesses": ["12mm", "25mm"],
+        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)"],
         "categories": []
     }
 
@@ -2335,6 +2335,16 @@ def generate_mock_products():
         "designs": [],
     }
     ombre_panel["categories"].append(color_core_ombre_category)
+
+    signature_ombre_category = {
+        "id": "signature-ombre",
+        "name": "Signature Ombre",
+        "product_type": "ombre",
+        "emboss_available": False,
+        "designs": [],
+    }
+    ombre_panel["categories"].append(signature_ombre_category)
+
     products.append(ombre_panel)
     
     # 5. Univic Strip Panels
