@@ -1048,26 +1048,49 @@ const Configurator = () => {
             variant="outline"
             size="sm"
             onClick={() => {
+              const isPetWool = selectedThickness?.includes("PET Wool");
               let pdfFile;
               if (selectedProductType?.id === "flat-embossed-vmd") {
-                const isPetWool = selectedThickness === "PET Wool";
-                if (selectedEmbossPattern) {
-                  pdfFile = isPetWool
-                    ? "Embossed VMT Series (PET WOOL).pdf"
-                    : "Embossed VMT Series (PET).pdf";
+                pdfFile = selectedEmbossPattern
+                  ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+                  : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+              } else if (selectedProductType?.id === "fabrics") {
+                const catId = selectedCategory?.id;
+                if (catId === "fabrics-color-core") {
+                  // Color Core has no PET Wool option
+                  pdfFile = selectedColorCoreEmboss ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
+                } else if (catId === "fabrics-designer-textile") {
+                  pdfFile = selectedDTEmboss
+                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
                 } else {
-                  pdfFile = isPetWool
-                    ? "Flat Panel VMT (PET WOOL).pdf"
-                    : "Flat Panel VMT (PET).pdf";
+                  // luxury-textures, modern-corporate — flat only
+                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
                 }
-              } else if (selectedProductType?.id === "ombre" && selectedCategory?.id === "ombre-color-core-ombre") {
-                pdfFile = selectedThickness === "25mm (PET Panel)"
-                  ? "Embossed VMT Series (PET).pdf"
-                  : "Flat Panel VMT (PET).pdf";
+              } else if (selectedProductType?.id === "ombre") {
+                if (selectedCategory?.id === "ombre-color-core-ombre") {
+                  // Color Core Ombre has no PET Wool option
+                  pdfFile = selectedOmbreEmbossPattern ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
+                } else {
+                  // Signature Ombre — always embossed
+                  pdfFile = isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf";
+                }
+              } else if (selectedProductType?.id === "wood") {
+                const catId = selectedCategory?.id;
+                if (catId === "wood-classic-parquet") {
+                  // Classic Parquet — flat only
+                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
+                } else {
+                  // wood-classics, wood-perforations — emboss available
+                  pdfFile = selectedEmbossPattern
+                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+                }
               } else if (selectedProductType?.id === "vicstrip") {
+                // VicStrip — flat only, no PET Wool
                 pdfFile = "Flat Panel VMT (PET).pdf";
               } else {
-                pdfFile = "ts_001.pdf";
+                pdfFile = "Flat Panel VMT (PET).pdf";
               }
               window.open(`${ASSETS_URL}/static/technical_specification_pdfs/${encodeURIComponent(pdfFile)}`, "_blank");
             }}
