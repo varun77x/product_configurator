@@ -362,41 +362,9 @@ const CanvasPreview = forwardRef(({
           data-testid="preview-canvas"
         />
         {(loading || isLoadingNewTexture) && (
-          <>
-            <style>{`
-              .cvp-loader {
-                display: inline-flex;
-                width: 90px;
-                aspect-ratio: 2;
-                animation: cvp-l10-0 1s linear infinite;
-              }
-              .cvp-loader:before,
-              .cvp-loader:after {
-                content: "";
-                flex: 1;
-                background: #574951;
-                clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-                animation: cvp-l10-1 1s linear infinite;
-                transform-origin: right;
-              }
-              .cvp-loader:after {
-                scale: -1 1;
-                translate: -100% 0;
-                animation-direction: reverse;
-              }
-              @keyframes cvp-l10-0 {
-                0%   { translate: 0 -35.35%; }
-                100% { translate: 0  35.35%; }
-              }
-              @keyframes cvp-l10-1 {
-                0%   { rotate: -45deg; }
-                100% { rotate:  45deg; }
-              }
-            `}</style>
-            <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: "#ffffff" }} data-testid="texture-loading">
-              <div className="cvp-loader" />
-            </div>
-          </>
+          <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: "#ffffff" }} data-testid="texture-loading">
+            <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
+          </div>
         )}
       </div>
     </div>

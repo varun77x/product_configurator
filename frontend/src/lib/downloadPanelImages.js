@@ -11,7 +11,8 @@ async function fetchBlob(url) {
 
 export async function downloadPanelImages({ design, categoryId }) {
   try {
-    const BACKEND = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+    // const BACKEND = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+    const BACKEND = process.env.REACT_APP_ASSETS_URL || window.location.origin;
 
     // Normalize helper to absolute URL
     const toAbsolute = (u) => (u && u.startsWith("http") ? u : (u ? `${BACKEND}${u}` : null));

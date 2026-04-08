@@ -109,7 +109,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
 }
 
 /* Thumbnail Grid */
@@ -267,33 +266,15 @@
     color: hsl(var(--muted-foreground));
 }
 
-/* Boot loader (easy to remove/re-theme without touching JSX) */
-.boot-loader {
-    width: 60px;
-    height: 25px;
-    border: 2px solid;
-    box-sizing: border-box;
-    border-radius: 50%;
-    display: grid;
-    animation: boot-loader-spin 2s infinite linear;
+/* Boot loader */
+.uv-loader {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    animation: uv-loader-pulse 1.2s ease-in-out infinite;
 }
 
-.boot-loader:before,
-.boot-loader:after {
-    content: "";
-    grid-area: 1/1;
-    border: inherit;
-    border-radius: 50%;
-    animation: inherit;
-    animation-duration: 3s;
-}
-
-.boot-loader:after {
-    --s: -1;
-}
-
-@keyframes boot-loader-spin {
-    100% {
-        transform: rotate(calc(var(--s, 1) * 1turn));
-    }
+@keyframes uv-loader-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.6; transform: scale(0.92); }
 }

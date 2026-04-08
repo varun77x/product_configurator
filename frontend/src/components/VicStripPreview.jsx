@@ -214,52 +214,20 @@ const VicStripPreview = forwardRef(
 
           {/* ── Preloader overlay (z-index 10) ── */}
           {isLoading && (
-            <>
-              <style>{`
-                .vsp-loader {
-                  display: inline-flex;
-                  width: 90px;
-                  aspect-ratio: 2;
-                  animation: vsp-l10-0 1s linear infinite;
-                }
-                .vsp-loader:before,
-                .vsp-loader:after {
-                  content: "";
-                  flex: 1;
-                  background: #574951;
-                  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-                  animation: vsp-l10-1 1s linear infinite;
-                  transform-origin: right;
-                }
-                .vsp-loader:after {
-                  scale: -1 1;
-                  translate: -100% 0;
-                  animation-direction: reverse;
-                }
-                @keyframes vsp-l10-0 {
-                  0%   { translate: 0 -35.35%; }
-                  100% { translate: 0  35.35%; }
-                }
-                @keyframes vsp-l10-1 {
-                  0%   { rotate: -45deg; }
-                  100% { rotate:  45deg; }
-                }
-              `}</style>
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: 10,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: TRANSITION_OVERLAY_COLOR,
-                }}
-                data-testid="vicstrip-preloader"
-              >
-                <div className="vsp-loader" />
-              </div>
-            </>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: TRANSITION_OVERLAY_COLOR,
+              }}
+              data-testid="vicstrip-preloader"
+            >
+              <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
+            </div>
           )}
         </div>
       </div>

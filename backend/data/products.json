@@ -1,0 +1,4378 @@
+[
+  {
+    "id": "flat-embossed-vmd",
+    "name": "Bespoke Graphics",
+    "active": true,
+    "sizes": [
+      "1200x2400",
+      "1200x2800"
+    ],
+    "densities": [],
+    "patterns": [],
+    "colors": [],
+    "thicknesses": [
+      "12mm (PET Panel)",
+      "25mm (PET Panel)",
+      "PET Wool"
+    ],
+    "categories": [
+      {
+        "id": "vmd-line-and-texture",
+        "name": "Line & Texture",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-lt-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-BL-02",
+            "design_name": "AB-BL-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-BL-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-BL-02.jpg",
+            "color_name": "AB-BL-02"
+          },
+          {
+            "id": "vmd-design-lt-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-NC-04",
+            "design_name": "AB-NC-04",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-04-PANEL-A.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-04-PANEL-A.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-04-PANEL-A.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-04-PANEL-B.jpg"
+            ],
+            "color_name": "AB-NC-04"
+          },
+          {
+            "id": "vmd-design-lt-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-NC-07",
+            "design_name": "AB-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-07.jpg",
+            "color_name": "AB-NC-07"
+          },
+          {
+            "id": "vmd-design-lt-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-NC-09",
+            "design_name": "AB-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-09.jpg",
+            "color_name": "AB-NC-09"
+          },
+          {
+            "id": "vmd-design-lt-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-NC-11",
+            "design_name": "AB-NC-11",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-11-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-11-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-11-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-11-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NC-11-PanelC.jpg"
+            ],
+            "color_name": "AB-NC-11"
+          },
+          {
+            "id": "vmd-design-lt-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "AB-NE-03",
+            "design_name": "AB-NE-03",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NE-03_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NE-03_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NE-03_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NE-03_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/AB-NE-03_PanelC.jpg"
+            ],
+            "color_name": "AB-NE-03"
+          },
+          {
+            "id": "vmd-design-lt-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "FB-PT-34",
+            "design_name": "FB-PT-34",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-34.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-34.jpg",
+            "color_name": "FB-PT-34"
+          },
+          {
+            "id": "vmd-design-lt-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "FB-PT-37",
+            "design_name": "FB-PT-37",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-37.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-37.jpg",
+            "color_name": "FB-PT-37"
+          },
+          {
+            "id": "vmd-design-lt-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "FB-PT-66",
+            "design_name": "FB-PT-66",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-66.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/FB-PT-66.jpg",
+            "color_name": "FB-PT-66"
+          },
+          {
+            "id": "vmd-design-lt-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-01",
+            "design_name": "SR-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-01.jpg",
+            "color_name": "SR-NC-01"
+          },
+          {
+            "id": "vmd-design-lt-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-05",
+            "design_name": "SR-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-05.jpg",
+            "color_name": "SR-NC-05"
+          },
+          {
+            "id": "vmd-design-lt-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-08",
+            "design_name": "SR-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-08.jpg",
+            "color_name": "SR-NC-08"
+          },
+          {
+            "id": "vmd-design-lt-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-09",
+            "design_name": "SR-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-09.jpg",
+            "color_name": "SR-NC-09"
+          },
+          {
+            "id": "vmd-design-lt-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-10",
+            "design_name": "SR-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-10.jpg",
+            "color_name": "SR-NC-10"
+          },
+          {
+            "id": "vmd-design-lt-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-11",
+            "design_name": "SR-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-11.jpg",
+            "color_name": "SR-NC-11"
+          },
+          {
+            "id": "vmd-design-lt-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-12",
+            "design_name": "SR-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-12.jpg",
+            "color_name": "SR-NC-12"
+          },
+          {
+            "id": "vmd-design-lt-017",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-14",
+            "design_name": "SR-NC-14",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-14.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-14.jpg",
+            "color_name": "SR-NC-14"
+          },
+          {
+            "id": "vmd-design-lt-018",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-15",
+            "design_name": "SR-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-15.jpg",
+            "color_name": "SR-NC-15"
+          },
+          {
+            "id": "vmd-design-lt-019",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "SR-NC-16",
+            "design_name": "SR-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/SR-NC-16.jpg",
+            "color_name": "SR-NC-16"
+          },
+          {
+            "id": "vmd-design-lt-020",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "WP-NC-08",
+            "design_name": "WP-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/WP-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/WP-NC-08.jpg",
+            "color_name": "WP-NC-08"
+          },
+          {
+            "id": "vmd-design-lt-021",
+            "product_type": "flat-embossed-vmd",
+            "category": "Line & Texture",
+            "design_code": "WP-NC-11",
+            "design_name": "WP-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-line-and-texture/WP-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-line-and-texture/WP-NC-11.jpg",
+            "color_name": "WP-NC-11"
+          }
+        ]
+      },
+      {
+        "id": "vmd-rhythm-and-repeat",
+        "name": "Rhythm & Repeat",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-rr-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-BL-03",
+            "design_name": "AB-BL-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-BL-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-BL-03.jpg",
+            "color_name": "AB-BL-03"
+          },
+          {
+            "id": "vmd-design-rr-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GR-01",
+            "design_name": "AB-GR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-01.jpg",
+            "color_name": "AB-GR-01"
+          },
+          {
+            "id": "vmd-design-rr-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GR-02",
+            "design_name": "AB-GR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-02.jpg",
+            "color_name": "AB-GR-02"
+          },
+          {
+            "id": "vmd-design-rr-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GR-03",
+            "design_name": "AB-GR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-03.jpg",
+            "color_name": "AB-GR-03"
+          },
+          {
+            "id": "vmd-design-rr-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GR-04",
+            "design_name": "AB-GR-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GR-04.jpg",
+            "color_name": "AB-GR-04"
+          },
+          {
+            "id": "vmd-design-rr-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GY-01",
+            "design_name": "AB-GY-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-01.jpg",
+            "color_name": "AB-GY-01"
+          },
+          {
+            "id": "vmd-design-rr-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GY-02",
+            "design_name": "AB-GY-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-02.jpg",
+            "color_name": "AB-GY-02"
+          },
+          {
+            "id": "vmd-design-rr-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-GY-03",
+            "design_name": "AB-GY-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-GY-03.jpg",
+            "color_name": "AB-GY-03"
+          },
+          {
+            "id": "vmd-design-rr-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-NC-06",
+            "design_name": "AB-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-06.jpg",
+            "color_name": "AB-NC-06"
+          },
+          {
+            "id": "vmd-design-rr-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-NC-08",
+            "design_name": "AB-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-08.jpg",
+            "color_name": "AB-NC-08"
+          },
+          {
+            "id": "vmd-design-rr-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-NC-16",
+            "design_name": "AB-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-16.jpg",
+            "color_name": "AB-NC-16"
+          },
+          {
+            "id": "vmd-design-rr-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-NC-18",
+            "design_name": "AB-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NC-18.jpg",
+            "color_name": "AB-NC-18"
+          },
+          {
+            "id": "vmd-design-rr-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-NE-01",
+            "design_name": "AB-NE-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NE-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-NE-01.jpg",
+            "color_name": "AB-NE-01"
+          },
+          {
+            "id": "vmd-design-rr-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-OR-02",
+            "design_name": "AB-OR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-02.jpg",
+            "color_name": "AB-OR-02"
+          },
+          {
+            "id": "vmd-design-rr-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-OR-03",
+            "design_name": "AB-OR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-03.jpg",
+            "color_name": "AB-OR-03"
+          },
+          {
+            "id": "vmd-design-rr-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-OR-04",
+            "design_name": "AB-OR-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-OR-04.jpg",
+            "color_name": "AB-OR-04"
+          },
+          {
+            "id": "vmd-design-rr-017",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "AB-PU-01",
+            "design_name": "AB-PU-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-PU-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/AB-PU-01.jpg",
+            "color_name": "AB-PU-01"
+          },
+          {
+            "id": "vmd-design-rr-018",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-BL-05",
+            "design_name": "WP-BL-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-BL-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-BL-05.jpg",
+            "color_name": "WP-BL-05"
+          },
+          {
+            "id": "vmd-design-rr-019",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-GR-01",
+            "design_name": "WP-GR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-GR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-GR-01.jpg",
+            "color_name": "WP-GR-01"
+          },
+          {
+            "id": "vmd-design-rr-020",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-NC-09",
+            "design_name": "WP-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-NC-09.jpg",
+            "color_name": "WP-NC-09"
+          },
+          {
+            "id": "vmd-design-rr-021",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-OR-01",
+            "design_name": "WP-OR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-OR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-OR-01.jpg",
+            "color_name": "WP-OR-01"
+          },
+          {
+            "id": "vmd-design-rr-022",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-PK-01",
+            "design_name": "WP-PK-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-PK-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-PK-01.jpg",
+            "color_name": "WP-PK-01"
+          },
+          {
+            "id": "vmd-design-rr-023",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-RD-01",
+            "design_name": "WP-RD-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-RD-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-RD-01.jpg",
+            "color_name": "WP-RD-01"
+          },
+          {
+            "id": "vmd-design-rr-024",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-RD-02",
+            "design_name": "WP-RD-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-RD-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-RD-02.jpg",
+            "color_name": "WP-RD-02"
+          },
+          {
+            "id": "vmd-design-rr-025",
+            "product_type": "flat-embossed-vmd",
+            "category": "Rhythm & Repeat",
+            "design_code": "WP-YL-01",
+            "design_name": "WP-YL-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-YL-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-rhythm-and-repeat/WP-YL-01.jpg",
+            "color_name": "WP-YL-01"
+          }
+        ]
+      },
+      {
+        "id": "vmd-woven-brushwork",
+        "name": "Woven Brushwork",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-wb-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "AB-BL-01",
+            "design_name": "AB-BL-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-BL-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-BL-01.jpg",
+            "color_name": "AB-BL-01"
+          },
+          {
+            "id": "vmd-design-wb-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "AB-NC-05",
+            "design_name": "AB-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-NC-05.jpg",
+            "color_name": "AB-NC-05"
+          },
+          {
+            "id": "vmd-design-wb-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "AB-NC-12",
+            "design_name": "AB-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-NC-12.jpg",
+            "color_name": "AB-NC-12"
+          },
+          {
+            "id": "vmd-design-wb-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-02",
+            "design_name": "SR-NC-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-02-PanelA.jpg"
+            ],
+            "color_name": "SR-NC-02"
+          },
+          {
+            "id": "vmd-design-wb-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-03",
+            "design_name": "SR-NC-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-03.jpg",
+            "color_name": "SR-NC-03"
+          },
+          {
+            "id": "vmd-design-wb-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-04",
+            "design_name": "SR-NC-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-04.jpg",
+            "color_name": "SR-NC-04"
+          },
+          {
+            "id": "vmd-design-wb-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-06",
+            "design_name": "SR-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-06.jpg",
+            "color_name": "SR-NC-06"
+          },
+          {
+            "id": "vmd-design-wb-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-13",
+            "design_name": "SR-NC-13",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-13-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-13-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-13-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-13-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-13-PanelA.jpg"
+            ],
+            "color_name": "SR-NC-13"
+          },
+          {
+            "id": "vmd-design-wb-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "SR-NC-18",
+            "design_name": "SR-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/SR-NC-18.jpg",
+            "color_name": "SR-NC-18"
+          },
+          {
+            "id": "vmd-design-wb-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "WP-BR-01",
+            "design_name": "WP-BR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/WP-BR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/WP-BR-01.jpg",
+            "color_name": "WP-BR-01"
+          },
+          {
+            "id": "vmd-design-wb-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Woven Brushwork",
+            "design_code": "WP-NC-07",
+            "design_name": "WP-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/WP-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-woven-brushwork/WP-NC-07.jpg",
+            "color_name": "WP-NC-07"
+          }
+        ]
+      },
+      {
+        "id": "vmd-patterned-weaves",
+        "name": "Patterned Weaves",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-pw-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-43",
+            "design_name": "FB-PT-43",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-43.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-43.jpg",
+            "color_name": "FB-PT-43"
+          },
+          {
+            "id": "vmd-design-pw-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-45",
+            "design_name": "FB-PT-45",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-45.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-45.jpg",
+            "color_name": "FB-PT-45"
+          },
+          {
+            "id": "vmd-design-pw-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-47",
+            "design_name": "FB-PT-47",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-47.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-47.jpg",
+            "color_name": "FB-PT-47"
+          },
+          {
+            "id": "vmd-design-pw-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-50",
+            "design_name": "FB-PT-50",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-50.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-50.jpg",
+            "color_name": "FB-PT-50"
+          },
+          {
+            "id": "vmd-design-pw-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-51",
+            "design_name": "FB-PT-51",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-51.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-51.jpg",
+            "color_name": "FB-PT-51"
+          },
+          {
+            "id": "vmd-design-pw-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-52",
+            "design_name": "FB-PT-52",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-52.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-52.jpg",
+            "color_name": "FB-PT-52"
+          },
+          {
+            "id": "vmd-design-pw-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-54",
+            "design_name": "FB-PT-54",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-54.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-54.jpg",
+            "color_name": "FB-PT-54"
+          },
+          {
+            "id": "vmd-design-pw-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-55",
+            "design_name": "FB-PT-55",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-55.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-55.jpg",
+            "color_name": "FB-PT-55"
+          },
+          {
+            "id": "vmd-design-pw-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-56",
+            "design_name": "FB-PT-56",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-56.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-56.jpg",
+            "color_name": "FB-PT-56"
+          },
+          {
+            "id": "vmd-design-pw-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-59",
+            "design_name": "FB-PT-59",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-59.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-59.jpg",
+            "color_name": "FB-PT-59"
+          },
+          {
+            "id": "vmd-design-pw-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-60",
+            "design_name": "FB-PT-60",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-60.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-60.jpg",
+            "color_name": "FB-PT-60"
+          },
+          {
+            "id": "vmd-design-pw-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-62",
+            "design_name": "FB-PT-62",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-62.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-62.jpg",
+            "color_name": "FB-PT-62"
+          },
+          {
+            "id": "vmd-design-pw-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "FB-PT-80",
+            "design_name": "FB-PT-80",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-80.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/FB-PT-80.jpg",
+            "color_name": "FB-PT-80"
+          },
+          {
+            "id": "vmd-design-pw-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Patterned Weaves",
+            "design_code": "WP-GR-02",
+            "design_name": "WP-GR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-patterned-weaves/WP-GR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-patterned-weaves/WP-GR-02.jpg",
+            "color_name": "WP-GR-02"
+          }
+        ]
+      },
+      {
+        "id": "vmd-indian-modern",
+        "name": "Indian Modern",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-im-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-35",
+            "design_name": "FB-PT-35",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-35.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-35.jpg",
+            "color_name": "FB-PT-35"
+          },
+          {
+            "id": "vmd-design-im-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-36",
+            "design_name": "FB-PT-36",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-36.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-36.jpg",
+            "color_name": "FB-PT-36"
+          },
+          {
+            "id": "vmd-design-im-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-38",
+            "design_name": "FB-PT-38",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-38.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-38.jpg",
+            "color_name": "FB-PT-38"
+          },
+          {
+            "id": "vmd-design-im-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-67",
+            "design_name": "FB-PT-67",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-67.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-67.jpg",
+            "color_name": "FB-PT-67"
+          },
+          {
+            "id": "vmd-design-im-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-68",
+            "design_name": "FB-PT-68",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-68.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-68.jpg",
+            "color_name": "FB-PT-68"
+          },
+          {
+            "id": "vmd-design-im-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "FB-PT-70",
+            "design_name": "FB-PT-70",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-70.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/FB-PT-70.jpg",
+            "color_name": "FB-PT-70"
+          },
+          {
+            "id": "vmd-design-im-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "IND-NC-01",
+            "design_name": "IND-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-01.jpg",
+            "color_name": "IND-NC-01"
+          },
+          {
+            "id": "vmd-design-im-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "IND-NC-02",
+            "design_name": "IND-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-02.jpg",
+            "color_name": "IND-NC-02"
+          },
+          {
+            "id": "vmd-design-im-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "IND-NC-04",
+            "design_name": "IND-NC-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-04.jpg",
+            "color_name": "IND-NC-04"
+          },
+          {
+            "id": "vmd-design-im-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "IND-NC-05",
+            "design_name": "IND-NC-05",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel1.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel1.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel1.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel2.jpg"
+            ],
+            "color_name": "IND-NC-05"
+          },
+          {
+            "id": "vmd-design-im-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "IND-NC-06",
+            "design_name": "IND-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-06.jpg",
+            "color_name": "IND-NC-06"
+          },
+          {
+            "id": "vmd-design-im-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "NA-RD-03",
+            "design_name": "NA-RD-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/NA-RD-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/NA-RD-03.jpg",
+            "color_name": "NA-RD-03"
+          },
+          {
+            "id": "vmd-design-im-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Indian Modern",
+            "design_code": "WP-GR-03",
+            "design_name": "WP-GR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/WP-GR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-indian-modern/WP-GR-03.jpg",
+            "color_name": "WP-GR-03"
+          }
+        ]
+      },
+      {
+        "id": "vmd-quiet-bloom",
+        "name": "Quiet Bloom",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-qb-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-01",
+            "design_name": "NA-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-01.jpg",
+            "color_name": "NA-NC-01"
+          },
+          {
+            "id": "vmd-design-qb-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-02",
+            "design_name": "NA-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-02.jpg",
+            "color_name": "NA-NC-02"
+          },
+          {
+            "id": "vmd-design-qb-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-05",
+            "design_name": "NA-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-05.jpg",
+            "color_name": "NA-NC-05"
+          },
+          {
+            "id": "vmd-design-qb-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-06",
+            "design_name": "NA-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-06.jpg",
+            "color_name": "NA-NC-06"
+          },
+          {
+            "id": "vmd-design-qb-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-07",
+            "design_name": "NA-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-07.jpg",
+            "color_name": "NA-NC-07"
+          },
+          {
+            "id": "vmd-design-qb-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-10",
+            "design_name": "NA-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-10.jpg",
+            "color_name": "NA-NC-10"
+          },
+          {
+            "id": "vmd-design-qb-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-11",
+            "design_name": "NA-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-11.jpg",
+            "color_name": "NA-NC-11"
+          },
+          {
+            "id": "vmd-design-qb-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-12",
+            "design_name": "NA-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-12.jpg",
+            "color_name": "NA-NC-12"
+          },
+          {
+            "id": "vmd-design-qb-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Quiet Bloom",
+            "design_code": "NA-NC-15",
+            "design_name": "NA-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-quiet-bloom/NA-NC-15.jpg",
+            "color_name": "NA-NC-15"
+          }
+        ]
+      },
+      {
+        "id": "vmd-nature-reimagined",
+        "name": "Nature Reimagined",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-nr-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-BL-01",
+            "design_name": "NA-BL-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-01-PanelC.jpg"
+            ],
+            "color_name": "NA-BL-01"
+          },
+          {
+            "id": "vmd-design-nr-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-BL-02",
+            "design_name": "NA-BL-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-02-PanelC.jpg"
+            ],
+            "color_name": "NA-BL-02"
+          },
+          {
+            "id": "vmd-design-nr-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-BL-03",
+            "design_name": "NA-BL-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-BL-03.jpg",
+            "color_name": "NA-BL-03"
+          },
+          {
+            "id": "vmd-design-nr-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-GR-01",
+            "design_name": "NA-GR-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-01-PanelC.jpg"
+            ],
+            "color_name": "NA-GR-01"
+          },
+          {
+            "id": "vmd-design-nr-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-GR-02",
+            "design_name": "NA-GR-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-02-PanelC.jpg"
+            ],
+            "color_name": "NA-GR-02"
+          },
+          {
+            "id": "vmd-design-nr-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-GR-03",
+            "design_name": "NA-GR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-03.jpg",
+            "color_name": "NA-GR-03"
+          },
+          {
+            "id": "vmd-design-nr-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-GR-04",
+            "design_name": "NA-GR-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-04.jpg",
+            "color_name": "NA-GR-04"
+          },
+          {
+            "id": "vmd-design-nr-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-GR-05",
+            "design_name": "NA-GR-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-05.jpg",
+            "color_name": "NA-GR-05"
+          },
+          {
+            "id": "vmd-design-nr-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-NC-16",
+            "design_name": "NA-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-16.jpg",
+            "color_name": "NA-NC-16"
+          },
+          {
+            "id": "vmd-design-nr-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-NC-19",
+            "design_name": "NA-NC-19",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-19_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-19_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-19_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-19_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-19_PanelC.jpg"
+            ],
+            "color_name": "NA-NC-19"
+          },
+          {
+            "id": "vmd-design-nr-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-NE-01",
+            "design_name": "NA-NE-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-01_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-01_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-01_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-01_PanelB.jpg"
+            ],
+            "color_name": "NA-NE-01"
+          },
+          {
+            "id": "vmd-design-nr-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-NE-02",
+            "design_name": "NA-NE-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-02_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-02_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-02_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NE-02_PanelB.jpg"
+            ],
+            "color_name": "NA-NE-02"
+          },
+          {
+            "id": "vmd-design-nr-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-RD-01",
+            "design_name": "NA-RD-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-01-PanelC.jpg"
+            ],
+            "color_name": "NA-RD-01"
+          },
+          {
+            "id": "vmd-design-nr-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-RD-02",
+            "design_name": "NA-RD-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-RD-02-PanelC.jpg"
+            ],
+            "color_name": "NA-RD-02"
+          },
+          {
+            "id": "vmd-design-nr-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-YL-01",
+            "design_name": "NA-YL-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-01-PanelC.jpg"
+            ],
+            "color_name": "NA-YL-01"
+          },
+          {
+            "id": "vmd-design-nr-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "NA-YL-02",
+            "design_name": "NA-YL-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-YL-02-PanelC.jpg"
+            ],
+            "color_name": "NA-YL-02"
+          },
+          {
+            "id": "vmd-design-nr-017",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "WP-BL-04",
+            "design_name": "WP-BL-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BL-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BL-04.jpg",
+            "color_name": "WP-BL-04"
+          },
+          {
+            "id": "vmd-design-nr-018",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "WP-BR-02",
+            "design_name": "WP-BR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BR-02.jpg",
+            "color_name": "WP-BR-02"
+          },
+          {
+            "id": "vmd-design-nr-019",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "WP-GR-04",
+            "design_name": "WP-GR-04",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-GR-04-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-GR-04-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-GR-04-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-GR-04-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-GR-04-PanelC.jpg"
+            ],
+            "color_name": "WP-GR-04"
+          },
+          {
+            "id": "vmd-design-nr-020",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "WP-NC-04",
+            "design_name": "WP-NC-04",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelC.jpg"
+            ],
+            "color_name": "WP-NC-04"
+          },
+          {
+            "id": "vmd-design-nr-021",
+            "product_type": "flat-embossed-vmd",
+            "category": "Nature Reimagined",
+            "design_code": "WP-OR-02",
+            "design_name": "WP-OR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-OR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-OR-02.jpg",
+            "color_name": "WP-OR-02"
+          }
+        ]
+      },
+      {
+        "id": "vmd-color-block",
+        "name": "Color Block",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-cb-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-BL-04",
+            "design_name": "AB-BL-04",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-04_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-BL-04_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-04_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-04_PanelB.jpg"
+            ],
+            "color_name": "AB-BL-04"
+          },
+          {
+            "id": "vmd-design-cb-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-BL-05",
+            "design_name": "AB-BL-05",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-05_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-BL-05_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-05_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-05_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-BL-05_PanelC.jpg"
+            ],
+            "color_name": "AB-BL-05"
+          },
+          {
+            "id": "vmd-design-cb-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NC-01",
+            "design_name": "AB-NC-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NC-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-01-PanelC.jpg"
+            ],
+            "color_name": "AB-NC-01"
+          },
+          {
+            "id": "vmd-design-cb-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NC-02",
+            "design_name": "AB-NC-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NC-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-02-PanelB.jpg"
+            ],
+            "color_name": "AB-NC-02"
+          },
+          {
+            "id": "vmd-design-cb-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NC-10",
+            "design_name": "AB-NC-10",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-10-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NC-10-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-10-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-10-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-10-PanelC.jpg"
+            ],
+            "color_name": "AB-NC-10"
+          },
+          {
+            "id": "vmd-design-cb-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NC-17",
+            "design_name": "AB-NC-17",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-17.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NC-17.jpg",
+            "color_name": "AB-NC-17"
+          },
+          {
+            "id": "vmd-design-cb-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NC-19",
+            "design_name": "AB-NC-19",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-19_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NC-19_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-19_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-19_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NC-19_PanelC.jpg"
+            ],
+            "color_name": "AB-NC-19"
+          },
+          {
+            "id": "vmd-design-cb-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-NE-02",
+            "design_name": "AB-NE-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NE-02_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-NE-02_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NE-02_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NE-02_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-NE-02_PanelC.jpg"
+            ],
+            "color_name": "AB-NE-02"
+          },
+          {
+            "id": "vmd-design-cb-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Color Block",
+            "design_code": "AB-OR-05",
+            "design_name": "AB-OR-05",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-OR-05_PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-color-block/AB-OR-05_PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-OR-05_PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-OR-05_PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-color-block/AB-OR-05_PanelC.jpg"
+            ],
+            "color_name": "AB-OR-05"
+          }
+        ]
+      },
+      {
+        "id": "vmd-fun-and-fantasy",
+        "name": "Fun & Fantasy",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-ff-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Fun & Fantasy",
+            "design_code": "WP-NC-01",
+            "design_name": "WP-NC-01",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-01-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-01-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-01-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-01-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-01-PanelC.jpg"
+            ],
+            "color_name": "WP-NC-01"
+          },
+          {
+            "id": "vmd-design-ff-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Fun & Fantasy",
+            "design_code": "WP-NC-02",
+            "design_name": "WP-NC-02",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-02-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-02-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-02-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-02-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-02-PanelC.jpg"
+            ],
+            "color_name": "WP-NC-02"
+          },
+          {
+            "id": "vmd-design-ff-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Fun & Fantasy",
+            "design_code": "WP-NC-03",
+            "design_name": "WP-NC-03",
+            "texture_color": "#FFFFFF",
+            "panel_variant": "continuous",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-03-PanelA.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-03-PanelA.jpg",
+            "texture_urls": [
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-03-PanelA.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-03-PanelB.jpg",
+              "/static/images/flat-embossed-vmt/panels/vmd-fun-and-fantasy/WP-NC-03-PanelC.jpg"
+            ],
+            "color_name": "WP-NC-03"
+          }
+        ]
+      },
+      {
+        "id": "vmd-soft-texture",
+        "name": "Soft Texture",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-st-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-BL-01",
+            "design_name": "TP-BL-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-01.jpg",
+            "color_name": "TP-BL-01"
+          },
+          {
+            "id": "vmd-design-st-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-BL-02",
+            "design_name": "TP-BL-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-02.jpg",
+            "color_name": "TP-BL-02"
+          },
+          {
+            "id": "vmd-design-st-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-BL-03",
+            "design_name": "TP-BL-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-BL-03.jpg",
+            "color_name": "TP-BL-03"
+          },
+          {
+            "id": "vmd-design-st-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GR-01",
+            "design_name": "TP-GR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-01.jpg",
+            "color_name": "TP-GR-01"
+          },
+          {
+            "id": "vmd-design-st-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GR-02",
+            "design_name": "TP-GR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-02.jpg",
+            "color_name": "TP-GR-02"
+          },
+          {
+            "id": "vmd-design-st-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GR-03",
+            "design_name": "TP-GR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GR-03.jpg",
+            "color_name": "TP-GR-03"
+          },
+          {
+            "id": "vmd-design-st-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GY-01",
+            "design_name": "TP-GY-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-01.jpg",
+            "color_name": "TP-GY-01"
+          },
+          {
+            "id": "vmd-design-st-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GY-02",
+            "design_name": "TP-GY-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-02.jpg",
+            "color_name": "TP-GY-02"
+          },
+          {
+            "id": "vmd-design-st-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-GY-03",
+            "design_name": "TP-GY-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-GY-03.jpg",
+            "color_name": "TP-GY-03"
+          },
+          {
+            "id": "vmd-design-st-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-01",
+            "design_name": "TP-NE-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-01.jpg",
+            "color_name": "TP-NE-01"
+          },
+          {
+            "id": "vmd-design-st-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-02",
+            "design_name": "TP-NE-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-02.jpg",
+            "color_name": "TP-NE-02"
+          },
+          {
+            "id": "vmd-design-st-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-03",
+            "design_name": "TP-NE-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-03.jpg",
+            "color_name": "TP-NE-03"
+          },
+          {
+            "id": "vmd-design-st-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-04",
+            "design_name": "TP-NE-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-04.jpg",
+            "color_name": "TP-NE-04"
+          },
+          {
+            "id": "vmd-design-st-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-05",
+            "design_name": "TP-NE-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-05.jpg",
+            "color_name": "TP-NE-05"
+          },
+          {
+            "id": "vmd-design-st-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-06",
+            "design_name": "TP-NE-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-06.jpg",
+            "color_name": "TP-NE-06"
+          },
+          {
+            "id": "vmd-design-st-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-07",
+            "design_name": "TP-NE-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-07.jpg",
+            "color_name": "TP-NE-07"
+          },
+          {
+            "id": "vmd-design-st-017",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-08",
+            "design_name": "TP-NE-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-08.jpg",
+            "color_name": "TP-NE-08"
+          },
+          {
+            "id": "vmd-design-st-018",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-09",
+            "design_name": "TP-NE-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-09.jpg",
+            "color_name": "TP-NE-09"
+          },
+          {
+            "id": "vmd-design-st-019",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-10",
+            "design_name": "TP-NE-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-10.jpg",
+            "color_name": "TP-NE-10"
+          },
+          {
+            "id": "vmd-design-st-020",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-11",
+            "design_name": "TP-NE-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-11.jpg",
+            "color_name": "TP-NE-11"
+          },
+          {
+            "id": "vmd-design-st-021",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-12",
+            "design_name": "TP-NE-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-12.jpg",
+            "color_name": "TP-NE-12"
+          },
+          {
+            "id": "vmd-design-st-022",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-13",
+            "design_name": "TP-NE-13",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-13.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-13.jpg",
+            "color_name": "TP-NE-13"
+          },
+          {
+            "id": "vmd-design-st-023",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-NE-14",
+            "design_name": "TP-NE-14",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-14.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-NE-14.jpg",
+            "color_name": "TP-NE-14"
+          },
+          {
+            "id": "vmd-design-st-024",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PK-01",
+            "design_name": "TP-PK-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-01.jpg",
+            "color_name": "TP-PK-01"
+          },
+          {
+            "id": "vmd-design-st-025",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PK-02",
+            "design_name": "TP-PK-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-02.jpg",
+            "color_name": "TP-PK-02"
+          },
+          {
+            "id": "vmd-design-st-026",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PK-03",
+            "design_name": "TP-PK-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-03.jpg",
+            "color_name": "TP-PK-03"
+          },
+          {
+            "id": "vmd-design-st-027",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PK-04",
+            "design_name": "TP-PK-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-04.jpg",
+            "color_name": "TP-PK-04"
+          },
+          {
+            "id": "vmd-design-st-028",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PK-05",
+            "design_name": "TP-PK-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PK-05.jpg",
+            "color_name": "TP-PK-05"
+          },
+          {
+            "id": "vmd-design-st-029",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PU-01",
+            "design_name": "TP-PU-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PU-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PU-01.jpg",
+            "color_name": "TP-PU-01"
+          },
+          {
+            "id": "vmd-design-st-030",
+            "product_type": "flat-embossed-vmd",
+            "category": "Soft Texture",
+            "design_code": "TP-PU-02",
+            "design_name": "TP-PU-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-soft-texture/TP-PU-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-soft-texture/TP-PU-02.jpg",
+            "color_name": "TP-PU-02"
+          }
+        ]
+      },
+      {
+        "id": "vmd-luxury-textures",
+        "name": "Luxury Textures",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-lx-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-39",
+            "design_name": "FB-PT-39",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-39.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-39.jpg",
+            "color_name": "FB-PT-39"
+          },
+          {
+            "id": "vmd-design-lx-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-40",
+            "design_name": "FB-PT-40",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-40.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-40.jpg",
+            "color_name": "FB-PT-40"
+          },
+          {
+            "id": "vmd-design-lx-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-41",
+            "design_name": "FB-PT-41",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-41.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-41.jpg",
+            "color_name": "FB-PT-41"
+          },
+          {
+            "id": "vmd-design-lx-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-42",
+            "design_name": "FB-PT-42",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-42.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-42.jpg",
+            "color_name": "FB-PT-42"
+          },
+          {
+            "id": "vmd-design-lx-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-69",
+            "design_name": "FB-PT-69",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-69.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-69.jpg",
+            "color_name": "FB-PT-69"
+          },
+          {
+            "id": "vmd-design-lx-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-75",
+            "design_name": "FB-PT-75",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-75.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-75.jpg",
+            "color_name": "FB-PT-75"
+          },
+          {
+            "id": "vmd-design-lx-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-76",
+            "design_name": "FB-PT-76",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-76.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-76.jpg",
+            "color_name": "FB-PT-76"
+          },
+          {
+            "id": "vmd-design-lx-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-77",
+            "design_name": "FB-PT-77",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-77.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-77.jpg",
+            "color_name": "FB-PT-77"
+          },
+          {
+            "id": "vmd-design-lx-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-78",
+            "design_name": "FB-PT-78",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-78.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-78.jpg",
+            "color_name": "FB-PT-78"
+          },
+          {
+            "id": "vmd-design-lx-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-79",
+            "design_name": "FB-PT-79",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-79.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-79.jpg",
+            "color_name": "FB-PT-79"
+          },
+          {
+            "id": "vmd-design-lx-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-81",
+            "design_name": "FB-PT-81",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-81.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-81.jpg",
+            "color_name": "FB-PT-81"
+          },
+          {
+            "id": "vmd-design-lx-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-82",
+            "design_name": "FB-PT-82",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-82.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-82.jpg",
+            "color_name": "FB-PT-82"
+          },
+          {
+            "id": "vmd-design-lx-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-83",
+            "design_name": "FB-PT-83",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-83.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-83.jpg",
+            "color_name": "FB-PT-83"
+          },
+          {
+            "id": "vmd-design-lx-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-84",
+            "design_name": "FB-PT-84",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-84.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-84.jpg",
+            "color_name": "FB-PT-84"
+          },
+          {
+            "id": "vmd-design-lx-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-85",
+            "design_name": "FB-PT-85",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-85.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-85.jpg",
+            "color_name": "FB-PT-85"
+          },
+          {
+            "id": "vmd-design-lx-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-86",
+            "design_name": "FB-PT-86",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-86.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-86.jpg",
+            "color_name": "FB-PT-86"
+          }
+        ]
+      },
+      {
+        "id": "vmd-marble",
+        "name": "Marble",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": true,
+        "designs": [
+          {
+            "id": "vmd-design-mb-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-01",
+            "design_name": "ST-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-01.jpg",
+            "color_name": "ST-NC-01",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-02",
+            "design_name": "ST-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-02.jpg",
+            "color_name": "ST-NC-02",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-03",
+            "design_name": "ST-NC-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-03.jpg",
+            "color_name": "ST-NC-03",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-04",
+            "design_name": "ST-NC-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-04.jpg",
+            "color_name": "ST-NC-04",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-05",
+            "design_name": "ST-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-05.jpg",
+            "color_name": "ST-NC-05",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-06",
+            "design_name": "ST-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-06.jpg",
+            "color_name": "ST-NC-06",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-07",
+            "design_name": "ST-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-07.jpg",
+            "color_name": "ST-NC-07",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-08",
+            "design_name": "ST-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-08.jpg",
+            "color_name": "ST-NC-08",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-09",
+            "design_name": "ST-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-09.jpg",
+            "color_name": "ST-NC-09",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-10",
+            "design_name": "ST-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-10.jpg",
+            "color_name": "ST-NC-10",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-11",
+            "design_name": "ST-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-11.jpg",
+            "color_name": "ST-NC-11",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-12",
+            "design_name": "ST-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-12.jpg",
+            "color_name": "ST-NC-12",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-13",
+            "design_name": "ST-NC-13",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-13.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-13.jpg",
+            "color_name": "ST-NC-13",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-14",
+            "design_name": "ST-NC-14",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-14.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-14.jpg",
+            "color_name": "ST-NC-14",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-15",
+            "design_name": "ST-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-15.jpg",
+            "color_name": "ST-NC-15",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-16",
+            "design_name": "ST-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-16.jpg",
+            "color_name": "ST-NC-16",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-017",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-17",
+            "design_name": "ST-NC-17",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-17.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-17.jpg",
+            "color_name": "ST-NC-17",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-018",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-18",
+            "design_name": "ST-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-18.jpg",
+            "color_name": "ST-NC-18",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-019",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-19",
+            "design_name": "ST-NC-19",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC19.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC19.jpg",
+            "color_name": "ST-NC-19",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-020",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-20",
+            "design_name": "ST-NC-20",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-20.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-20.jpg",
+            "color_name": "ST-NC-20",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-021",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-21",
+            "design_name": "ST-NC-21",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-21.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-21.jpg",
+            "color_name": "ST-NC-21",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-022",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-22",
+            "design_name": "ST-NC-22",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-22.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-22.jpg",
+            "color_name": "ST-NC-22",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-023",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-23",
+            "design_name": "ST-NC-23",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-23.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-23.jpg",
+            "color_name": "ST-NC-23",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-024",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-24",
+            "design_name": "ST-NC-24",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-24.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-24.jpg",
+            "color_name": "ST-NC-24",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-025",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-25",
+            "design_name": "ST-NC-25",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-25.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-25.jpg",
+            "color_name": "ST-NC-25",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-026",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-26",
+            "design_name": "ST-NC-26",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-26.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-26.jpg",
+            "color_name": "ST-NC-26",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-027",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-27",
+            "design_name": "ST-NC-27",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-27.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-27.jpg",
+            "color_name": "ST-NC-27",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-028",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-28",
+            "design_name": "ST-NC-28",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-28.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-28.jpg",
+            "color_name": "ST-NC-28",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-029",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-29",
+            "design_name": "ST-NC-29",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-29.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-29.jpg",
+            "color_name": "ST-NC-29",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-030",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-30",
+            "design_name": "ST-NC-30",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-30.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-30.jpg",
+            "color_name": "ST-NC-30",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-mb-031",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-31",
+            "design_name": "ST-NC-31",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-31.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-31.jpg",
+            "color_name": "ST-NC-31",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          },
+          {
+            "id": "vmd-design-mb-032",
+            "product_type": "flat-embossed-vmd",
+            "category": "Marble",
+            "design_code": "ST-NC-32",
+            "design_name": "ST-NC-32",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-32.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-32.jpg",
+            "color_name": "ST-NC-32",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vmd-leather",
+        "name": "Leather",
+        "product_type": "flat-embossed-vmd",
+        "emboss_available": true,
+        "designs": [
+          {
+            "id": "vmd-design-lh-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-01",
+            "design_name": "LH-BR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg",
+            "color_name": "LH-BR-01",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle",
+              "square_30"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-02",
+            "design_name": "LH-BR-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg",
+            "color_name": "LH-BR-02",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-03",
+            "design_name": "LH-BR-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg",
+            "color_name": "LH-BR-03",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-04",
+            "design_name": "LH-BR-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg",
+            "color_name": "LH-BR-04",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-05",
+            "design_name": "LH-BR-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg",
+            "color_name": "LH-BR-05",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-BR-06",
+            "design_name": "LH-BR-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg",
+            "color_name": "LH-BR-06",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-GR-01",
+            "design_name": "LH-GR-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg",
+            "color_name": "LH-GR-01",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-GY-01",
+            "design_name": "LH-GY-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg",
+            "color_name": "LH-GY-01",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-GY-02",
+            "design_name": "LH-GY-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg",
+            "color_name": "LH-GY-02",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-NE-01",
+            "design_name": "LH-NE-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg",
+            "color_name": "LH-NE-01",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          },
+          {
+            "id": "vmd-design-lh-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Leather",
+            "design_code": "LH-NE-02",
+            "design_name": "LH-NE-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg",
+            "color_name": "LH-NE-02",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_45mm",
+              "ribbed_60mm",
+              "tappered",
+              "triangle"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wood",
+    "name": "Wood",
+    "active": true,
+    "sizes": [
+      "1200x2400",
+      "1200x2800"
+    ],
+    "densities": [],
+    "patterns": [],
+    "colors": [],
+    "thicknesses": [
+      "12mm (PET Panel)",
+      "20mm (PET Panel)",
+      "25mm (PET Wool)"
+    ],
+    "categories": [
+      {
+        "id": "wood-wood-classics",
+        "name": "Wood Classics",
+        "product_type": "wood",
+        "emboss_available": true,
+        "designs": [
+          {
+            "id": "vmd-design-wc-001",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-01",
+            "design_name": "WD-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-01.jpg",
+            "color_name": "WD-NC-01",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-002",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-02",
+            "design_name": "WD-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-02.jpg",
+            "color_name": "WD-NC-02",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-003",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-03",
+            "design_name": "WD-NC-03",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-03.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-03.jpg",
+            "color_name": "WD-NC-03",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-004",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-04",
+            "design_name": "WD-NC-04",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-04.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-04.jpg",
+            "color_name": "WD-NC-04",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-005",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-05",
+            "design_name": "WD-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-05.jpg",
+            "color_name": "WD-NC-05",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-006",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-06",
+            "design_name": "WD-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-06.jpg",
+            "color_name": "WD-NC-06",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-007",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-07",
+            "design_name": "WD-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-07.jpg",
+            "color_name": "WD-NC-07",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-008",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-08",
+            "design_name": "WD-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-08.jpg",
+            "color_name": "WD-NC-08",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-009",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-09",
+            "design_name": "WD-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-09.jpg",
+            "color_name": "WD-NC-09",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-010",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-10",
+            "design_name": "WD-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-10.jpg",
+            "color_name": "WD-NC-10",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-011",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-11",
+            "design_name": "WD-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-11.jpg",
+            "color_name": "WD-NC-11",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-012",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-12",
+            "design_name": "WD-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-12.jpg",
+            "color_name": "WD-NC-12",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-013",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-13",
+            "design_name": "WD-NC-13",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-13.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-13.jpg",
+            "color_name": "WD-NC-13",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-014",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-14",
+            "design_name": "WD-NC-14",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-14.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-14.jpg",
+            "color_name": "WD-NC-14",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-015",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-15",
+            "design_name": "WD-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-15.jpg",
+            "color_name": "WD-NC-15",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-016",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-16",
+            "design_name": "WD-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-16.jpg",
+            "color_name": "WD-NC-16",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-017",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-17",
+            "design_name": "WD-NC-17",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-17.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-17.jpg",
+            "color_name": "WD-NC-17",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-018",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-18",
+            "design_name": "WD-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-18.jpg",
+            "color_name": "WD-NC-18",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-019",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-19",
+            "design_name": "WD-NC-19",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-19.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-19.jpg",
+            "color_name": "WD-NC-19",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-020",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-20",
+            "design_name": "WD-NC-20",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-20.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-20.jpg",
+            "color_name": "WD-NC-20",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-021",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-21",
+            "design_name": "WD-NC-21",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-21.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-21.jpg",
+            "color_name": "WD-NC-21",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-022",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-22",
+            "design_name": "WD-NC-22",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-22.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-22.jpg",
+            "color_name": "WD-NC-22",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-023",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-23",
+            "design_name": "WD-NC-23",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-23.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-23.jpg",
+            "color_name": "WD-NC-23",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-024",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-24",
+            "design_name": "WD-NC-24",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-24.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-24.jpg",
+            "color_name": "WD-NC-24",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-025",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-25",
+            "design_name": "WD-NC-25",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-25.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-25.jpg",
+            "color_name": "WD-NC-25",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-026",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-26",
+            "design_name": "WD-NC-26",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-26.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-26.jpg",
+            "color_name": "WD-NC-26",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-027",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-27",
+            "design_name": "WD-NC-27",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-27.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-27.jpg",
+            "color_name": "WD-NC-27",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-028",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-28",
+            "design_name": "WD-NC-28",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-28.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-28.jpg",
+            "color_name": "WD-NC-28",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-029",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-29",
+            "design_name": "WD-NC-29",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-29.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-29.jpg",
+            "color_name": "WD-NC-29",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-030",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-30",
+            "design_name": "WD-NC-30",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-30.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-30.jpg",
+            "color_name": "WD-NC-30",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-031",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-31",
+            "design_name": "WD-NC-31",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-31.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-31.jpg",
+            "color_name": "WD-NC-31",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-032",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-32",
+            "design_name": "WD-NC-32",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-32.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-32.jpg",
+            "color_name": "WD-NC-32",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-033",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-33",
+            "design_name": "WD-NC-33",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-33.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-33.jpg",
+            "color_name": "WD-NC-33",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-034",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-34",
+            "design_name": "WD-NC-34",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-34.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-34.jpg",
+            "color_name": "WD-NC-34",
+            "available_emboss": [
+              "flux_ribbed",
+              "ribbed_25mm",
+              "ribbed_45mm",
+              "ribbed_60mm"
+            ]
+          },
+          {
+            "id": "vmd-design-wc-035",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-35",
+            "design_name": "WD-NC-35",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-35.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-35.jpg",
+            "color_name": "WD-NC-35",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-036",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-36",
+            "design_name": "WD-NC-36",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-36.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-36.jpg",
+            "color_name": "WD-NC-36",
+            "available_emboss": []
+          },
+          {
+            "id": "vmd-design-wc-037",
+            "product_type": "wood",
+            "category": "Wood Classics",
+            "design_code": "WD-NC-37",
+            "design_name": "WD-NC-37",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-37.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-37.jpg",
+            "color_name": "WD-NC-37",
+            "available_emboss": []
+          }
+        ]
+      },
+      {
+        "id": "wood-classic-parquet",
+        "name": "Classic Parquet",
+        "product_type": "wood",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "wood-cp-002",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-01",
+            "design_name": "PR-NC-01",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-01.jpg",
+            "color_name": "PR-NC-01"
+          },
+          {
+            "id": "wood-cp-003",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-02",
+            "design_name": "PR-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-02.jpg",
+            "color_name": "PR-NC-02"
+          },
+          {
+            "id": "wood-cp-004",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-05",
+            "design_name": "PR-NC-05",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-05.jpg",
+            "color_name": "PR-NC-05"
+          },
+          {
+            "id": "wood-cp-005",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-06",
+            "design_name": "PR-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "color_name": "PR-NC-06"
+          },
+          {
+            "id": "wood-cp-006",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-07",
+            "design_name": "PR-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-07.jpg",
+            "color_name": "PR-NC-07"
+          },
+          {
+            "id": "wood-cp-007",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-08",
+            "design_name": "PR-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "color_name": "PR-NC-08"
+          },
+          {
+            "id": "wood-cp-008",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-09",
+            "design_name": "PR-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "color_name": "PR-NC-09"
+          },
+          {
+            "id": "wood-cp-009",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-10",
+            "design_name": "PR-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "color_name": "PR-NC-10"
+          },
+          {
+            "id": "wood-cp-010",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-11",
+            "design_name": "PR-NC-11",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-11.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-11.jpg",
+            "color_name": "PR-NC-11"
+          },
+          {
+            "id": "wood-cp-011",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-12",
+            "design_name": "PR-NC-12",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-12.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-12.jpg",
+            "color_name": "PR-NC-12"
+          },
+          {
+            "id": "wood-cp-012",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-13",
+            "design_name": "PR-NC-13",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-13.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-13.jpg",
+            "color_name": "PR-NC-13"
+          },
+          {
+            "id": "wood-cp-013",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-14",
+            "design_name": "PR-NC-14",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-14.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-14.jpg",
+            "color_name": "PR-NC-14"
+          },
+          {
+            "id": "wood-cp-014",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-15",
+            "design_name": "PR-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-15.jpg",
+            "color_name": "PR-NC-15"
+          },
+          {
+            "id": "wood-cp-015",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-16",
+            "design_name": "PR-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-16.jpg",
+            "color_name": "PR-NC-16"
+          },
+          {
+            "id": "wood-cp-016",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-17",
+            "design_name": "PR-NC-17",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-17.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-17.jpg",
+            "color_name": "PR-NC-17"
+          },
+          {
+            "id": "wood-cp-017",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-18",
+            "design_name": "PR-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-18.jpg",
+            "color_name": "PR-NC-18"
+          },
+          {
+            "id": "wood-cp-018",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-19",
+            "design_name": "PR-NC-19",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "color_name": "PR-NC-19"
+          },
+          {
+            "id": "wood-cp-019",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-20",
+            "design_name": "PR-NC-20",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "color_name": "PR-NC-20"
+          },
+          {
+            "id": "wood-cp-020",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-21",
+            "design_name": "PR-NC-21",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-21.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-21.jpg",
+            "color_name": "PR-NC-21"
+          },
+          {
+            "id": "wood-cp-021",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-22",
+            "design_name": "PR-NC-22",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-22.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-22.jpg",
+            "color_name": "PR-NC-22"
+          },
+          {
+            "id": "wood-cp-022",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-23",
+            "design_name": "PR-NC-23",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-23.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-23.jpg",
+            "color_name": "PR-NC-23"
+          },
+          {
+            "id": "wood-cp-023",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-24",
+            "design_name": "PR-NC-24",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-24.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-24.jpg",
+            "color_name": "PR-NC-24"
+          },
+          {
+            "id": "wood-cp-024",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-25",
+            "design_name": "PR-NC-25",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-25.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-25.jpg",
+            "color_name": "PR-NC-25"
+          },
+          {
+            "id": "wood-cp-025",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-26",
+            "design_name": "PR-NC-26",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-26.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-26.jpg",
+            "color_name": "PR-NC-26"
+          },
+          {
+            "id": "wood-cp-026",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-27",
+            "design_name": "PR-NC-27",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-27.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-27.jpg",
+            "color_name": "PR-NC-27"
+          },
+          {
+            "id": "wood-cp-027",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-28",
+            "design_name": "PR-NC-28",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-28.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-28.jpg",
+            "color_name": "PR-NC-28"
+          },
+          {
+            "id": "wood-cp-028",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-29",
+            "design_name": "PR-NC-29",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-29.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-29.jpg",
+            "color_name": "PR-NC-29"
+          },
+          {
+            "id": "wood-cp-029",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-30",
+            "design_name": "PR-NC-30",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-30.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-30.jpg",
+            "color_name": "PR-NC-30"
+          }
+        ]
+      },
+      {
+        "id": "wood-perforations",
+        "name": "Wood Perforations",
+        "product_type": "wood",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "wood-pf-001",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-05",
+            "design_name": "WD-NC-05",
+            "texture_color": "#886840",
+            "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-05.jpg",
+            "color_name": "WD-NC-05"
+          },
+          {
+            "id": "wood-pf-002",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-21",
+            "design_name": "WD-NC-21",
+            "texture_color": "#C8A060",
+            "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-21.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-21.jpg",
+            "color_name": "WD-NC-21"
+          },
+          {
+            "id": "wood-pf-003",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-24",
+            "design_name": "WD-NC-24",
+            "texture_color": "#C0A878",
+            "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-24.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-24.jpg",
+            "color_name": "WD-NC-24"
+          },
+          {
+            "id": "wood-pf-004",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-33",
+            "design_name": "WD-NC-33",
+            "texture_color": "#B8A080",
+            "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-33.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-33.jpg",
+            "color_name": "WD-NC-33"
+          },
+          {
+            "id": "wood-pf-005",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-34",
+            "design_name": "WD-NC-34",
+            "texture_color": "#A89070",
+            "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-34.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-34.jpg",
+            "color_name": "WD-NC-34"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fabrics",
+    "name": "Fabrics",
+    "active": true,
+    "sizes": [
+      "1200x2400",
+      "1200x2800"
+    ],
+    "densities": [],
+    "patterns": [],
+    "colors": [],
+    "thicknesses": [
+      "12mm (PET Panel)",
+      "20mm (PET Panel)",
+      "25mm (PET Wool)"
+    ],
+    "categories": [
+      {
+        "id": "fabrics-luxury-textures",
+        "name": "Luxury Textures",
+        "product_type": "fabrics",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-lx-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-39",
+            "design_name": "FB-PT-39",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-39.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-39.jpg",
+            "color_name": "FB-PT-39"
+          },
+          {
+            "id": "vmd-design-lx-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-40",
+            "design_name": "FB-PT-40",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-40.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-40.jpg",
+            "color_name": "FB-PT-40"
+          },
+          {
+            "id": "vmd-design-lx-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-41",
+            "design_name": "FB-PT-41",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-41.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-41.jpg",
+            "color_name": "FB-PT-41"
+          },
+          {
+            "id": "vmd-design-lx-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-42",
+            "design_name": "FB-PT-42",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-42.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-42.jpg",
+            "color_name": "FB-PT-42"
+          },
+          {
+            "id": "vmd-design-lx-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-69",
+            "design_name": "FB-PT-69",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-69.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-69.jpg",
+            "color_name": "FB-PT-69"
+          },
+          {
+            "id": "vmd-design-lx-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-75",
+            "design_name": "FB-PT-75",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-75.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-75.jpg",
+            "color_name": "FB-PT-75"
+          },
+          {
+            "id": "vmd-design-lx-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-76",
+            "design_name": "FB-PT-76",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-76.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-76.jpg",
+            "color_name": "FB-PT-76"
+          },
+          {
+            "id": "vmd-design-lx-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-77",
+            "design_name": "FB-PT-77",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-77.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-77.jpg",
+            "color_name": "FB-PT-77"
+          },
+          {
+            "id": "vmd-design-lx-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-78",
+            "design_name": "FB-PT-78",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-78.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-78.jpg",
+            "color_name": "FB-PT-78"
+          },
+          {
+            "id": "vmd-design-lx-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-79",
+            "design_name": "FB-PT-79",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-79.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-79.jpg",
+            "color_name": "FB-PT-79"
+          },
+          {
+            "id": "vmd-design-lx-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-81",
+            "design_name": "FB-PT-81",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-81.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-81.jpg",
+            "color_name": "FB-PT-81"
+          },
+          {
+            "id": "vmd-design-lx-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-82",
+            "design_name": "FB-PT-82",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-82.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-82.jpg",
+            "color_name": "FB-PT-82"
+          },
+          {
+            "id": "vmd-design-lx-013",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-83",
+            "design_name": "FB-PT-83",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-83.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-83.jpg",
+            "color_name": "FB-PT-83"
+          },
+          {
+            "id": "vmd-design-lx-014",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-84",
+            "design_name": "FB-PT-84",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-84.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-84.jpg",
+            "color_name": "FB-PT-84"
+          },
+          {
+            "id": "vmd-design-lx-015",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-85",
+            "design_name": "FB-PT-85",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-85.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-85.jpg",
+            "color_name": "FB-PT-85"
+          },
+          {
+            "id": "vmd-design-lx-016",
+            "product_type": "flat-embossed-vmd",
+            "category": "Luxury Textures",
+            "design_code": "FB-PT-86",
+            "design_name": "FB-PT-86",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-86.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-luxury-textures/FB-PT-86.jpg",
+            "color_name": "FB-PT-86"
+          }
+        ]
+      },
+      {
+        "id": "fabrics-modern-corporate",
+        "name": "Modern Corporate",
+        "product_type": "fabrics",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vmd-design-mc-001",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-44",
+            "design_name": "FB-PT-44",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-44.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-44.jpg",
+            "color_name": "FB-PT-44"
+          },
+          {
+            "id": "vmd-design-mc-002",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-46",
+            "design_name": "FB-PT-46",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-46.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-46.jpg",
+            "color_name": "FB-PT-46"
+          },
+          {
+            "id": "vmd-design-mc-003",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-48",
+            "design_name": "FB-PT-48",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-48.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-48.jpg",
+            "color_name": "FB-PT-48"
+          },
+          {
+            "id": "vmd-design-mc-004",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-49",
+            "design_name": "FB-PT-49",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-49.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-49.jpg",
+            "color_name": "FB-PT-49"
+          },
+          {
+            "id": "vmd-design-mc-005",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-53",
+            "design_name": "FB-PT-53",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-53.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-53.jpg",
+            "color_name": "FB-PT-53"
+          },
+          {
+            "id": "vmd-design-mc-006",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-57",
+            "design_name": "FB-PT-57",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-57.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-57.jpg",
+            "color_name": "FB-PT-57"
+          },
+          {
+            "id": "vmd-design-mc-007",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-58",
+            "design_name": "FB-PT-58",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-58.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-58.jpg",
+            "color_name": "FB-PT-58"
+          },
+          {
+            "id": "vmd-design-mc-008",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-61",
+            "design_name": "FB-PT-61",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-61.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-61.jpg",
+            "color_name": "FB-PT-61"
+          },
+          {
+            "id": "vmd-design-mc-009",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-63",
+            "design_name": "FB-PT-63",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-63.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-63.jpg",
+            "color_name": "FB-PT-63"
+          },
+          {
+            "id": "vmd-design-mc-010",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-64",
+            "design_name": "FB-PT-64",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-64.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-64.jpg",
+            "color_name": "FB-PT-64"
+          },
+          {
+            "id": "vmd-design-mc-011",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-65",
+            "design_name": "FB-PT-65",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-65.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-65.jpg",
+            "color_name": "FB-PT-65"
+          },
+          {
+            "id": "vmd-design-mc-012",
+            "product_type": "flat-embossed-vmd",
+            "category": "Modern Corporate",
+            "design_code": "FB-PT-87",
+            "design_name": "FB-PT-87",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-87.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-modern-corporate/FB-PT-87.jpg",
+            "color_name": "FB-PT-87"
+          }
+        ]
+      },
+      {
+        "id": "fabrics-color-core",
+        "name": "Color Core",
+        "product_type": "fabrics",
+        "emboss_available": true,
+        "designs": []
+      },
+      {
+        "id": "fabrics-designer-textile",
+        "name": "Designer Textile",
+        "product_type": "fabrics",
+        "emboss_available": true,
+        "designs": []
+      }
+    ]
+  },
+  {
+    "id": "ombre",
+    "name": "Ombre",
+    "active": true,
+    "sizes": [
+      "1200x2800",
+      "1200x2400"
+    ],
+    "densities": [],
+    "patterns": [],
+    "colors": [],
+    "thicknesses": [
+      "12mm (PET Panel)",
+      "25mm (PET Panel)"
+    ],
+    "categories": [
+      {
+        "id": "ombre-color-core-ombre",
+        "name": "Color Core Ombre",
+        "product_type": "ombre",
+        "emboss_available": false,
+        "designs": []
+      },
+      {
+        "id": "signature-ombre",
+        "name": "Signature Ombre",
+        "product_type": "ombre",
+        "emboss_available": false,
+        "designs": []
+      }
+    ]
+  },
+  {
+    "id": "vicstrip",
+    "name": "Univic Strip",
+    "active": true,
+    "sizes": [
+      "600x600",
+      "600x2400"
+    ],
+    "densities": [],
+    "patterns": [
+      "Single Groove",
+      "Double Groove",
+      "Square",
+      "Double Square"
+    ],
+    "colors": [
+      "#FFFFFF",
+      "#F5F5F5",
+      "#E0E0E0",
+      "#BDBDBD",
+      "#8D6E63",
+      "#795548",
+      "#5D4037",
+      "#3E2723",
+      "#212121",
+      "#37474F",
+      "#455A64",
+      "#546E7A",
+      "#1565C0",
+      "#1976D2",
+      "#2196F3",
+      "#42A5F5"
+    ],
+    "thicknesses": [
+      "12 mm",
+      "25 mm"
+    ],
+    "categories": [
+      {
+        "id": "vicstrip-single-groove",
+        "name": "Single Groove",
+        "product_type": "vicstrip",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vicstrip-design-1",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0001",
+            "design_name": "Single Groove - Pure White",
+            "texture_color": "#FFFFFF",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#FFFFFF",
+            "color_name": "Pure White"
+          },
+          {
+            "id": "vicstrip-design-2",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0002",
+            "design_name": "Single Groove - Cloud",
+            "texture_color": "#F5F5F5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#F5F5F5",
+            "color_name": "Cloud"
+          },
+          {
+            "id": "vicstrip-design-3",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0003",
+            "design_name": "Single Groove - Silver",
+            "texture_color": "#E0E0E0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#E0E0E0",
+            "color_name": "Silver"
+          },
+          {
+            "id": "vicstrip-design-4",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0004",
+            "design_name": "Single Groove - Pewter",
+            "texture_color": "#BDBDBD",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#BDBDBD",
+            "color_name": "Pewter"
+          }
+        ]
+      },
+      {
+        "id": "vicstrip-double-groove",
+        "name": "Double Groove",
+        "product_type": "vicstrip",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vicstrip-design-5",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0005",
+            "design_name": "Double Groove - Pure White",
+            "texture_color": "#FFFFFF",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#FFFFFF",
+            "color_name": "Pure White"
+          },
+          {
+            "id": "vicstrip-design-6",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0006",
+            "design_name": "Double Groove - Cloud",
+            "texture_color": "#F5F5F5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#F5F5F5",
+            "color_name": "Cloud"
+          },
+          {
+            "id": "vicstrip-design-7",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0007",
+            "design_name": "Double Groove - Silver",
+            "texture_color": "#E0E0E0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#E0E0E0",
+            "color_name": "Silver"
+          },
+          {
+            "id": "vicstrip-design-8",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0008",
+            "design_name": "Double Groove - Pewter",
+            "texture_color": "#BDBDBD",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#BDBDBD",
+            "color_name": "Pewter"
+          }
+        ]
+      },
+      {
+        "id": "vicstrip-square",
+        "name": "Square",
+        "product_type": "vicstrip",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vicstrip-design-9",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0009",
+            "design_name": "Square - Pure White",
+            "texture_color": "#FFFFFF",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#FFFFFF",
+            "color_name": "Pure White"
+          },
+          {
+            "id": "vicstrip-design-10",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0010",
+            "design_name": "Square - Cloud",
+            "texture_color": "#F5F5F5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#F5F5F5",
+            "color_name": "Cloud"
+          },
+          {
+            "id": "vicstrip-design-11",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0011",
+            "design_name": "Square - Silver",
+            "texture_color": "#E0E0E0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#E0E0E0",
+            "color_name": "Silver"
+          },
+          {
+            "id": "vicstrip-design-12",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0012",
+            "design_name": "Square - Pewter",
+            "texture_color": "#BDBDBD",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#BDBDBD",
+            "color_name": "Pewter"
+          }
+        ]
+      },
+      {
+        "id": "vicstrip-double-square",
+        "name": "Double Square",
+        "product_type": "vicstrip",
+        "emboss_available": false,
+        "designs": [
+          {
+            "id": "vicstrip-design-13",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0013",
+            "design_name": "Double Square - Pure White",
+            "texture_color": "#FFFFFF",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#FFFFFF",
+            "color_name": "Pure White"
+          },
+          {
+            "id": "vicstrip-design-14",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0014",
+            "design_name": "Double Square - Cloud",
+            "texture_color": "#F5F5F5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#F5F5F5",
+            "color_name": "Cloud"
+          },
+          {
+            "id": "vicstrip-design-15",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0015",
+            "design_name": "Double Square - Silver",
+            "texture_color": "#E0E0E0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#E0E0E0",
+            "color_name": "Silver"
+          },
+          {
+            "id": "vicstrip-design-16",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0016",
+            "design_name": "Double Square - Pewter",
+            "texture_color": "#BDBDBD",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#BDBDBD",
+            "color_name": "Pewter"
+          }
+        ]
+      }
+    ]
+  }
+]

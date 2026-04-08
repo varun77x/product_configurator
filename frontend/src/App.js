@@ -9,6 +9,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Configurator />} />
+          <Route path="/:productType" element={<Configurator />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-center" richColors />

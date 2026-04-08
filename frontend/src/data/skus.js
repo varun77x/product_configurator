@@ -22,24 +22,28 @@ const COLORS = [
 
 const PATTERNS = [
   {
-    id: "single-groove",
-    name: "Single Groove",
-    colors: COLORS,
-  },
-  {
-    id: "double-groove",
-    name: "Double Groove",
-    colors: COLORS,
-  },
-  {
     id: "square",
     name: "Square",
     colors: COLORS,
+    sizes: ["600x600"],
   },
   {
     id: "double-square",
     name: "Double Square",
     colors: COLORS,
+    sizes: ["600x600"],
+  },
+  {
+    id: "single-groove",
+    name: "Single Groove",
+    colors: COLORS,
+    sizes: ["600x2400"],
+  },
+  {
+    id: "double-groove",
+    name: "Double Groove",
+    colors: COLORS,
+    sizes: ["600x2400"],
   },
 ];
 
@@ -49,9 +53,14 @@ export const VICSTRIP_PRODUCT = {
   patterns: PATTERNS,
 };
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
+// const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
+// Assets (images, thumbs, PDFs, JSON catalog) are now served from the CDN bucket.
+const ASSETS_URL = process.env.REACT_APP_ASSETS_URL || "http://localhost:8001";
+// Shim: keeps all existing ${BACKEND_URL}/static/... references pointing at the CDN
+// without touching every URL builder individually.
+const BACKEND_URL = ASSETS_URL;
 
-// Helper function to get VicStrip image path (served from backend)
+// Helper function to get VicStrip image path (served from CDN)
 export const getImagePath = (patternId, colorId) => {
   return `${BACKEND_URL}/static/images/vicstrip/${patternId}/${colorId}.jpg`;
 };
@@ -286,7 +295,8 @@ export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
  * returned from the API. Pre-generated full-panel overlay images live at:
  *   /static/images/flat-embossed-vmt/emboss-panels/{designCode}/{id}.png
  */
-const FVP_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/flat-embossed-vmt/embossed_line_thumbnails/${file}`;
+// const FVP_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/flat-embossed-vmt/embossed_line_thumbnails/${file}`;
+const FVP_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/flat-embossed-vmt/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
   { id: "flux_ribbed", name: "Flux Ribbed", thumbnailUrl: FVP_EMBOSS_THUMB("flux_ribbed.png") },
   { id: "ribbed_25mm", name: "Ribbed 25mm", thumbnailUrl: FVP_EMBOSS_THUMB("ribbed_25mm.png") },
@@ -344,7 +354,8 @@ export const WOOD_PERFORATION_SIZES = [
 ];
 
 /** All perforation overlay patterns. The same PNG file is used for every size. */
-const WOOD_PERF_THUMB = (file) => `${BACKEND_URL}/thumb/wood/perforations-thumbnails/${file}`;
+// const WOOD_PERF_THUMB = (file) => `${BACKEND_URL}/thumb/wood/perforations-thumbnails/${file}`;
+const WOOD_PERF_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/wood/perforations-thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 export const WOOD_PERFORATION_PATTERNS = [
   { id: "PF-NC-07", name: "PF-NC-07", url: `${BACKEND_URL}/static/images/wood/perfocations/PF-NC-07_1200x2800.png`, thumbnailUrl: WOOD_PERF_THUMB("PF-NC-07_1200x2800.png") },
   { id: "PF-NC-08", name: "PF-NC-08", url: `${BACKEND_URL}/static/images/wood/perfocations/PF-NC-08_1200x2800.png`, thumbnailUrl: WOOD_PERF_THUMB("PF-NC-08_1200x2800.png") },
@@ -403,12 +414,15 @@ export const COLOR_CORE_FABRIC_STRUCTURES = [
 export const getColorCorePanelUrl = (structureId, colorId) =>
   `${BACKEND_URL}/static/images/fabric/color-core/panels/${structureId}_${colorId}.jpg`;
 
+// export const getColorCoreThumbnailUrl = (structureId, colorId) =>
+//   `${BACKEND_URL}/thumb/fabric/color-core/panels/${structureId}_${colorId}.jpg`;
 export const getColorCoreThumbnailUrl = (structureId, colorId) =>
-  `${BACKEND_URL}/thumb/fabric/color-core/panels/${structureId}_${colorId}.jpg`;
+  `${ASSETS_URL}/static/_thumbcache/fabric/color-core/panels/${structureId}_${colorId}.jpg`;
 
 export const COLOR_CORE_SIZES = ["1200x2800", "1200x2400", "600x600", "600x1200"];
 
-const CC_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/color-core/embossed_line_thumbnails/${file}`;
+// const CC_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/color-core/embossed_line_thumbnails/${file}`;
+const CC_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/fabric/color-core/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 
 export const COLOR_CORE_EMBOSS_PATTERNS = [
   { id: "ribbed_25mm", name: "Ribbed 25mm",  thumbnailUrl: CC_EMBOSS_THUMB("ribbed_25mm.png"),  availableSizes: ["1200x2800", "1200x2400"] },
@@ -599,7 +613,8 @@ export const OMBRE_COLOR_CORE_OVERLAYS = {
 export const getOmbreColorCorePanelUrl = (baseColorId, filename) =>
   `${BACKEND_URL}/static/images/ombre/color-core-ombre/panels/${baseColorId}/${encodeURIComponent(filename)}`;
 
-const OMBRE_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/embossed_line_thumbnails/${file}`;
+// const OMBRE_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/embossed_line_thumbnails/${file}`;
+const OMBRE_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/ombre/color-core-ombre/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 export const OMBRE_COLOR_CORE_EMBOSS_PATTERNS = [
   { id: "flux_ribbed", name: "Flux Ribbed", suffix: "Flux Ribbed", thumbnailUrl: OMBRE_EMBOSS_THUMB("flux_ribbed.png") },
   { id: "ribbed_25mm", name: "Ribbed 25mm", suffix: "Ribbed 25mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_25mm.png") },
@@ -619,7 +634,8 @@ export const getOmbreEmbossPanelUrl = (pattern, overlayFilename) => {
 
 // ─── Ombre — Color Core Ombre Groove ─────────────────────────────────────────
 
-const GROOVE_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/groove_thumbnails/${file}`;
+// const GROOVE_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/groove_thumbnails/${file}`;
+const GROOVE_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/ombre/color-core-ombre/groove_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 export const OMBRE_COLOR_CORE_GROOVE_PATTERNS = [
   { id: "aqualine", name: "Aqualine", suffix: "Aqualine", thumbnailUrl: GROOVE_THUMB("AQUALINE.png") },
   { id: "arcane",   name: "Arcane",   suffix: "Arcane",   thumbnailUrl: GROOVE_THUMB("ARCANE.png")   },
@@ -795,7 +811,8 @@ export const DESIGNER_TEXTILE_THICKNESSES = [
 //   Large tall  (1200x2800, 1200x2400) : ribbed family, elliptera, ellipsia, flux, draft, aqualine, tapered, weave, bloom, afterflute, penray, shard
 //   Large square (1200x2400 only)      : + axis, square_8, square_30, deck, triangle, symmetric
 //   Small square (600x600)             : axis, square_8, square_30, deck, triangle
-const DT_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/designer_textile/emboss_thumbnails/${file}`;
+// const DT_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/designer_textile/emboss_thumbnails/${file}`;
+const DT_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/fabric/designer_textile/emboss_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
 
 //   Small tall   (600x1200)            : axis, square_8, square_30, deck, triangle, symmetric
 export const DESIGNER_TEXTILE_EMBOSS_PATTERNS = [
@@ -840,8 +857,10 @@ export const getDesignerTextilePanelUrl = (fabricId, shadeId) =>
  * caches the result — subsequent requests return the tiny cached file.
  * Used for the fabric picker thumbnails so they stay ~5–15 KB each.
  */
+// export const getDesignerTextileThumbnailUrl = (fabricId, shadeId) =>
+//   `${BACKEND_URL}/thumb/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`;
 export const getDesignerTextileThumbnailUrl = (fabricId, shadeId) =>
-  `${BACKEND_URL}/thumb/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`;
+  `${ASSETS_URL}/static/_thumbcache/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`;
 
 /**
  * Returns the pre-rendered embossed panel URL (reserved for future use).

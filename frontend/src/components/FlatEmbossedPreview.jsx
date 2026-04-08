@@ -515,52 +515,20 @@ const FlatEmbossedPreview = forwardRef(
 
           {/* ── Layer 4: Preloader (z-index 10) ── */}
           {isLoading && (
-            <>
-              <style>{`
-                .fep-loader {
-                  display: inline-flex;
-                  width: 90px;
-                  aspect-ratio: 2;
-                  animation: fep-l10-0 1s linear infinite;
-                }
-                .fep-loader:before,
-                .fep-loader:after {
-                  content: "";
-                  flex: 1;
-                  background: #574951;
-                  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-                  animation: fep-l10-1 1s linear infinite;
-                  transform-origin: right;
-                }
-                .fep-loader:after {
-                  scale: -1 1;
-                  translate: -100% 0;
-                  animation-direction: reverse;
-                }
-                @keyframes fep-l10-0 {
-                  0%   { translate: 0 -35.35%; }
-                  100% { translate: 0  35.35%; }
-                }
-                @keyframes fep-l10-1 {
-                  0%   { rotate: -45deg; }
-                  100% { rotate:  45deg; }
-                }
-              `}</style>
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: 10,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: TRANSITION_OVERLAY_COLOR,
-                }}
-                data-testid="flat-embossed-preloader"
-              >
-                <div className="fep-loader" />
-              </div>
-            </>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: TRANSITION_OVERLAY_COLOR,
+              }}
+              data-testid="flat-embossed-preloader"
+            >
+              <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
+            </div>
           )}
 
 

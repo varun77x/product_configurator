@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useCallback, useRef, memo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
-import axios from "axios";
+// import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
 import { toast } from "sonner";
 import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,15 +23,15 @@ import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
 import SignatureOmbreLightRing from "@/components/SignatureOmbreLightRing";
 import { OmbreEmbossEngine } from "@/lib/OmbreEmbossEngine";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// const API = `${BACKEND_URL}/api`;
+// Products catalog + tech specs are now fetched as static JSON from the CDN.
+const ASSETS_URL = process.env.REACT_APP_ASSETS_URL || "http://localhost:8001";
+// const ASSETS_URL ="http://localhost:8001";
 
 // Boot loader toggles (quickly reversible without touching JSX)
 const ENABLE_BOOT_WHITE_OVERLAY = true;
 const BOOT_OVERLAY_EXTRA_MS = 500;
-
-// Interior background image (user provided)
-const INTERIOR_IMAGE = "https://customer-assets.emergentagent.com/job_74835dcc-aa13-4905-afe8-adfb41a5c38e/artifacts/drq6tblo_UniVic%20Strip_AO%20Map.png";
 
 // ── Signature Ombre: 6 emboss patterns with OBJ models ──────────────────────
 const SO_PATTERNS = [
@@ -288,7 +289,18 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
 ));
 EmbossThumbnail.displayName = "EmbossThumbnail";
 
+// Maps public URL slugs to internal product IDs
+const URL_SLUG_TO_PRODUCT_ID = {
+  "bespoke-graphics": "flat-embossed-vmd",
+};
+const PRODUCT_ID_TO_URL_SLUG = Object.fromEntries(
+  Object.entries(URL_SLUG_TO_PRODUCT_ID).map(([slug, id]) => [id, slug])
+);
+
 const Configurator = () => {
+  const { productType: productTypeParam } = useParams();
+  const navigate = useNavigate();
+
   // Products from API
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -333,7 +345,7 @@ const Configurator = () => {
   const [soBaseColor, setSoBaseColor] = useState('#C47A4A');
   const [soOverlayColor, setSoOverlayColor] = useState('#6B3A2A');
   const [soBlend, setSoBlend] = useState(50);
-  const [soLightRotation, setSoLightRotation] = useState(0);
+  const [soLightRotation, setSoLightRotation] = useState(-10 * (Math.PI / 180)); // 10° CCW from Front
   const [soSelectedPattern, setSoSelectedPattern] = useState(SO_PATTERNS[0].id);
   const [soPanelImage, setSoPanelImage] = useState(null);
   const [soIsLoading, setSoIsLoading] = useState(false);
@@ -354,7 +366,7 @@ const Configurator = () => {
     ? (selectedDTEmboss && selectedDTFabric?.id && selectedDTShade?.id
         ? getDesignerTextileEmbossUrl(selectedDTFabric.id, selectedDTEmboss.id, selectedDTShade.id, selectedDTEmboss.filenameSuffix)
         : (selectedDTFabric?.id && selectedDTShade?.id
-            ? `${BACKEND_URL}/static/images/fabric/designer_textile/panels/${selectedDTFabric.id}_${selectedDTShade.id}.jpg`
+            ? `${ASSETS_URL}/static/images/fabric/designer_textile/panels/${selectedDTFabric.id}_${selectedDTShade.id}.jpg`
             : null))
     : null;
   const { blobUrl: dtPanelBlobUrl, isLoading: dtPanelLoading } = useBlobPanel(dtPanelUrl);
@@ -552,26 +564,32 @@ const Configurator = () => {
     favoritesOpen,
   });
 
-  // Load products from API
+  // Load products from CDN JSON (replaces /api/products)
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${API}/products`);
-        const apiProducts = response.data;
+        // const response = await axios.get(`${API}/products`);
+        // const apiProducts = response.data;
+        const response = await fetch(`${ASSETS_URL}/data/products.json`);
+        const apiProducts = await response.json();
         setProducts(apiProducts);
         
-        // Set default selection to first active product
-        const firstActive = apiProducts.find(p => p.active);
+        // Set default selection: use URL param if provided, else first active product
+        const resolvedId = productTypeParam ? (URL_SLUG_TO_PRODUCT_ID[productTypeParam] || productTypeParam) : null;
+        const urlProduct = resolvedId ? apiProducts.find(p => p.id === resolvedId && p.active) : null;
+        const firstActive = urlProduct || apiProducts.find(p => p.active);
         if (firstActive) {
           setSelectedProductType(firstActive);
           
           // Initialize state based on product type
           if (firstActive.id === "vicstrip") {
             // VicStrip-specific initialization
-            setSelectedPattern(VICSTRIP_PRODUCT.patterns[0]);
-            setSelectedDesign({ pattern: VICSTRIP_PRODUCT.patterns[0], color: VICSTRIP_PRODUCT.patterns[0].colors[0] });
-            setSelectedSize("600x600");
-            setSelectedThickness("12 mm");
+            const initSize = "600x600";
+            const initPattern = VICSTRIP_PRODUCT.patterns.find(p => p.sizes.includes(initSize)) || VICSTRIP_PRODUCT.patterns[0];
+            setSelectedPattern(initPattern);
+            setSelectedDesign({ pattern: initPattern, color: initPattern.colors[0] });
+            setSelectedSize(initSize);
+            setSelectedThickness("12mm (PET Panel)");
           } else if (firstActive.id === "ombre") {
             // Ombre-specific initialization
             setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
@@ -625,13 +643,16 @@ const Configurator = () => {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  // Load tech specs when product type changes
+  // Load tech specs from CDN JSON (replaces /api/products/{id}/specs)
   useEffect(() => {
     const fetchSpecs = async () => {
       if (selectedProductType?.id) {
         try {
-          const response = await axios.get(`${API}/products/${selectedProductType.id}/specs`);
-          setTechSpecs(response.data);
+          // const response = await axios.get(`${API}/products/${selectedProductType.id}/specs`);
+          // setTechSpecs(response.data);
+          const response = await fetch(`${ASSETS_URL}/data/tech-specs.json`);
+          const allSpecs = await response.json();
+          setTechSpecs(allSpecs[selectedProductType.id] || {});
         } catch (error) {
           setTechSpecs(DEFAULT_SPECS[selectedProductType.id] || null);
         }
@@ -661,6 +682,7 @@ const Configurator = () => {
   const handleProductTypeChange = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product && product.active) {
+      navigate('/' + (PRODUCT_ID_TO_URL_SLUG[productId] || productId));
       setSelectedProductType(product);
       
       // Clear all state first
@@ -685,11 +707,12 @@ const Configurator = () => {
       // Reset options based on new product type
       if (product.id === "vicstrip") {
         // VicStrip-specific initialization
-        const defaultPattern = VICSTRIP_PRODUCT.patterns[0];
+        const defaultSize = "600x600";
+        const defaultPattern = VICSTRIP_PRODUCT.patterns.find(p => p.sizes.includes(defaultSize)) || VICSTRIP_PRODUCT.patterns[0];
         setSelectedPattern(defaultPattern);
         setSelectedDesign({ pattern: defaultPattern, color: defaultPattern.colors[0] });
-        setSelectedSize("600x600");
-        setSelectedThickness("12 mm");
+        setSelectedSize(defaultSize);
+        setSelectedThickness("12mm (PET Panel)");
       } else if (product.id === "ombre") {
         // Ombre-specific initialization
         setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
@@ -760,7 +783,7 @@ const Configurator = () => {
         setSoBaseColor('#C47A4A');
         setSoOverlayColor('#6B3A2A');
         setSoBlend(50);
-        setSoLightRotation(0);
+        setSoLightRotation(-60 * (Math.PI / 180)); // 60° CCW from Front
         setSoSelectedPattern(SO_PATTERNS[0].id);
         setSelectedDesign(null);
       } else if (category.designs?.length > 0) {
@@ -768,6 +791,17 @@ const Configurator = () => {
       } else {
         setSelectedDesign(null);
       }
+    }
+  };
+
+  // VicStrip: handle size change — resets pattern to first available for new size
+  const handleVicstripSizeChange = (size) => {
+    setSelectedSize(size);
+    const firstForSize = VICSTRIP_PRODUCT.patterns.find(p => p.sizes.includes(size));
+    if (firstForSize) {
+      setSelectedPattern(firstForSize);
+      setSelectedDesign({ pattern: firstForSize, color: firstForSize.colors[0] });
+      setSelectedCategory(null);
     }
   };
 
@@ -886,7 +920,7 @@ const Configurator = () => {
           }
         }
         setSelectedSize(favorite.size || "600x600");
-        setSelectedThickness(favorite.thickness || "12 mm");
+        setSelectedThickness(favorite.thickness || "12mm (PET Panel)");
       } else {
         // Generic product flow
         const category = product.categories?.find(c => c.id === favorite.categoryId);
@@ -954,13 +988,24 @@ const Configurator = () => {
   if (!ENABLE_BOOT_WHITE_OVERLAY && loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="boot-loader" aria-label="Loading configurator" />
+        <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
       </div>
     );
   }
 
   return (
     <div className="configurator-root" data-testid="configurator-page">
+      {/* Mobile block screen */}
+      <div className="md:hidden fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center gap-4 p-8 text-center">
+        <img src="/univicoustic-logo.png" alt="UniVicoustic" className="h-12 w-auto object-contain mb-2" />
+        <p className="text-[hsl(215,25%,27%)] font-semibold text-lg leading-snug">
+          Please open on a larger screen
+        </p>
+        <p className="text-[hsl(215,16%,50%)] text-sm leading-relaxed max-w-xs">
+          The UniVicoustic configurator is designed for desktop use. For the best experience, open this on a laptop or desktop browser.
+        </p>
+      </div>
+
       {/* Full-page loading overlay — blocks all interaction while preview image is changing */}
       {(isImageLoading || dtPanelLoading || ccPanelLoading || ombrePanelLoading || fvpSingleLoading || fvpContinuousLoading || vicstripLoading) && (
         <div
@@ -972,10 +1017,12 @@ const Configurator = () => {
       {/* ── TOP HEADER BAR ───────────────────────────────────────────────── */}
       <header className="app-header" data-testid="app-header">
         <div className="flex items-center gap-3">
-          <div>
-            <h1 className="brand-logo text-xl leading-none text-[hsl(215,25%,27%)]" data-testid="brand-logo">UniVicoustic</h1>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(215,16%,47%)] mt-0.5">Acoustic Panel Configurator</p>
-          </div>
+          <img
+            src="/univicoustic-logo.png"
+            alt="UniVicoustic"
+            className="h-10 w-auto object-contain"
+            data-testid="brand-logo"
+          />
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -1017,10 +1064,12 @@ const Configurator = () => {
                 pdfFile = selectedThickness === "25mm (PET Panel)"
                   ? "Embossed VMT Series (PET).pdf"
                   : "Flat Panel VMT (PET).pdf";
+              } else if (selectedProductType?.id === "vicstrip") {
+                pdfFile = "Flat Panel VMT (PET).pdf";
               } else {
                 pdfFile = "ts_001.pdf";
               }
-              window.open(`${BACKEND_URL}/tech-specs/${encodeURIComponent(pdfFile)}`, "_blank");
+              window.open(`${ASSETS_URL}/static/technical_specification_pdfs/${encodeURIComponent(pdfFile)}`, "_blank");
             }}
             className="text-[hsl(215,25%,27%)]"
             data-testid="tech-spec-btn"
@@ -1070,7 +1119,7 @@ const Configurator = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {VICSTRIP_PRODUCT.patterns.map((pattern) => (
+                      {VICSTRIP_PRODUCT.patterns.filter(p => p.sizes.includes(selectedSize || "600x600")).map((pattern) => (
                         <SelectItem key={pattern.id} value={pattern.id} data-testid={`pattern-${pattern.id}`}>
                           {pattern.name}
                         </SelectItem>
@@ -1085,7 +1134,7 @@ const Configurator = () => {
                   <div className="flex gap-3">
                     <div className="flex-1">
                       <Label className="text-xs">Size</Label>
-                      <Select value={selectedSize || ""} onValueChange={setSelectedSize}>
+                      <Select value={selectedSize || ""} onValueChange={handleVicstripSizeChange}>
                         <SelectTrigger className="w-full" data-testid="size-trigger">
                           <SelectValue />
                         </SelectTrigger>
@@ -1102,8 +1151,8 @@ const Configurator = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="12 mm">12 mm</SelectItem>
-                          <SelectItem value="25 mm">25 mm</SelectItem>
+                          <SelectItem value="12mm (PET Panel)">12mm (PET Panel)</SelectItem>
+                          <SelectItem value="25mm (PET Panel)">25mm (PET Panel)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -2207,6 +2256,10 @@ const Configurator = () => {
             </DialogContent>
           </Dialog>
         </div>
+        {/* Caveat */}
+        <p className="px-4 py-2 text-[0.62rem] text-[hsl(215,16%,60%)] leading-tight border-t border-[hsl(var(--border))]">
+          *This configurator provides an indicative visualization only. Actual product appearance may vary due to lighting conditions, surface textures, material finishes, and installation environment.
+        </p>
       </aside>
 
       {/* Canvas Preview Area */}
@@ -2277,9 +2330,12 @@ const Configurator = () => {
             }
             // flipCenter: allow per-design override (`selectedDesign.mirror_center`) or
             // fall back to category-level `mirrorCenter` from FLAT_EMBOSSED_VMT_CONFIG.
+            // Special case: Ellis groove pattern in Ombre Color Core always mirrors center.
             flipCenter={
-              selectedDesign?.mirror_center ??
-              (selectedCategory?.id ? FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.mirrorCenter : false)
+              (selectedProductType?.id === "ombre" && selectedOmbreGroovePattern?.id === "ellis")
+                ? true
+                : selectedDesign?.mirror_center ??
+                  (selectedCategory?.id ? FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.mirrorCenter : false)
             }
             textureUrls={
               // Ombre: never uses multi-column slices
@@ -2318,7 +2374,6 @@ const Configurator = () => {
           <CanvasPreview
             ref={canvasRef}
             onLoadingChange={handleLoadingChange}
-            backgroundImage={INTERIOR_IMAGE}
             textureColor={selectedDesign?.texture_color}
             textureUrl={canvasBlobUrl}
             selectedColor={selectedColor}
@@ -2356,7 +2411,7 @@ const Configurator = () => {
 
       {showBootOverlay && (
         <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center" data-testid="boot-overlay" aria-hidden="true">
-          <div className="boot-loader" aria-label="Loading configurator" />
+          <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
         </div>
       )}
     </div>

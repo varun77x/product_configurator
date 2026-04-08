@@ -46,6 +46,13 @@ app = FastAPI()
 # Serve static assets (images) from backend/static/
 app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
 
+# Serve pre-generated catalog JSON from backend/data/
+# This mirrors the S3 layout so the frontend works unchanged locally.
+# Run scripts/dump_catalog.py first if backend/data/ doesn't exist yet.
+_data_dir = ROOT_DIR / "data"
+if _data_dir.exists():
+    app.mount("/data", StaticFiles(directory=_data_dir), name="data")
+
 THUMB_CACHE_DIR = ROOT_DIR / "static" / "_thumbcache"
 THUMB_SIZE = (200, 200)
 
@@ -2481,4 +2488,4 @@ logger = logging.getLogger(__name__)
 # Main entry point
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=8001, reload=True)

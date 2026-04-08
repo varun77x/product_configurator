@@ -116,11 +116,16 @@ const SignatureOmbreLightRing = ({ rotation, onChange }) => {
           />
         </div>
       </div>
-      <div style={{
-        textAlign: 'center', fontSize: 8, color: '#8a8480',
-        textTransform: 'uppercase', letterSpacing: '0.1em',
-      }}>
-        Drag to rotate light
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#c4956a', lineHeight: 1.2 }}>
+          {Math.round(rotation * (180 / Math.PI))}°
+        </div>
+        <div style={{
+          fontSize: 8, color: '#8a8480',
+          textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2,
+        }}>
+          Drag to rotate light
+        </div>
       </div>
     </div>
   );
