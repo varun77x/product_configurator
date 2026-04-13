@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
 // import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +22,7 @@ import { downloadPanelImages } from "@/lib/downloadPanelImages";
 import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
 import SignatureOmbreLightRing from "@/components/SignatureOmbreLightRing";
 import { OmbreEmbossEngine } from "@/lib/OmbreEmbossEngine";
+import ChatWidget from "@/components/ChatWidget";
 
 // const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 // const API = `${BACKEND_URL}/api`;
@@ -305,6 +306,7 @@ const Configurator = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBootOverlay, setShowBootOverlay] = useState(ENABLE_BOOT_WHITE_OVERLAY);
+  const [chatOpen, setChatOpen] = useState(false);
   
   // Product type selection
   const [selectedProductType, setSelectedProductType] = useState(null);
@@ -748,11 +750,14 @@ const Configurator = () => {
       setSelectedCategory(category);
       setIsEmbossed(false);
       setSelectedEmbossPattern(null);
-      // Wood Perforations: reset to blank state — size must be selected first
+      // Wood Perforations: auto-select first size, first print (design), and first pattern
       if (category.id === "wood-perforations") {
-        setSelectedDesign(null);
-        setSelectedWoodPerfSize(null);
-        setSelectedPerforation(null);
+        const defaultSize = WOOD_PERFORATION_SIZES[0].id;
+        const exclusions = WOOD_PERFORATION_EXCLUSIONS[defaultSize] || [];
+        const defaultPattern = WOOD_PERFORATION_PATTERNS.find(p => !exclusions.includes(p.id));
+        setSelectedDesign(category.designs?.[0] || null);
+        setSelectedWoodPerfSize(defaultSize);
+        setSelectedPerforation(defaultPattern || null);
       } else if (category.id === "fabrics-color-core") {
         // Color Core: auto-select first color + structure + size
         setSelectedColorCoreColor(COLOR_CORE_COLORS[0]);
@@ -786,6 +791,7 @@ const Configurator = () => {
         setSoLightRotation(-60 * (Math.PI / 180)); // 60° CCW from Front
         setSoSelectedPattern(SO_PATTERNS[0].id);
         setSelectedDesign(null);
+        setSelectedThickness(selectedProductType?.thicknesses?.[0] || null);
       } else if (category.designs?.length > 0) {
         setSelectedDesign(category.designs[0]);
       } else {
@@ -1787,6 +1793,23 @@ const Configurator = () => {
                       <Label className="section-header">HDRI Lighting</Label>
                       <SignatureOmbreLightRing rotation={soLightRotation} onChange={setSoLightRotation} />
                     </div>
+
+                    {/* Thickness */}
+                    {selectedProductType?.thicknesses?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Thickness</Label>
+                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="so-thickness-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select thickness" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.thicknesses.map((t) => (
+                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -2289,7 +2312,7 @@ const Configurator = () => {
       <main className="canvas-area" data-testid="canvas-area">
 
         {/* Zoom Controls */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10" data-testid="zoom-controls">
+        <div className="absolute top-4 right-4 flex flex-col gap-1 z-10" data-testid="zoom-controls">
           <Button
             variant="outline"
             size="icon"
@@ -2431,6 +2454,20 @@ const Configurator = () => {
       </main>
 
       </div>{/* end configurator-content */}
+
+      {/* Floating chat button */}
+      <button
+        onClick={() => setChatOpen((v) => !v)}
+        className="fixed bottom-6 right-6 z-[300] w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+        style={{ background: 'hsl(26,21%,65%)' }}
+        aria-label="Chat with us"
+        data-testid="chat-fab"
+      >
+        <img src="/chat-icon.png" alt="Chat" className="w-11 h-11 object-contain" />
+        {/* <MessageCircle className="h-6 w-6 text-white" /> */}
+      </button>
+
+      <ChatWidget open={chatOpen} onClose={() => setChatOpen(false)} />
 
       {showBootOverlay && (
         <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center" data-testid="boot-overlay" aria-hidden="true">

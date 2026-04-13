@@ -230,7 +230,7 @@ export const FLAT_EMBOSSED_VMT_CONFIG = {
   // Fabrics product — Color Core category
   "fabrics-color-core": {
     furniture: `${BACKEND_URL}/static/images/fabric/furniture/color-core.png`,
-    tpatti: `${BACKEND_URL}/static/images/fabric/tpatti/color-core.png`,
+    // tpatti: `${BACKEND_URL}/static/images/fabric/tpatti/color-core.png`,
     renderMode: "portrait",
     repeat: 3,
     panelWidth: 1200,
@@ -439,7 +439,7 @@ export const COLOR_CORE_EMBOSS_PATTERNS = [
   { id: "deck",       name: "Deck",         thumbnailUrl: CC_EMBOSS_THUMB("deck.png"),          availableSizes: ["1200x2400", "600x600", "600x1200"], panelRows: 6 },
   { id: "triangle",   name: "Triangle",     thumbnailUrl: CC_EMBOSS_THUMB("triangle.png"),      availableSizes: ["1200x2400", "600x600", "600x1200"], panelRows: 6 },
   { id: "square_8",   name: "Square 8",     thumbnailUrl: CC_EMBOSS_THUMB("square_8.png"),     availableSizes: ["1200x2400", "600x600", "600x1200"], panelRows: 6 },
-  { id: "symmetric",  name: "Symmetric",    thumbnailUrl: CC_EMBOSS_THUMB("symmetric.png"),    availableSizes: ["1200x2400", "600x600", "600x1200"], panelRows: 6 },
+  { id: "symmetric",  name: "Symmetric",    thumbnailUrl: CC_EMBOSS_THUMB("symmetric.png"),    availableSizes: ["1200x2400", "600x1200"], panelRows: 6 },
   { id: "alter_flute",name: "Alter Flute",  thumbnailUrl: CC_EMBOSS_THUMB("afterflute.png"),  availableSizes: ["1200x2800", "1200x2400"] },
   { id: "bloom",      name: "Bloom",        thumbnailUrl: CC_EMBOSS_THUMB("bloom.png"),        availableSizes: ["1200x2800", "1200x2400"] },
   { id: "drift",      name: "Drift",        thumbnailUrl: CC_EMBOSS_THUMB("drift.png"),        availableSizes: ["1200x2800", "1200x2400"] },

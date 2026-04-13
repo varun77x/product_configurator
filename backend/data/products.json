@@ -2829,8 +2829,8 @@
     "colors": [],
     "thicknesses": [
       "12mm (PET Panel)",
-      "20mm (PET Panel)",
-      "25mm (PET Wool)"
+      "25mm (PET Panel)",
+      "PET Wool"
     ],
     "categories": [
       {
@@ -3719,8 +3719,8 @@
     "colors": [],
     "thicknesses": [
       "12mm (PET Panel)",
-      "20mm (PET Panel)",
-      "25mm (PET Wool)"
+      "25mm (PET Panel)",
+      "PET Wool"
     ],
     "categories": [
       {

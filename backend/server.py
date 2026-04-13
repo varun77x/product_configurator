@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from dotenv import load_dotenv
@@ -6,9 +6,12 @@ from starlette.middleware.cors import CORSMiddleware
 import os
 import sys
 import logging
+import time
+from collections import defaultdict
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
+from chat_knowledge import SYSTEM_PROMPT
 
 # Python 3.14 introduced a strict assertion in _SelectorSocketTransport._write_send()
 # that fires when the write callback is invoked after the buffer has already been
@@ -2455,6 +2458,70 @@ async def get_category_designs(product_id: str, category_id: str):
 async def get_product_specs(product_id: str):
     """Get technical specifications for a product type"""
     return TECH_SPECS.get(product_id, {})
+
+# ── Chat endpoint ────────────────────────────────────────────────────────────
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str = Field(max_length=2000)
+
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage] = Field(max_items=20)
+
+# Simple in-memory rate limiter (20 requests / 60 seconds per IP)
+_rate_store: dict = defaultdict(list)
+_RATE_LIMIT = 20
+_RATE_WINDOW = 60
+
+def _check_rate_limit(client_ip: str) -> bool:
+    now = time.time()
+    _rate_store[client_ip] = [t for t in _rate_store[client_ip] if now - t < _RATE_WINDOW]
+    if len(_rate_store[client_ip]) >= _RATE_LIMIT:
+        return False
+    _rate_store[client_ip].append(now)
+    return True
+
+@api_router.post("/chat")
+async def chat(request: ChatRequest, req: Request):
+    client_ip = req.client.host if req.client else "unknown"
+    if not _check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests — please wait a moment.")
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Chat assistant is not configured.")
+
+    if not request.messages:
+        raise HTTPException(status_code=400, detail="No messages provided.")
+
+    # Only allow role values of 'user' or 'model' to prevent prompt injection via role field
+    for msg in request.messages:
+        if msg.role not in ("user", "model"):
+            raise HTTPException(status_code=400, detail="Invalid message role.")
+
+    try:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=api_key)
+
+        # Build full conversation as contents (multi-turn)
+        contents = [
+            types.Content(role=msg.role, parts=[types.Part(text=msg.content)])
+            for msg in request.messages
+        ]
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=contents,
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
+        )
+        return {"reply": response.text}
+    except Exception as e:
+        err_str = str(e)
+        logger.error(f"Gemini chat error: {e}")
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+            raise HTTPException(status_code=429, detail="The assistant is busy — please try again in a moment.")
+        raise HTTPException(status_code=500, detail="Chat service error — please try again.")
+
 
 # Include the router in the main app
 app.include_router(api_router)
