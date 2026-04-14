@@ -116,6 +116,10 @@ const FlatEmbossedPreview = forwardRef(
 
     // Whether the preloader is visible
     const [isLoading, setIsLoading] = useState(false);
+    // True when the category (furniture) is also changing — overlay covers everything.
+    // False for same-category swaps — overlay sits below the furniture so only the wall area
+    // appears to be loading while the furniture remains fully visible.
+    const [loadingCoversAll, setLoadingCoversAll] = useState(false);
 
     // Notify parent when loading state changes
     useEffect(() => {
@@ -187,6 +191,7 @@ const FlatEmbossedPreview = forwardRef(
       // overlay.  Previously an early setDisplayedTextureUrls() was done for
       // same-category switches which caused new (not-yet-decoded) <img>
       // elements to mount immediately, making panels go blank under the blur.
+      setLoadingCoversAll(categoryChanging);
       setIsLoading(true);
 
       // Helper: decode an image URL silently (background prefetch)
@@ -395,8 +400,8 @@ const FlatEmbossedPreview = forwardRef(
             </div>
           </div>
 
-          {/* ── Layer 2: T-Patti overlay (z-index 3) — below emboss ── */}
-          {hasTpatti && (
+          {/* ── Layer 2: T-Patti overlay (z-index 3) — hidden when emboss is active ── */}
+          {hasTpatti && !hasEmboss && (
             <img
               src={tpattiBlobUrl ?? cfg.tpatti}
               alt="T-Patti decorative overlay"
@@ -442,9 +447,8 @@ const FlatEmbossedPreview = forwardRef(
                       key={i}
                       style={{
                         position: "relative",
-                        width: `calc(100% / ${columnCount})`,
+                        flex: 1,
                         height: "100%",
-                        flexShrink: 0,
                         overflow: "hidden",
                       }}
                     >
@@ -486,8 +490,6 @@ const FlatEmbossedPreview = forwardRef(
             );
           })()}
 
-
-
           {/*
            * ── Layer 4: Furniture image (z-index 5) ────────────────────────
            * THE SIZE-DEFINING ELEMENT.
@@ -506,20 +508,23 @@ const FlatEmbossedPreview = forwardRef(
               display: "block",
               maxWidth: "calc(100vw - 360px)",
               maxHeight: "calc(100vh - 64px)",
-              zIndex: 5,
+              zIndex: 6,
               userSelect: "none",
               pointerEvents: "none",
             }}
             data-testid="furniture-layer"
           />
 
-          {/* ── Layer 4: Preloader (z-index 10) ── */}
+          {/* ── Layer 5: Preloader ──
+               Category changing  → z=10 (above furniture): full white overlay.
+               Same-category swap → z=5 (below furniture z=6): only the wall area
+               appears to load; furniture stays visible above. */}
           {isLoading && (
             <div
               style={{
                 position: "absolute",
                 inset: 0,
-                zIndex: 10,
+                zIndex: loadingCoversAll ? 10 : 5,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

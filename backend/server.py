@@ -1020,6 +1020,7 @@ def generate_mock_products():
                 "texture_urls": [
                     "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel1.jpg",
                     "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel2.jpg",
+                    "/static/images/flat-embossed-vmt/panels/vmd-indian-modern/IND-NC-05-Panel1.jpg",
                 ],
                 "color_name": "IND-NC-05",
             },

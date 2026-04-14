@@ -27,8 +27,8 @@ import ChatWidget from "@/components/ChatWidget";
 // const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 // const API = `${BACKEND_URL}/api`;
 // Products catalog + tech specs are now fetched as static JSON from the CDN.
-const ASSETS_URL = process.env.REACT_APP_ASSETS_URL || "http://localhost:8001";
-// const ASSETS_URL ="http://localhost:8001";
+// const ASSETS_URL = process.env.REACT_APP_ASSETS_URL
+const ASSETS_URL ="http://localhost:8001";
 
 // Boot loader toggles (quickly reversible without touching JSX)
 const ENABLE_BOOT_WHITE_OVERLAY = true;
@@ -290,6 +290,88 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
 ));
 EmbossThumbnail.displayName = "EmbossThumbnail";
 
+// ─── HDRI Lighting angle dial ─────────────────────────────────────────────────
+// Standalone interactive SVG dial. Angle: 0° = top (12-o'clock), clockwise.
+const LightingAngleDial = memo(({ angle, onChange, accentColor }) => {
+  const dialRef = useRef(null);
+  const draggingRef = useRef(false);
+  const SIZE = 76;
+  const CX = SIZE / 2;
+  const RADIUS = 24;
+  const color = accentColor || '#F59E0B';
+  const rad = (angle * Math.PI) / 180;
+  const indX = CX + Math.sin(rad) * RADIUS;
+  const indY = CX - Math.cos(rad) * RADIUS;
+
+  const getAngle = (e) => {
+    const rect = dialRef.current.getBoundingClientRect();
+    const dx = e.clientX - (rect.left + rect.width / 2);
+    const dy = e.clientY - (rect.top + rect.height / 2);
+    return ((90 + Math.atan2(dy, dx) * 180 / Math.PI) + 360) % 360;
+  };
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    draggingRef.current = true;
+    onChange(Math.round(getAngle(e)));
+    const onMove = (ev) => { if (draggingRef.current) onChange(Math.round(getAngle(ev))); };
+    const onUp = () => {
+      draggingRef.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+      <svg
+        ref={dialRef}
+        width={SIZE}
+        height={SIZE}
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        onMouseDown={handleMouseDown}
+        style={{ cursor: 'crosshair', display: 'block', touchAction: 'none', userSelect: 'none' }}
+        aria-label={`Light angle: ${Math.round(angle)} degrees`}
+        role="slider"
+        aria-valuenow={Math.round(angle)}
+        aria-valuemin={0}
+        aria-valuemax={359}
+      >
+        {/* Track ring */}
+        <circle cx={CX} cy={CX} r={RADIUS} fill="none" stroke="#E2E8F0" strokeWidth={5} />
+        {/* Cardinal tick marks (N/E/S/W) placed just outside the ring */}
+        {[0, 90, 180, 270].map((a) => {
+          const tr = (a * Math.PI) / 180;
+          return (
+            <line
+              key={a}
+              x1={CX + Math.sin(tr) * (RADIUS + 4)} y1={CX - Math.cos(tr) * (RADIUS + 4)}
+              x2={CX + Math.sin(tr) * (RADIUS + 8)} y2={CX - Math.cos(tr) * (RADIUS + 8)}
+              stroke="#CBD5E1" strokeWidth={1.5} strokeLinecap="round"
+            />
+          );
+        })}
+        {/* ↑ north label inside top */}
+        <text x={CX} y={CX - RADIUS + 11} textAnchor="middle" fill="#94A3B8" fontSize={7} fontFamily="system-ui,sans-serif">↑</text>
+        {/* Spoke from center to indicator */}
+        <line x1={CX} y1={CX} x2={indX} y2={indY} stroke={color} strokeWidth={1.5} strokeLinecap="round" opacity={0.45} />
+        {/* Center pivot dot */}
+        <circle cx={CX} cy={CX} r={2.5} fill={color} opacity={0.35} />
+        {/* Indicator dot — sits on the track ring */}
+        <circle cx={indX} cy={indY} r={6} fill={color} opacity={0.92} />
+        {/* Small highlight inside the indicator dot */}
+        <circle cx={indX - Math.sin(rad) * 1.8} cy={indY + Math.cos(rad) * 1.8} r={2} fill="white" opacity={0.45} />
+      </svg>
+      <span style={{ fontSize: 9, color: '#94A3B8', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.04em' }}>
+        {Math.round(angle)}°
+      </span>
+    </div>
+  );
+});
+LightingAngleDial.displayName = 'LightingAngleDial';
+
 // Maps public URL slugs to internal product IDs
 const URL_SLUG_TO_PRODUCT_ID = {
   "bespoke-graphics": "flat-embossed-vmd",
@@ -468,6 +550,8 @@ const Configurator = () => {
 
   const canvasRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [hdriLighting, setHdriLighting] = useState('none'); // 'none' | 'warm' | 'soft'
+  const [lightAngle, setLightAngle] = useState(40); // degrees: 0=top, 90=right, 180=bottom, 270=left
   const ZOOM_STEP = 0.25;
   const ZOOM_MIN = 0.5;
   const ZOOM_MAX = selectedProductType?.id === "ombre" ? 1.5 : 8.0;
@@ -2311,6 +2395,47 @@ const Configurator = () => {
       {/* Canvas Preview Area */}
       <main className="canvas-area" data-testid="canvas-area">
 
+        {/* HDRI Studio Lighting Control */}
+        <div className="absolute bottom-32 right-4 z-10 select-none" data-testid="hdri-lighting-control">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-[hsl(var(--border))] p-2 flex flex-col items-stretch gap-1">
+            <p className="text-[9px] font-bold text-[hsl(215,16%,55%)] uppercase tracking-widest text-center pb-0.5">Studio Lighting</p>
+            {[
+              { id: 'none', label: 'Off',  dot: '#CBD5E1' },
+              { id: 'warm', label: 'Warm', dot: '#F59E0B' },
+              { id: 'soft', label: 'Soft', dot: '#93C5FD' },
+            ].map(({ id, label, dot }) => (
+              <button
+                key={id}
+                onClick={() => setHdriLighting(id)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  hdriLighting === id
+                    ? 'bg-[hsl(30,40%,46%)] text-white'
+                    : 'text-[hsl(215,16%,47%)] hover:bg-[hsl(var(--secondary))]'
+                }`}
+                data-testid={`lighting-${id}`}
+                aria-pressed={hdriLighting === id}
+              >
+                <span
+                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: hdriLighting === id ? 'rgba(255,255,255,0.75)' : dot }}
+                />
+                {label}
+              </button>
+            ))}
+            {/* Angle dial — visible only when a lighting mode is active */}
+            {hdriLighting !== 'none' && (
+              <div className="pt-1.5 mt-0.5 border-t border-[hsl(var(--border))]">
+                <p className="text-[9px] font-bold text-[hsl(215,16%,55%)] uppercase tracking-widest text-center mb-1">Angle</p>
+                <LightingAngleDial
+                  angle={lightAngle}
+                  onChange={setLightAngle}
+                  accentColor={hdriLighting === 'warm' ? '#F59E0B' : '#93C5FD'}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Zoom Controls */}
         <div className="absolute top-4 right-4 flex flex-col gap-1 z-10" data-testid="zoom-controls">
           <Button
@@ -2341,11 +2466,16 @@ const Configurator = () => {
         </div>
 
         {/* Preview Component — routes by product type */}
-        <div className="rounded-3xl overflow-hidden shadow-lg inset-shadow-lg inset-shadow-indigo-500/100"
+        <div className="relative rounded-3xl overflow-hidden shadow-lg inset-shadow-lg inset-shadow-indigo-500/100"
           style={{
             transform: `scale(${zoomLevel})`,
             transformOrigin: "center",
             transition: "transform 0.2s ease",
+            filter: hdriLighting === 'warm'
+              ? 'brightness(1.04) contrast(1.06) saturate(1.10) sepia(0.08)'
+              : hdriLighting === 'soft'
+                ? 'brightness(1.12) contrast(0.89) saturate(0.80)'
+                : undefined,
           }}
           data-testid="preview-zoom-wrapper"
         >
@@ -2428,6 +2558,43 @@ const Configurator = () => {
             productType={selectedProductType?.id}
           />
         )}
+        {/* HDRI Lighting overlay — angle-driven gradient layers, pointer-events-none */}
+        {hdriLighting !== 'none' && (() => {
+          const _rad = (lightAngle * Math.PI) / 180;
+          const lx = `${(50 + Math.sin(_rad) * 65).toFixed(1)}%`;
+          const ly = `${(50 - Math.cos(_rad) * 65).toFixed(1)}%`;
+          const fillAngle = (lightAngle + 180) % 360;
+          const shadowAngle = lightAngle;
+          if (hdriLighting === 'warm') return (
+            <>
+              {/* Key light: warm amber from the light direction */}
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100,
+                background: `radial-gradient(ellipse 100% 70% at ${lx} ${ly}, rgba(255,190,55,0.26) 0%, transparent 60%)`,
+                mixBlendMode: 'overlay' }} />
+              {/* Fill sweep from light direction */}
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100,
+                background: `linear-gradient(${fillAngle}deg, rgba(255,155,30,0.10), transparent)`,
+                mixBlendMode: 'soft-light' }} />
+              {/* Shadow on opposite side */}
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100,
+                background: `linear-gradient(${shadowAngle}deg, rgba(45,18,0,0.22), transparent 50%)`,
+                mixBlendMode: 'multiply' }} />
+            </>
+          );
+          if (hdriLighting === 'soft') return (
+            <>
+              {/* Soft diffuse from light direction */}
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100,
+                background: `radial-gradient(ellipse 150% 120% at ${lx} ${ly}, rgba(220,228,255,0.20) 0%, rgba(190,205,240,0.12) 55%, transparent 100%)`,
+                mixBlendMode: 'screen' }} />
+              {/* Soft fill from light direction */}
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100,
+                background: `linear-gradient(${fillAngle}deg, rgba(230,240,255,0.08), transparent)`,
+                mixBlendMode: 'screen' }} />
+            </>
+          );
+          return null;
+        })()}
         </div>
 
         {/* Configuration Summary - float*/ }
