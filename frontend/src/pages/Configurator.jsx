@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useRef, memo } from "react";
+﻿import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
 // import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
@@ -380,6 +380,36 @@ const PRODUCT_ID_TO_URL_SLUG = Object.fromEntries(
   Object.entries(URL_SLUG_TO_PRODUCT_ID).map(([slug, id]) => [id, slug])
 );
 
+// ── New top-level taxonomy: Flat | Embossed | Grooving ───────────────────────
+// Maps each surface type to the product-line IDs that belong there.
+const SURFACE_SERIES_MAP = {
+  flat:     ['flat-embossed-vmd', 'wood', 'fabrics'],
+  embossed: ['flat-embossed-vmd', 'wood', 'fabrics', 'ombre'],
+  grooving: ['ombre', 'vicstrip'],
+};
+
+// Returns the subset of categories valid for a given surface type + product.
+// Pure function — safe to call inside handlers before state updates flush.
+function getCategoriesForSurface(categories, surfaceType, productId) {
+  if (!surfaceType || !categories?.length) return categories ?? [];
+  if (surfaceType === 'flat') {
+    if (productId === 'flat-embossed-vmd' || productId === 'wood')
+      return categories.filter(c => !c.emboss_available);
+    return categories; // fabrics: all categories visible under Flat
+  }
+  if (surfaceType === 'embossed') {
+    if (productId === 'flat-embossed-vmd' || productId === 'wood' || productId === 'fabrics')
+      return categories.filter(c => c.emboss_available);
+    return categories; // ombre: both sub-categories
+  }
+  if (surfaceType === 'grooving') {
+    if (productId === 'ombre')
+      return categories.filter(c => c.id === 'ombre-color-core-ombre');
+    return categories; // vicstrip: no category-level filtering
+  }
+  return categories;
+}
+
 const Configurator = () => {
   const { productType: productTypeParam } = useParams();
   const navigate = useNavigate();
@@ -393,6 +423,8 @@ const Configurator = () => {
   // Product type selection
   const [selectedProductType, setSelectedProductType] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  // Surface type: new top-level filter (Flat | Embossed | Grooving)
+  const [selectedSurfaceType, setSelectedSurfaceType] = useState('flat');
   
   // Generic product state (for non-VicStrip products like VMD, Ombre)
   const [selectedDesign, setSelectedDesign] = useState(null);
@@ -442,6 +474,78 @@ const Configurator = () => {
   const [techSpecs, setTechSpecs] = useState(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const handleLoadingChange = useCallback((loading) => setIsImageLoading(loading), []);
+
+  // ── Derived: series and categories filtered by selected surface type ─────
+  const filteredSeries = useMemo(() => {
+    const ids = SURFACE_SERIES_MAP[selectedSurfaceType] ?? [];
+    return products.filter(p => p.active && ids.includes(p.id));
+  }, [selectedSurfaceType, products]);
+
+  const filteredCategories = useMemo(() =>
+    getCategoriesForSurface(
+      selectedProductType?.categories ?? [],
+      selectedSurfaceType,
+      selectedProductType?.id
+    ),
+    [selectedProductType, selectedSurfaceType]
+  );
+
+  const filteredDesigns = useMemo(() => {
+    const designs = selectedCategory?.designs ?? [];
+    if (selectedSurfaceType === 'embossed') {
+      return designs.filter(d => d.available_emboss?.length > 0);
+    }
+    return designs;
+  }, [selectedCategory, selectedSurfaceType]);
+
+  // ── True when the user has filled all required sections (patti toggle is always optional) ──
+  const isConfigComplete = useMemo(() => {
+    if (!selectedProductType) return false;
+    const id = selectedProductType.id;
+    const needsSize  = (selectedProductType.sizes?.length ?? 0) > 0;
+    const needsThick = (selectedProductType.thicknesses?.length ?? 0) > 0;
+
+    if (id === "vicstrip") {
+      return !!(selectedPattern && selectedDesign && selectedSize && selectedThickness);
+    }
+
+    if (id === "ombre") {
+      if (!selectedCategory) return false;
+      if (selectedCategory.id === "signature-ombre") {
+        return !!((!needsThick || selectedThickness));
+      }
+      const base = !!(selectedOmbreBaseColor && selectedOmbreOverlay);
+      return base && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness);
+    }
+
+    if (id === "flat-embossed-vmd" || id === "wood") {
+      if (!selectedCategory) return false;
+      if (selectedCategory.id === "wood-perforations") {
+        return !!(selectedWoodPerfSize && selectedDesign && (!needsThick || !!selectedThickness));
+      }
+      return !!(selectedDesign && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+    }
+
+    if (id === "fabrics") {
+      if (!selectedCategory) return false;
+      if (selectedCategory.id === "fabrics-color-core") {
+        return !!(selectedColorCoreColor && selectedFabricStructure && !!selectedSize);
+      }
+      if (selectedCategory.id === "fabrics-designer-textile") {
+        return !!(selectedDTShade && selectedDTFabric && selectedDTSize && selectedThickness);
+      }
+      return !!(selectedDesign && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+    }
+
+    // Generic fallback
+    return !!(selectedCategory && selectedDesign &&
+      (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+  }, [
+    selectedProductType, selectedPattern, selectedDesign, selectedCategory,
+    selectedSize, selectedThickness, selectedDTSize,
+    selectedWoodPerfSize, selectedColorCoreColor, selectedFabricStructure,
+    selectedDTShade, selectedDTFabric, selectedOmbreBaseColor, selectedOmbreOverlay,
+  ]);
 
   // Designer Textile — Blob URL panel manager (exactly 1 full-res image in memory)
   // When an emboss pattern is selected, the pre-rendered emboss composite replaces the base panel.
@@ -666,39 +770,12 @@ const Configurator = () => {
         const firstActive = urlProduct || apiProducts.find(p => p.active);
         if (firstActive) {
           setSelectedProductType(firstActive);
-          
-          // Initialize state based on product type
-          if (firstActive.id === "vicstrip") {
-            // VicStrip-specific initialization
-            const initSize = "600x600";
-            const initPattern = VICSTRIP_PRODUCT.patterns.find(p => p.sizes.includes(initSize)) || VICSTRIP_PRODUCT.patterns[0];
-            setSelectedPattern(initPattern);
-            setSelectedDesign({ pattern: initPattern, color: initPattern.colors[0] });
-            setSelectedSize(initSize);
-            setSelectedThickness("12mm (PET Panel)");
-          } else if (firstActive.id === "ombre") {
-            // Ombre-specific initialization
-            setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
-            setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null);
+          // Nothing else pre-filled — user selects everything from scratch.
+          if (firstActive.id === "ombre") {
+            // Keep finish-type state consistent; no visible selections yet
             setSelectedOmbreEmbossPattern(null);
             setSelectedOmbreGroovePattern(null);
             setOmbreFinishType("emboss");
-            if (firstActive.sizes?.length > 0) setSelectedSize(firstActive.sizes[0]);
-            if (firstActive.thicknesses?.length > 0) setSelectedThickness(firstActive.thicknesses[0]);
-            if (firstActive.categories?.length > 0) setSelectedCategory(firstActive.categories[0]);
-          } else {
-            // Generic product initialization (VMD, Ombre, etc.)
-            if (firstActive.sizes?.length > 0) setSelectedSize(firstActive.sizes[0]);
-            if (firstActive.densities?.length > 0) setSelectedDensity(firstActive.densities[0]);
-            if (firstActive.patterns?.length > 0) setSelectedPattern(firstActive.patterns[0]);
-            if (firstActive.thicknesses?.length > 0) setSelectedThickness(firstActive.thicknesses[0]);
-            if (firstActive.colors?.length > 0) setSelectedColor(firstActive.colors[0]);
-            if (firstActive.categories?.length > 0) {
-              setSelectedCategory(firstActive.categories[0]);
-              if (firstActive.categories[0].designs?.length > 0) {
-                setSelectedDesign(firstActive.categories[0].designs[0]);
-              }
-            }
           }
         }
         setLoading(false);
@@ -765,7 +842,10 @@ const Configurator = () => {
   }, []);
 
   // Handle product type change
-  const handleProductTypeChange = (productId) => {
+  // handleProductTypeChange accepts an optional overrideSurfaceType so it can
+  // be called before React flushes the setSelectedSurfaceType update (e.g. from
+  // handleSurfaceTypeChange). Falls back to the current selectedSurfaceType.
+  const handleProductTypeChange = (productId, overrideSurfaceType) => {
     const product = products.find(p => p.id === productId);
     if (product && product.active) {
       navigate('/' + (PRODUCT_ID_TO_URL_SLUG[productId] || productId));
@@ -790,39 +870,13 @@ const Configurator = () => {
       setSelectedOmbreGroovePattern(null);
       setOmbreFinishType("emboss");
       
-      // Reset options based on new product type
-      if (product.id === "vicstrip") {
-        // VicStrip-specific initialization
-        const defaultSize = "600x600";
-        const defaultPattern = VICSTRIP_PRODUCT.patterns.find(p => p.sizes.includes(defaultSize)) || VICSTRIP_PRODUCT.patterns[0];
-        setSelectedPattern(defaultPattern);
-        setSelectedDesign({ pattern: defaultPattern, color: defaultPattern.colors[0] });
-        setSelectedSize(defaultSize);
-        setSelectedThickness("12mm (PET Panel)");
-      } else if (product.id === "ombre") {
-        // Ombre-specific initialization
-        setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
-        setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null);
+      // Nothing pre-filled on product type change — user selects everything from scratch.
+      if (product.id === "ombre") {
+        // Keep finish-type state consistent; no visible selections yet
         setSelectedOmbreEmbossPattern(null);
         setSelectedOmbreGroovePattern(null);
-        setOmbreFinishType("emboss");
-        if (product.sizes?.length > 0) setSelectedSize(product.sizes[0]);
-        if (product.thicknesses?.length > 0) setSelectedThickness(product.thicknesses[0]);
-        if (product.categories?.length > 0) setSelectedCategory(product.categories[0]);
-      } else {
-        // Generic product initialization
-        if (product.sizes?.length > 0) setSelectedSize(product.sizes[0]);
-        if (product.densities?.length > 0) setSelectedDensity(product.densities[0]);
-        if (product.patterns?.length > 0) setSelectedPattern(product.patterns[0]);
-        if (product.thicknesses?.length > 0) setSelectedThickness(product.thicknesses[0]);
-        if (product.colors?.length > 0) setSelectedColor(product.colors[0]);
-        
-        if (product.categories?.length > 0) {
-          setSelectedCategory(product.categories[0]);
-          if (product.categories[0].designs?.length > 0) {
-            setSelectedDesign(product.categories[0].designs[0]);
-          }
-        }
+        const st = overrideSurfaceType ?? selectedSurfaceType;
+        setOmbreFinishType(st === 'grooving' ? 'groove' : 'emboss');
       }
     }
   };
@@ -864,7 +918,8 @@ const Configurator = () => {
         setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null);
         setSelectedOmbreEmbossPattern(null);
         setSelectedOmbreGroovePattern(null);
-        setOmbreFinishType("emboss");
+        // Force groove when the user has selected the Grooving surface type
+        setOmbreFinishType(selectedSurfaceType === 'grooving' ? 'groove' : 'emboss');
         setSelectedDesign(null);
       } else if (category.id === "signature-ombre") {
         // Signature Ombre: reset to defaults; engine inits via useEffect
@@ -1069,6 +1124,18 @@ const Configurator = () => {
     }
   };
 
+  // Handle surface type change (Flat / Embossed / Grooving)
+  // Selects the first available series for the new surface type and resets downstream state.
+  const handleSurfaceTypeChange = (surfaceType) => {
+    if (surfaceType === selectedSurfaceType) return;
+    setSelectedSurfaceType(surfaceType);
+    const ids = SURFACE_SERIES_MAP[surfaceType] ?? [];
+    const firstSeries = products.find(p => p.active && ids.includes(p.id));
+    if (firstSeries) {
+      handleProductTypeChange(firstSeries.id, surfaceType);
+    }
+  };
+
   // Technical Specs Panel — defined outside Configurator (see below)
   // Using the module-level TechSpecsPanel component with specs passed as a prop.
 
@@ -1199,27 +1266,49 @@ const Configurator = () => {
       <aside className="config-sidebar" data-testid="config-sidebar">
         <ScrollArea className="flex-1 min-h-0">
           <div className="flex flex-col" data-testid="config-options">
-            {/* Product Type Dropdown */}
+            {/* Product Type — Flat | Embossed | Grooving */}
             <div className="config-section space-y-2">
               <Label className="section-header">Product Type</Label>
-              <Select value={selectedProductType?.id} onValueChange={handleProductTypeChange}>
-                <SelectTrigger className="w-full" data-testid="product-type-trigger">
-                  <SelectValue placeholder="Select product type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem 
-                      key={product.id} 
-                      value={product.id}
-                      disabled={!product.active}
-                      data-testid={`product-type-${product.id}`}
-                    >
-                      {product.name} {!product.active && "(Coming Soon)"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex rounded-md overflow-hidden border border-[hsl(var(--border))]">
+                {[
+                  { id: 'flat', label: 'Flat' },
+                  { id: 'embossed', label: 'Embossed' },
+                  { id: 'grooving', label: 'Grooving' },
+                ].map((st, idx, arr) => (
+                  <button
+                    key={st.id}
+                    onClick={() => handleSurfaceTypeChange(st.id)}
+                    className={`flex-1 py-2 text-sm font-medium transition-colors ${idx < arr.length - 1 ? 'border-r border-[hsl(var(--border))]' : ''} ${
+                      selectedSurfaceType === st.id
+                        ? 'bg-[hsl(30,40%,46%)] text-white'
+                        : 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
+                    }`}
+                    data-testid={`surface-type-${st.id}`}
+                  >
+                    {st.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Series — filtered by surface type */}
+            {filteredSeries.length > 0 && (
+              <div className="config-section space-y-2">
+                <Label className="section-header">Series</Label>
+                <Select value={selectedProductType?.id ?? ''} onValueChange={handleProductTypeChange}>
+                  <SelectTrigger className="w-full" data-testid="series-trigger">
+                    <SelectValue placeholder="Select series" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredSeries.map((product) => (
+                      <SelectItem key={product.id} value={product.id} data-testid={`series-${product.id}`}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* VicStrip Options */}
             {selectedProductType?.id === "vicstrip" && (
@@ -1333,8 +1422,8 @@ const Configurator = () => {
                   </div>
                 )}
 
-                {/* 2. Category */}
-                {selectedProductType?.categories?.length > 0 && (
+                {/* 2. Category — filtered by surface type */}
+                {filteredCategories.length > 0 && (
                   <div className="config-section space-y-2">
                     <Label className="section-header">Category</Label>
                     <Select value={selectedCategory?.id} onValueChange={handleCategoryChange} data-testid="category-select">
@@ -1342,7 +1431,7 @@ const Configurator = () => {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.categories.map((category) => (
+                        {filteredCategories.map((category) => (
                           <SelectItem key={category.id} value={category.id} data-testid={`category-${category.id}`}>
                             {category.name}
                           </SelectItem>
@@ -1359,7 +1448,26 @@ const Configurator = () => {
                   </div>
                 )}
 
-                {/* 2b. Size — only for Wood Perforations (category-level, gates the print grid) */}
+                {/* 3. Thickness */}
+                {selectedProductType?.thicknesses?.length > 0 && selectedCategory?.id !== "fabrics-designer-textile" && (
+                  <div className="config-section space-y-2">
+                    <Label className="section-header">Thickness</Label>
+                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="thickness-select">
+                      <SelectTrigger className="w-full" data-testid="thickness-trigger">
+                        <SelectValue placeholder="Select thickness" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.thicknesses.map((thickness) => (
+                          <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
+                            {thickness}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* 4. Size — only for Wood Perforations (category-level, gates the print grid) */}
                 {selectedCategory?.id === "wood-perforations" && (
                   <div className="config-section space-y-2">
                     <Label className="section-header">Size</Label>
@@ -1625,19 +1733,18 @@ const Configurator = () => {
                       )}
                     </div>
                   </>
-                ) : selectedCategory?.designs?.length > 0 ? (
-                  selectedCategory.id === "wood-perforations" && !selectedWoodPerfSize ? (
+                ) : selectedCategory?.id === "wood-perforations" && !selectedWoodPerfSize ? (
                     <div className="config-section">
                       <p className="section-header mb-1">Print</p>
                       <p className="text-sm text-[hsl(215,16%,47%)]">Select a size above to view available prints.</p>
                     </div>
-                  ) : (
+                ) : filteredDesigns.length > 0 ? (
                   <Accordion type="single" collapsible defaultValue="print" className="config-accordion-wrapper">
                     <AccordionItem value="print" className="border-0 px-4">
                       <AccordionTrigger className="section-header py-3">Print</AccordionTrigger>
                       <AccordionContent className="pb-4">
                         <div className="thumbnail-grid" data-testid="design-grid">
-                          {selectedCategory.designs.map((design) => (
+                          {filteredDesigns.map((design) => (
                             <DesignThumbnail
                               key={design.id}
                               design={design}
@@ -1655,7 +1762,6 @@ const Configurator = () => {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                  )
                 ) : null}
 
                 {/* 4. Emboss — shown for emboss-enabled categories; hidden if selected design has no emboss */}
@@ -1748,32 +1854,14 @@ const Configurator = () => {
                   </Accordion>
                 )}
 
-                {/* 5. Thickness */}
-                {selectedProductType?.thicknesses?.length > 0 && selectedCategory?.id !== "fabrics-designer-textile" && (
-                  <div className="config-section space-y-2">
-                    <Label className="section-header">Thickness</Label>
-                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="thickness-select">
-                      <SelectTrigger className="w-full" data-testid="thickness-trigger">
-                        <SelectValue placeholder="Select thickness" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProductType.thicknesses.map((thickness) => (
-                          <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
-                            {thickness}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </div>
             )}
 
             {/* ── Ombre Options ─────────────────────────────────────────────── */}
             {selectedProductType?.id === "ombre" && (
               <div className="flex flex-col">
-                {/* 0. Category */}
-                {selectedProductType?.categories?.length > 0 && (
+                {/* 0. Category — filtered by surface type */}
+                {filteredCategories.length > 0 && (
                   <div className="config-section space-y-2">
                     <Label className="section-header">Category</Label>
                     <Select value={selectedCategory?.id ?? ""} onValueChange={handleCategoryChange} data-testid="ombre-category-select">
@@ -1781,7 +1869,7 @@ const Configurator = () => {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.categories.map((cat) => (
+                        {filteredCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1995,7 +2083,8 @@ const Configurator = () => {
                 <div className="config-section space-y-3">
                   <Label className="section-header">Pattern</Label>
 
-                  {/* Segmented toggle: Emboss | Groove */}
+                  {/* Segmented toggle: Emboss | Groove — hidden when surface type is Grooving */}
+                  {selectedSurfaceType !== 'grooving' && (
                   <div className="flex rounded-md overflow-hidden border border-[hsl(var(--border))]">
                     <button
                       disabled={selectedSize === "1200x2400"}
@@ -2029,6 +2118,7 @@ const Configurator = () => {
                       Groove
                     </button>
                   </div>
+                  )}
 
                   {/* Emboss pattern thumbnails */}
                   {ombreFinishType === "emboss" && (
@@ -2597,27 +2687,123 @@ const Configurator = () => {
         })()}
         </div>
 
-        {/* Configuration Summary - float*/ }
-        {/* {selectedProductType && (
-          <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg max-w-xs z-[20]" data-testid="config-summary">
-            <p className="font-manrope font-bold text-sm text-[hsl(215,25%,27%)]">
-              {selectedProductType?.id === "vicstrip"
-                ? (selectedPattern?.name || "Select a pattern")
-                : selectedProductType?.id === "ombre"
-                  ? (selectedOmbreBaseColor?.name || "Select a base color")
-                  : (selectedDesign?.design_name || "Select a design")}
-            </p>
-            <p className="text-xs text-[hsl(215,16%,47%)] mt-1">
-              {selectedProductType?.id === "vicstrip"
-                ? (selectedDesign?.color?.name 
-                  ? `${selectedDesign?.color?.name} • ${selectedDesign?.color?.hex} • ${selectedSize} • ${selectedThickness}`
-                  : "Select a color")
-                : selectedProductType?.id === "ombre"
-                  ? [selectedOmbreBaseColor?.name, selectedOmbreOverlay?.hex && `Overlay ${selectedOmbreOverlay.hex}`, selectedSize, selectedThickness].filter(Boolean).join(" • ")
-                  : [selectedSize, selectedDensity, selectedThickness, selectedEmbossPattern?.name && `Emboss: ${selectedEmbossPattern.name}`].filter(Boolean).join(" • ")}
-            </p>
+        {/* ── Incomplete-selections note ─────────────────────────────── */}
+        {selectedProductType && !isConfigComplete && (
+          <div
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+            data-testid="incomplete-selections-note"
+          >
+            <div className="flex items-center gap-2.5 bg-black/60 backdrop-blur-md rounded-xl px-5 py-2.5 shadow-xl">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span className="text-white text-[13px] font-medium tracking-wide whitespace-nowrap">
+                Please fill in all selections to see the full preview.
+              </span>
+            </div>
           </div>
-        )} */}
+        )}
+
+        {/* ── Selection mini cards — stacked at bottom-left of canvas area ── */}
+        {selectedProductType && (() => {
+          const id = selectedProductType.id;
+
+          // Build a flat list of { label, value, color? } entries for the active config
+          const entries = [];
+
+          entries.push({ label: 'Series', value: selectedProductType.name });
+
+          if (id === 'vicstrip') {
+            if (selectedPattern) entries.push({ label: 'Pattern', value: selectedPattern.name });
+            if (selectedDesign?.color) entries.push({ label: 'Color', value: selectedDesign.color.name, color: selectedDesign.color.hex });
+            if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+            if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+
+          } else if (id === 'ombre') {
+            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+            if (selectedCategory?.id === 'signature-ombre') {
+              entries.push({ label: 'Base', value: soBaseColor, color: soBaseColor });
+              entries.push({ label: 'Overlay', value: soOverlayColor, color: soOverlayColor });
+              if (soSelectedPattern) entries.push({ label: 'Pattern', value: SO_PATTERNS.find(p => p.id === soSelectedPattern)?.name ?? soSelectedPattern });
+            } else {
+              if (selectedOmbreBaseColor) entries.push({ label: 'Base Color', value: selectedOmbreBaseColor.name, color: selectedOmbreBaseColor.hex });
+              if (selectedOmbreOverlay) entries.push({ label: 'Overlay', value: selectedOmbreOverlay.hex, color: selectedOmbreOverlay.hex });
+              if (selectedOmbreEmbossPattern) entries.push({ label: 'Emboss', value: selectedOmbreEmbossPattern.name });
+              if (selectedOmbreGroovePattern) entries.push({ label: 'Groove', value: selectedOmbreGroovePattern.name });
+              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+            }
+
+          } else if (id === 'fabrics') {
+            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+            if (selectedCategory?.id === 'fabrics-color-core') {
+              if (selectedColorCoreColor) entries.push({ label: 'Color', value: selectedColorCoreColor.name, color: selectedColorCoreColor.hex });
+              if (selectedFabricStructure) entries.push({ label: 'Texture', value: selectedFabricStructure.name });
+              if (selectedColorCoreEmboss) entries.push({ label: 'Emboss', value: selectedColorCoreEmboss.name });
+              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+            } else if (selectedCategory?.id === 'fabrics-designer-textile') {
+              if (selectedDTShade) entries.push({ label: 'Shade', value: `${selectedDTColorGroup?.name} · ${selectedDTShade.id.replace('_', ' ')}`, color: selectedDTShade.hex });
+              if (selectedDTFabric) entries.push({ label: 'Fabric', value: selectedDTFabric.name });
+              if (selectedDTEmboss) entries.push({ label: 'Emboss', value: selectedDTEmboss.name });
+              if (selectedDTSize) entries.push({ label: 'Size', value: selectedDTSize });
+              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+            } else {
+              if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
+              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+              if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
+            }
+
+          } else {
+            // flat-embossed-vmd, wood, and generic
+            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+            if (selectedCategory?.id === 'wood-perforations') {
+              if (selectedWoodPerfSize) entries.push({ label: 'Size', value: selectedWoodPerfSize });
+              if (selectedDesign) entries.push({ label: 'Print', value: selectedDesign.design_name || selectedDesign.design_code });
+              if (selectedPerforation) entries.push({ label: 'Perforation', value: selectedPerforation.name });
+            } else {
+              if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
+              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+              if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
+            }
+          }
+
+          // T-Patti (relevant for categories that support it)
+          if (selectedCategory?.id && FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti) {
+            entries.push({ label: 'T-Profile', value: showTpatti ? 'On' : 'Off' });
+          }
+
+          if (entries.length === 0) return null;
+
+          return (
+            <div
+              className="absolute bottom-4 left-4 z-20 flex flex-col-reverse gap-1.5 items-start pointer-events-none"
+              data-testid="selection-mini-cards"
+            >
+              {entries.map(({ label, value, color }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 bg-white/88 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md border border-white/40"
+                  style={{ backdropFilter: 'blur(8px)' }}
+                >
+                  {color && (
+                    <span
+                      className="inline-block w-3 h-3 rounded-full flex-shrink-0 border border-black/10"
+                      style={{ backgroundColor: color }}
+                    />
+                  )}
+                  <span className="text-[10px] font-semibold text-[hsl(215,16%,50%)] uppercase tracking-wide leading-none">
+                    {label}
+                  </span>
+                  <span className="text-[11px] font-medium text-[hsl(215,25%,27%)] leading-none max-w-[120px] truncate">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </main>
 
       </div>{/* end configurator-content */}

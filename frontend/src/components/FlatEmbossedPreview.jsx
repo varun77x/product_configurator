@@ -335,6 +335,18 @@ const FlatEmbossedPreview = forwardRef(
                 inset: 0,
                 display: "flex",
                 alignItems: "stretch",
+                // Sub-pixel gap filler: paint the same texture on the container so
+                // any hairline gap between flex columns at non-100% zoom exposes the
+                // same image (not the white page background), making the seam invisible.
+                // Only applies when all columns share one texture (single-url designs).
+                ...(displayedTextureUrls?.length === 1 && !panelFallbackColor
+                  ? {
+                      backgroundImage: `url(${displayedTextureUrls[0]})`,
+                      backgroundSize: `calc(100% / ${displayedTextureUrls.length > 1 ? displayedTextureUrls.length : cfg.repeat}) auto`,
+                      backgroundRepeat: "repeat",
+                      backgroundPosition: "top left",
+                    }
+                  : {}),
               }}
             >
 {(() => {
