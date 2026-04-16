@@ -248,45 +248,59 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
 DesignThumbnail.displayName = "DesignThumbnail";
 
 const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
-  <div
-    className={`thumbnail-item emboss-thumbnail ${isSelected && !disabled ? "selected" : ""} ${disabled ? "disabled" : ""}`}
-    style={{
-      backgroundColor: "#E5E7EB",
-      cursor: disabled ? "default" : "pointer",
-      position: "relative",
-    }}
-    onClick={disabled ? undefined : () => onSelect(pattern)}
-    data-testid={`emboss-thumbnail-${pattern.id}`}
-  >
-    {pattern.thumbnailUrl && (
-      <img
-        src={pattern.thumbnailUrl}
-        alt={pattern.name}
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-    )}
-    {disabled ? (
+  <HoverCard openDelay={250} closeDelay={100}>
+    <HoverCardTrigger asChild>
       <div
+        className={`thumbnail-item emboss-thumbnail ${isSelected && !disabled ? "selected" : ""} ${disabled ? "disabled" : ""}`}
         style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.52)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
+          backgroundColor: "#E5E7EB",
+          cursor: disabled ? "default" : "pointer",
+          position: "relative",
         }}
+        onClick={disabled ? undefined : () => onSelect(pattern)}
+        data-testid={`emboss-thumbnail-${pattern.id}`}
       >
-        <X className="h-4 w-4 text-white/70" />
+        {pattern.thumbnailUrl && (
+          <img
+            src={pattern.thumbnailUrl}
+            alt={pattern.name}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+        {disabled ? (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "rgba(0,0,0,0.52)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <X className="h-4 w-4 text-white/70" />
+          </div>
+        ) : (
+          <div className="emboss-thumbnail-label">
+            {pattern.name}
+          </div>
+        )}
       </div>
-    ) : (
-      <div className="emboss-thumbnail-label">
-        {pattern.name}
+    </HoverCardTrigger>
+    <HoverCardContent side="right" align="start" className="w-52 p-0 overflow-hidden">
+      {pattern.thumbnailUrl ? (
+        <img src={pattern.thumbnailUrl} alt={pattern.name} className="w-full h-32 object-cover" />
+      ) : (
+        <div className="h-32 w-full bg-gray-100" />
+      )}
+      <div className="p-3">
+        <p className="font-manrope font-bold text-sm">{pattern.name}</p>
       </div>
-    )}
-  </div>
+    </HoverCardContent>
+  </HoverCard>
 ));
 EmbossThumbnail.displayName = "EmbossThumbnail";
 
@@ -394,7 +408,7 @@ function getCategoriesForSurface(categories, surfaceType, productId) {
   if (!surfaceType || !categories?.length) return categories ?? [];
   if (surfaceType === 'flat') {
     if (productId === 'flat-embossed-vmd' || productId === 'wood')
-      return categories.filter(c => !c.emboss_available);
+      return categories.filter(c => !c.emboss_available || c.flat_available);
     return categories; // fabrics: all categories visible under Flat
   }
   if (surfaceType === 'embossed') {
@@ -440,20 +454,18 @@ const Configurator = () => {
   const [selectedWoodPerfSize, setSelectedWoodPerfSize] = useState(null);
   const [selectedPerforation, setSelectedPerforation] = useState(null);
   // Color Core specific state
-  const [selectedColorCoreColor, setSelectedColorCoreColor] = useState(COLOR_CORE_COLORS[0]);
-  const [selectedFabricStructure, setSelectedFabricStructure] = useState(COLOR_CORE_FABRIC_STRUCTURES[0]);
+  const [selectedColorCoreColor, setSelectedColorCoreColor] = useState(null);
+  const [selectedFabricStructure, setSelectedFabricStructure] = useState(null);
   const [selectedColorCoreEmboss, setSelectedColorCoreEmboss] = useState(null);
   // Designer Textile specific state
-  const [selectedDTColorGroup, setSelectedDTColorGroup] = useState(DESIGNER_TEXTILE_COLOR_GROUPS[0]);
-  const [selectedDTShade, setSelectedDTShade] = useState(DESIGNER_TEXTILE_COLOR_GROUPS[0].shades[0]);
-  const [selectedDTFabric, setSelectedDTFabric] = useState(DESIGNER_TEXTILE_FABRICS[0]);
-  const [selectedDTSize, setSelectedDTSize] = useState(DESIGNER_TEXTILE_SIZES[0].id);
+  const [selectedDTColorGroup, setSelectedDTColorGroup] = useState(null);
+  const [selectedDTShade, setSelectedDTShade] = useState(null);
+  const [selectedDTFabric, setSelectedDTFabric] = useState(null);
+  const [selectedDTSize, setSelectedDTSize] = useState(null);
   const [selectedDTEmboss, setSelectedDTEmboss] = useState(null);
   // Ombre Color Core specific state
-  const [selectedOmbreBaseColor, setSelectedOmbreBaseColor] = useState(OMBRE_COLOR_CORE_BASE_COLORS[0]);
-  const [selectedOmbreOverlay, setSelectedOmbreOverlay] = useState(
-    OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null
-  );
+  const [selectedOmbreBaseColor, setSelectedOmbreBaseColor] = useState(null);
+  const [selectedOmbreOverlay, setSelectedOmbreOverlay] = useState(null);
   const [selectedOmbreEmbossPattern, setSelectedOmbreEmbossPattern] = useState(null);
   const [selectedOmbreGroovePattern, setSelectedOmbreGroovePattern] = useState(null);
   const [ombreFinishType, setOmbreFinishType] = useState("emboss"); // "emboss" | "groove"
@@ -568,16 +580,16 @@ const Configurator = () => {
 
   // Color Core — Blob URL panel manager (exactly 1 full-res image in memory)
   const isCCActive = selectedCategory?.id === "fabrics-color-core";
-  const ccPanelUrl = isCCActive
+  const ccPanelUrl = (isCCActive && selectedColorCoreColor && selectedFabricStructure)
     ? (selectedColorCoreEmboss
         ? getColorCoreEmbossUrl(
-            selectedFabricStructure?.id ?? COLOR_CORE_FABRIC_STRUCTURES[0].id,
+            selectedFabricStructure.id,
             selectedColorCoreEmboss.id,
-            selectedColorCoreColor?.id ?? COLOR_CORE_COLORS[0].id
+            selectedColorCoreColor.id
           )
         : getColorCorePanelUrl(
-            selectedFabricStructure?.id ?? COLOR_CORE_FABRIC_STRUCTURES[0].id,
-            selectedColorCoreColor?.id ?? COLOR_CORE_COLORS[0].id
+            selectedFabricStructure.id,
+            selectedColorCoreColor.id
           ))
     : null;
   const { blobUrl: ccPanelBlobUrl, isLoading: ccPanelLoading } = useBlobPanel(ccPanelUrl);
@@ -654,13 +666,78 @@ const Configurator = () => {
 
   const canvasRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
   const [hdriLighting, setHdriLighting] = useState('none'); // 'none' | 'warm' | 'soft'
   const [lightAngle, setLightAngle] = useState(40); // degrees: 0=top, 90=right, 180=bottom, 270=left
-  const ZOOM_STEP = 0.25;
-  const ZOOM_MIN = 0.5;
+  const ZOOM_STEP = 0.50;
+  const ZOOM_MIN = 1.0;
   const ZOOM_MAX = selectedProductType?.id === "ombre" ? 1.5 : 8.0;
   const zoomIn = () => setZoomLevel(prev => Math.min(parseFloat((prev + ZOOM_STEP).toFixed(2)), ZOOM_MAX));
   const zoomOut = () => setZoomLevel(prev => Math.max(parseFloat((prev - ZOOM_STEP).toFixed(2)), ZOOM_MIN));
+
+  // Reset pan when zoom returns to 1
+  useEffect(() => {
+    if (zoomLevel === 1) setPanOffset({ x: 0, y: 0 });
+  }, [zoomLevel]);
+
+  const handlePanStart = useCallback((e) => {
+    if (zoomLevel <= 1) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { x: panOffset.x, y: panOffset.y };
+  }, [zoomLevel, panOffset]);
+
+  const handlePanMove = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    setPanOffset({ x: panStartRef.current.x + dx, y: panStartRef.current.y + dy });
+  }, []);
+
+  const handlePanEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  }, []);
+
+  // ── Magnifier loupe ───────────────────────────────────────────────────────
+  // Uses cloneNode(true) + CSS transform — fully synchronous, zero canvas rendering.
+  // The clone is placed inside the circular lens div (overflow:hidden) and
+  // repositioned on every mousemove via direct DOM style mutations (no React state).
+  const magnifierRef = useRef(null);   // outer preview container
+  const magnifierDivRef = useRef(null); // the lens circle (always in DOM)
+  const lensCloneRef = useRef(null);    // cloned preview inside lens
+  const [magnifierActive, setMagnifierActive] = useState(false);
+  const MAGNIFIER_SIZE = 200;
+  const MAGNIFIER_ZOOM = 2.5;
+
+  const handleMagnifierEnter = useCallback(() => {
+    if (!isConfigComplete || isDraggingRef.current) return;
+    const node = magnifierRef.current;
+    const lens = magnifierDivRef.current;
+    if (!node || !lens) return;
+    // Remove any stale clone
+    while (lens.firstChild) lens.removeChild(lens.firstChild);
+    // Deep-clone the preview node — synchronous, images already cached
+    const clone = node.cloneNode(true);
+    clone.style.cssText = [
+      'position:absolute',
+      'top:0',
+      'left:0',
+      `width:${node.offsetWidth}px`,
+      `height:${node.offsetHeight}px`,
+      'pointer-events:none',
+      'transform-origin:top left',
+      `transform:scale(${MAGNIFIER_ZOOM})`,
+    ].join(';');
+    lens.appendChild(clone);
+    lensCloneRef.current = clone;
+    setMagnifierActive(true);
+  }, [isConfigComplete]);
 
   // Clamp zoom when switching to ombre (which has a lower max)
   useEffect(() => {
@@ -852,6 +929,7 @@ const Configurator = () => {
       setSelectedProductType(product);
       
       // Clear all state first
+      setPanOffset({ x: 0, y: 0 });
       setSelectedCategory(null);
       setSelectedDesign(null);
       setIsEmbossed(false);
@@ -864,8 +942,15 @@ const Configurator = () => {
       setSelectedWoodPerfSize(null);
       setSelectedPerforation(null);
       setSelectedColorCoreEmboss(null);
-      setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
-      setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null);
+      setSelectedColorCoreColor(null);
+      setSelectedFabricStructure(null);
+      setSelectedDTColorGroup(null);
+      setSelectedDTShade(null);
+      setSelectedDTFabric(null);
+      setSelectedDTSize(null);
+      setSelectedDTEmboss(null);
+      setSelectedOmbreBaseColor(null);
+      setSelectedOmbreOverlay(null);
       setSelectedOmbreEmbossPattern(null);
       setSelectedOmbreGroovePattern(null);
       setOmbreFinishType("emboss");
@@ -897,25 +982,30 @@ const Configurator = () => {
         setSelectedWoodPerfSize(defaultSize);
         setSelectedPerforation(defaultPattern || null);
       } else if (category.id === "fabrics-color-core") {
-        // Color Core: auto-select first color + structure + size
-        setSelectedColorCoreColor(COLOR_CORE_COLORS[0]);
-        setSelectedFabricStructure(COLOR_CORE_FABRIC_STRUCTURES[0]);
+        // Color Core: clear all selections — user picks from scratch
+        setSelectedColorCoreColor(null);
+        setSelectedFabricStructure(null);
         setSelectedColorCoreEmboss(null);
-        setSelectedSize("1200x2800");
+        setSelectedSize(null);
         setSelectedDesign(null);
       } else if (category.id === "fabrics-designer-textile") {
-        // Designer Textile: auto-select first color group, shade, fabric, size; clear emboss
-        setSelectedDTColorGroup(DESIGNER_TEXTILE_COLOR_GROUPS[0]);
-        setSelectedDTShade(DESIGNER_TEXTILE_COLOR_GROUPS[0].shades[0]);
-        setSelectedDTFabric(DESIGNER_TEXTILE_FABRICS[0]);
-        setSelectedDTSize(DESIGNER_TEXTILE_SIZES[0].id);
+        // Designer Textile: auto-select first color + first compatible fabric so textures are immediately visible
+        const firstGroup = DESIGNER_TEXTILE_COLOR_GROUPS[0];
+        const firstShade = firstGroup?.shades?.[0] ?? null;
+        const firstFabric = firstGroup
+          ? (DESIGNER_TEXTILE_FABRICS.find(f => f.supportedColorGroups.includes(firstGroup.id)) ?? DESIGNER_TEXTILE_FABRICS[0])
+          : null;
+        setSelectedDTColorGroup(firstGroup ?? null);
+        setSelectedDTShade(firstShade);
+        setSelectedDTFabric(firstFabric);
+        setSelectedDTSize(null);
         setSelectedDTEmboss(null);
-        setSelectedThickness(DESIGNER_TEXTILE_THICKNESSES[0]);
+        setSelectedThickness(null);
         setSelectedDesign(null);
       } else if (category.id === "ombre-color-core-ombre") {
-        // Ombre Color Core: reset base/overlay selection
-        setSelectedOmbreBaseColor(OMBRE_COLOR_CORE_BASE_COLORS[0]);
-        setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[OMBRE_COLOR_CORE_BASE_COLORS[0].id]?.[0] ?? null);
+        // Ombre Color Core: clear all selections — user picks from scratch
+        setSelectedOmbreBaseColor(null);
+        setSelectedOmbreOverlay(null);
         setSelectedOmbreEmbossPattern(null);
         setSelectedOmbreGroovePattern(null);
         // Force groove when the user has selected the Grooving surface type
@@ -1126,13 +1216,28 @@ const Configurator = () => {
 
   // Handle surface type change (Flat / Embossed / Grooving)
   // Selects the first available series for the new surface type and resets downstream state.
+  // If the current product type is also valid for the new surface, stays on it and
+  // preserves the selected category when it's valid for the new surface too.
   const handleSurfaceTypeChange = (surfaceType) => {
     if (surfaceType === selectedSurfaceType) return;
+    const prevCategory = selectedCategory;
+    const prevProductId = selectedProductType?.id;
     setSelectedSurfaceType(surfaceType);
     const ids = SURFACE_SERIES_MAP[surfaceType] ?? [];
-    const firstSeries = products.find(p => p.active && ids.includes(p.id));
-    if (firstSeries) {
-      handleProductTypeChange(firstSeries.id, surfaceType);
+    // Stay on current series if it exists in the new surface, otherwise jump to first
+    const targetId = (prevProductId && ids.includes(prevProductId))
+      ? prevProductId
+      : products.find(p => p.active && ids.includes(p.id))?.id;
+    if (targetId) {
+      handleProductTypeChange(targetId, surfaceType);
+      // Restore category if it's valid for the new surface type
+      if (prevCategory && targetId === prevProductId) {
+        const targetProduct = products.find(p => p.id === targetId);
+        const validCats = getCategoriesForSurface(targetProduct?.categories ?? [], surfaceType, targetId);
+        if (validCats.some(c => c.id === prevCategory.id)) {
+          setSelectedCategory(prevCategory);
+        }
+      }
     }
   };
 
@@ -1405,24 +1510,7 @@ const Configurator = () => {
             {/* Flat Embossed VMT Options */}
             {(selectedProductType?.id === "flat-embossed-vmd" || selectedProductType?.id === "wood" || selectedProductType?.id === "fabrics") && (
               <div className="flex flex-col">
-                {/* 1. Size */}
-                {selectedProductType?.sizes?.length > 0 && selectedCategory?.id !== "wood-perforations" && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (
-                  <div className="config-section space-y-2">
-                    <Label className="section-header">Size</Label>
-                    <Select value={selectedSize || ""} onValueChange={setSelectedSize} data-testid="size-select">
-                      <SelectTrigger className="w-full" data-testid="size-trigger">
-                        <SelectValue placeholder="Select size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProductType.sizes.map((size) => (
-                          <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* 2. Category — filtered by surface type */}
+                {/* 1. Category — filtered by surface type; shown first so size/thickness can be category-aware */}
                 {filteredCategories.length > 0 && (
                   <div className="config-section space-y-2">
                     <Label className="section-header">Category</Label>
@@ -1448,8 +1536,25 @@ const Configurator = () => {
                   </div>
                 )}
 
-                {/* 3. Thickness */}
-                {selectedProductType?.thicknesses?.length > 0 && selectedCategory?.id !== "fabrics-designer-textile" && (
+                {/* 2. Size — only shown after a category is selected */}
+                {selectedCategory && selectedProductType?.sizes?.length > 0 && selectedCategory?.id !== "wood-perforations" && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (
+                  <div className="config-section space-y-2">
+                    <Label className="section-header">Size</Label>
+                    <Select value={selectedSize || ""} onValueChange={setSelectedSize} data-testid="size-select">
+                      <SelectTrigger className="w-full" data-testid="size-trigger">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.sizes.map((size) => (
+                          <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* 3. Thickness — only shown after a category is selected */}
+                {selectedCategory && selectedProductType?.thicknesses?.length > 0 && selectedCategory?.id !== "fabrics-designer-textile" && (
                   <div className="config-section space-y-2">
                     <Label className="section-header">Thickness</Label>
                     <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="thickness-select">
@@ -1493,18 +1598,28 @@ const Configurator = () => {
                       <Label className="section-header">Base Color</Label>
                       <div className="grid grid-cols-5 gap-2">
                         {COLOR_CORE_COLORS.map((color) => (
-                          <button
-                            key={color.id}
-                            title={color.name}
-                            onClick={() => setSelectedColorCoreColor(color)}
-                            className={`relative aspect-square rounded border-2 transition-colors ${
-                              selectedColorCoreColor?.id === color.id
-                                ? "border-[hsl(30,40%,46%)]"
-                                : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                            }`}
-                            style={{ backgroundColor: color.hex }}
-                            data-testid={`color-core-color-${color.id}`}
-                          />
+                          <HoverCard key={color.id} openDelay={200} closeDelay={100}>
+                            <HoverCardTrigger asChild>
+                              <button
+                                title={color.name}
+                                onClick={() => setSelectedColorCoreColor(color)}
+                                className={`relative aspect-square rounded border-2 transition-colors ${
+                                  selectedColorCoreColor?.id === color.id
+                                    ? "border-[hsl(30,40%,46%)]"
+                                    : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                }`}
+                                style={{ backgroundColor: color.hex }}
+                                data-testid={`color-core-color-${color.id}`}
+                              />
+                            </HoverCardTrigger>
+                            <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
+                              <div className="h-24 w-full" style={{ backgroundColor: color.hex }} />
+                              <div className="p-3 space-y-1">
+                                <p className="font-manrope font-bold text-sm">{color.name}</p>
+                                <p className="text-xs text-[hsl(215,16%,47%)] font-mono">{color.hex}</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         ))}
                       </div>
                       {selectedColorCoreColor && (
@@ -1629,24 +1744,35 @@ const Configurator = () => {
                           <p className="text-[10px] font-semibold text-[hsl(215,16%,47%)] uppercase tracking-wider mb-1.5">{group.name}</p>
                           <div className="flex flex-wrap gap-1.5">
                             {group.shades.map((shade) => (
-                              <button
-                                key={shade.id}
-                                title={shade.id.replace('_', ' ')}
-                                onClick={() => {
-                                  setSelectedDTColorGroup(group);
-                                  setSelectedDTShade(shade);
-                                  // Reset fabric to first one that supports this color group
-                                  const firstAvailable = DESIGNER_TEXTILE_FABRICS.find(f => f.supportedColorGroups.includes(group.id));
-                                  setSelectedDTFabric(firstAvailable ?? DESIGNER_TEXTILE_FABRICS[0]);
-                                }}
-                                className={`w-6 h-6 rounded border-2 transition-colors ${
-                                  selectedDTShade?.id === shade.id
-                                    ? "border-[hsl(30,40%,46%)] scale-110"
-                                    : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                                }`}
-                                style={{ backgroundColor: shade.hex }}
-                                data-testid={`dt-shade-${shade.id}`}
-                              />
+                              <HoverCard key={shade.id} openDelay={200} closeDelay={100}>
+                                <HoverCardTrigger asChild>
+                                  <button
+                                    title={shade.id.replace('_', ' ')}
+                                    onClick={() => {
+                                      setSelectedDTColorGroup(group);
+                                      setSelectedDTShade(shade);
+                                      // Reset fabric to first one that supports this color group
+                                      const firstAvailable = DESIGNER_TEXTILE_FABRICS.find(f => f.supportedColorGroups.includes(group.id));
+                                      setSelectedDTFabric(firstAvailable ?? DESIGNER_TEXTILE_FABRICS[0]);
+                                    }}
+                                    className={`w-6 h-6 rounded border-2 transition-colors ${
+                                      selectedDTShade?.id === shade.id
+                                        ? "border-[hsl(30,40%,46%)] scale-110"
+                                        : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                    }`}
+                                    style={{ backgroundColor: shade.hex }}
+                                    data-testid={`dt-shade-${shade.id}`}
+                                  />
+                                </HoverCardTrigger>
+                                <HoverCardContent side="right" align="start" className="w-44 p-0 overflow-hidden">
+                                  <div className="h-20 w-full" style={{ backgroundColor: shade.hex }} />
+                                  <div className="p-3 space-y-1">
+                                    <p className="font-manrope font-bold text-sm">{group.name}</p>
+                                    <p className="text-xs text-[hsl(215,16%,47%)]">{shade.id.replace('_', ' ')}</p>
+                                    <p className="text-xs text-[hsl(215,16%,47%)] font-mono">{shade.hex}</p>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
                             ))}
                           </div>
                         </div>
@@ -1666,25 +1792,42 @@ const Configurator = () => {
                           .filter(f => !selectedDTColorGroup || f.supportedColorGroups.includes(selectedDTColorGroup.id))
                           .map((fabric) => {
                             const isSelected = selectedDTFabric?.id === fabric.id;
+                            const thumbUrl = getDesignerTextileThumbnailUrl(fabric.id, selectedDTShade?.id);
                             return (
-                              <button
-                                key={fabric.id}
-                                title={fabric.name}
-                                onClick={() => setSelectedDTFabric(fabric)}
-                                className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
-                                  isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                                }`}
-                                data-testid={`dt-fabric-${fabric.id}`}
-                              >
-                                <img
-                                  src={getDesignerTextileThumbnailUrl(fabric.id, selectedDTShade?.id)}
-                                  alt={fabric.name}
-                                  className="absolute inset-0 w-full h-full object-cover"
-                                />
-                                <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center font-semibold text-white bg-black/40 py-0.5">
-                                  {fabric.name}
-                                </span>
-                              </button>
+                              <HoverCard key={fabric.id} openDelay={200} closeDelay={100}>
+                                <HoverCardTrigger asChild>
+                                  <button
+                                    title={fabric.name}
+                                    onClick={() => setSelectedDTFabric(fabric)}
+                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
+                                      isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                    }`}
+                                    data-testid={`dt-fabric-${fabric.id}`}
+                                  >
+                                    <img
+                                      src={thumbUrl}
+                                      alt={fabric.name}
+                                      className="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                    <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center font-semibold text-white bg-black/40 py-0.5">
+                                      {fabric.name}
+                                    </span>
+                                  </button>
+                                </HoverCardTrigger>
+                                <HoverCardContent side="right" align="start" className="w-56 p-0 overflow-hidden">
+                                  <div className="relative w-full h-40 overflow-hidden">
+                                    <img
+                                      src={thumbUrl}
+                                      alt={fabric.name}
+                                      className="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  <div className="px-3 py-2">
+                                    <p className="font-manrope font-bold text-sm">{fabric.name}</p>
+                                    <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
                             );
                           })
                         }
@@ -1764,8 +1907,8 @@ const Configurator = () => {
                   </Accordion>
                 ) : null}
 
-                {/* 4. Emboss — shown for emboss-enabled categories; hidden if selected design has no emboss */}
-                {selectedCategory?.emboss_available && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (() => {
+                {/* 4. Emboss — shown for emboss-enabled categories in Embossed/Grooving; hidden in Flat */}
+                {selectedCategory?.emboss_available && selectedSurfaceType !== 'flat' && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (() => {
                   const availableEmbossIds = selectedDesign?.available_emboss ?? [];
                   // Hide the entire section if a design is selected but it has no emboss options
                   if (selectedDesign && availableEmbossIds.length === 0) return null;
@@ -1983,7 +2126,7 @@ const Configurator = () => {
                       </div>
                     )}
                   </>
-                ) : (
+                ) : selectedCategory?.id === "ombre-color-core-ombre" ? (
                   <>
                     {/* ── Color Core Ombre controls (existing) ── */}
                     {/* 1. Size */}
@@ -2008,25 +2151,35 @@ const Configurator = () => {
                   <Label className="section-header">Base Color</Label>
                   <div className="grid grid-cols-5 gap-2">
                     {OMBRE_COLOR_CORE_BASE_COLORS.map((color) => (
-                      <button
-                        key={color.id}
-                        title={color.name}
-                        onClick={() => {
-                          setSelectedOmbreBaseColor(color);
-                          // Auto-select first overlay so the preview updates immediately
-                          setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[color.id]?.[0] ?? null);
-                          // Clear any selected finish pattern
-                          setSelectedOmbreEmbossPattern(null);
-                          setSelectedOmbreGroovePattern(null);
-                        }}
-                        className={`relative aspect-square rounded border-2 transition-colors ${
-                          selectedOmbreBaseColor?.id === color.id
-                            ? "border-[hsl(30,40%,46%)]"
-                            : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        data-testid={`ombre-base-color-${color.id}`}
-                      />
+                      <HoverCard key={color.id} openDelay={200} closeDelay={100}>
+                        <HoverCardTrigger asChild>
+                          <button
+                            title={color.name}
+                            onClick={() => {
+                              setSelectedOmbreBaseColor(color);
+                              // Auto-select first overlay so the preview updates immediately
+                              setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[color.id]?.[0] ?? null);
+                              // Clear any selected finish pattern
+                              setSelectedOmbreEmbossPattern(null);
+                              setSelectedOmbreGroovePattern(null);
+                            }}
+                            className={`relative aspect-square rounded border-2 transition-colors ${
+                              selectedOmbreBaseColor?.id === color.id
+                                ? "border-[hsl(30,40%,46%)]"
+                                : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                            }`}
+                            style={{ backgroundColor: color.hex }}
+                            data-testid={`ombre-base-color-${color.id}`}
+                          />
+                        </HoverCardTrigger>
+                        <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
+                          <div className="h-24 w-full" style={{ backgroundColor: color.hex }} />
+                          <div className="p-3 space-y-1">
+                            <p className="font-manrope font-bold text-sm">{color.name}</p>
+                            <p className="text-xs text-[hsl(215,16%,47%)] font-mono">{color.hex}</p>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     ))}
                   </div>
                   {selectedOmbreBaseColor && (
@@ -2044,24 +2197,37 @@ const Configurator = () => {
                   ) : (
                     <div className="grid grid-cols-5 gap-2">
                       {(OMBRE_COLOR_CORE_OVERLAYS[selectedOmbreBaseColor.id] ?? []).map((overlay) => (
-                        <button
-                          key={overlay.filename}
-                          title={overlay.hex}
-                          onClick={() => {
-                            setSelectedOmbreOverlay(prev =>
-                              prev?.filename === overlay.filename ? null : overlay
-                            );
-                            setSelectedOmbreEmbossPattern(null);
-                            setSelectedOmbreGroovePattern(null);
-                          }}
-                          className={`relative aspect-square rounded border-2 transition-colors ${
-                            selectedOmbreOverlay?.filename === overlay.filename
-                              ? "border-[hsl(30,40%,46%)]"
-                              : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                          }`}
-                          style={{ backgroundColor: overlay.hex }}
-                          data-testid={`ombre-overlay-${overlay.hex}`}
-                        />
+                        <HoverCard key={overlay.filename} openDelay={200} closeDelay={100}>
+                          <HoverCardTrigger asChild>
+                            <button
+                              title={overlay.hex}
+                              onClick={() => {
+                                setSelectedOmbreOverlay(prev =>
+                                  prev?.filename === overlay.filename ? null : overlay
+                                );
+                                setSelectedOmbreEmbossPattern(null);
+                                setSelectedOmbreGroovePattern(null);
+                              }}
+                              className={`relative aspect-square rounded border-2 transition-colors ${
+                                selectedOmbreOverlay?.filename === overlay.filename
+                                  ? "border-[hsl(30,40%,46%)]"
+                                  : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                              }`}
+                              style={{ backgroundColor: overlay.hex }}
+                              data-testid={`ombre-overlay-${overlay.hex}`}
+                            />
+                          </HoverCardTrigger>
+                          <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
+                            <div
+                              className="h-24 w-full"
+                              style={{ background: `linear-gradient(to bottom, ${selectedOmbreBaseColor?.hex ?? '#ccc'} 0%, ${overlay.hex} 100%)` }}
+                            />
+                            <div className="p-3 space-y-1">
+                              <p className="font-manrope font-bold text-sm">Ombre Overlay</p>
+                              <p className="text-xs text-[hsl(215,16%,47%)] font-mono">{overlay.hex}</p>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                       ))}
                     </div>
                   )}
@@ -2190,7 +2356,7 @@ const Configurator = () => {
                   </div>
                 )}
                   </>
-                )}
+                ) : null}
               </div>
             )}
 
@@ -2556,16 +2722,52 @@ const Configurator = () => {
         </div>
 
         {/* Preview Component — routes by product type */}
-        <div className="relative rounded-3xl overflow-hidden shadow-lg inset-shadow-lg inset-shadow-indigo-500/100"
+        <div
+          ref={magnifierRef}
+          className="relative rounded-3xl overflow-hidden shadow-lg inset-shadow-lg inset-shadow-indigo-500/100"
           style={{
-            transform: `scale(${zoomLevel})`,
+            cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : undefined,
+          }}
+          onMouseDown={handlePanStart}
+          onMouseMove={(e) => {
+            handlePanMove(e);
+            if (!isDraggingRef.current && magnifierDivRef.current && magnifierRef.current) {
+              const rect = magnifierRef.current.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              // Move the lens circle to follow the cursor
+              magnifierDivRef.current.style.top = `${y}px`;
+              magnifierDivRef.current.style.left = `${x}px`;
+              // Shift the clone inside the lens so the cursor point is centred
+              if (lensCloneRef.current) {
+                lensCloneRef.current.style.top = `${MAGNIFIER_SIZE / 2 - y * MAGNIFIER_ZOOM}px`;
+                lensCloneRef.current.style.left = `${MAGNIFIER_SIZE / 2 - x * MAGNIFIER_ZOOM}px`;
+              }
+            }
+          }}
+          onMouseUp={handlePanEnd}
+          onMouseEnter={handleMagnifierEnter}
+          onMouseLeave={() => {
+            handlePanEnd();
+            setMagnifierActive(false);
+            // Clear clone to free memory
+            const lens = magnifierDivRef.current;
+            if (lens) while (lens.firstChild) lens.removeChild(lens.firstChild);
+            lensCloneRef.current = null;
+          }}
+        >
+        <div
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
             transformOrigin: "center",
-            transition: "transform 0.2s ease",
+            transition: isDragging ? "none" : "transform 0.2s ease",
             filter: hdriLighting === 'warm'
               ? 'brightness(1.04) contrast(1.06) saturate(1.10) sepia(0.08)'
               : hdriLighting === 'soft'
                 ? 'brightness(1.12) contrast(0.89) saturate(0.80)'
                 : undefined,
+            width: '100%',
+            height: '100%',
           }}
           data-testid="preview-zoom-wrapper"
         >
@@ -2685,6 +2887,29 @@ const Configurator = () => {
           );
           return null;
         })()}
+        </div>
+
+        {/* ── Magnifier loupe ─────────────────────────────────────────── */}
+        {/* Always in DOM so magnifierDivRef is available on mouseenter */}
+        <div
+          ref={magnifierDivRef}
+          aria-hidden="true"
+          style={{
+            display: magnifierActive && !isDragging ? 'block' : 'none',
+            position: 'absolute',
+            width: MAGNIFIER_SIZE,
+            height: MAGNIFIER_SIZE,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '2.5px solid rgba(255,255,255,0.85)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.1)',
+            pointerEvents: 'none',
+            zIndex: 50,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
         </div>
 
         {/* ── Incomplete-selections note ─────────────────────────────── */}
