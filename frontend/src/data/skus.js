@@ -65,6 +65,22 @@ export const getImagePath = (patternId, colorId) => {
   return `${BACKEND_URL}/static/images/vicstrip/${patternId}/${colorId}.jpg`;
 };
 
+/**
+ * Build thumbnail URL for VicStrip panels.
+ * Filenames on disk use underscores for pattern names and lowercase design codes
+ * e.g. patternId: "double-square", designCode: "VCS-0001" ->
+ *  ${ASSETS_URL}/static/images/vicstrip/thumbnails/double_square_vcs0001.png
+ */
+export const getVicstripThumbnailUrl = (patternIdOrName, designCode) => {
+  if (!patternIdOrName || !designCode) return null;
+  const patternKey = String(patternIdOrName)
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/-/g, '_');
+  const codeKey = String(designCode).toLowerCase().replace(/-/g, '');
+  return `${ASSETS_URL}/static/images/vicstrip/thumbnails/${patternKey}_${codeKey}.png`;
+};
+
 // ─── Flat / Embossed VMT Panels ──────────────────────────────────────────────
 
 /**

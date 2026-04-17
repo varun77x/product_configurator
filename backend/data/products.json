@@ -3,18 +3,11 @@
     "id": "flat-embossed-vmd",
     "name": "Bespoke Graphics",
     "active": true,
-    "sizes": [
-      "1200x2400",
-      "1200x2800"
-    ],
+    "sizes": ["1200x2400", "1200x2800"],
     "densities": [],
     "patterns": [],
     "colors": [],
-    "thicknesses": [
-      "12mm (PET Panel)",
-      "25mm (PET Panel)",
-      "PET Wool"
-    ],
+    "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
     "categories": [
       {
         "id": "vmd-line-and-texture",
@@ -2777,18 +2770,11 @@
     "id": "wood",
     "name": "Wood",
     "active": true,
-    "sizes": [
-      "1200x2400",
-      "1200x2800"
-    ],
+    "sizes": ["1200x2400", "1200x2800"],
     "densities": [],
     "patterns": [],
     "colors": [],
-    "thicknesses": [
-      "12mm (PET Panel)",
-      "25mm (PET Panel)",
-      "PET Wool"
-    ],
+    "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
     "categories": [
       {
         "id": "wood-wood-classics",
@@ -3311,27 +3297,40 @@
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-02.jpg",
             "color_name": "PR-NC-02"
           },
+
           {
-            "id": "wood-cp-004",
+            "id": "wood-cp-009",
             "product_type": "wood",
             "category": "Classic Parquet",
-            "design_code": "PR-NC-05",
-            "design_name": "PR-NC-05",
+            "design_code": "PR-NC-10",
+            "design_name": "PR-NC-10",
             "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-05.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-05.jpg",
-            "color_name": "PR-NC-05"
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "color_name": "PR-NC-10"
+          },
+
+          {
+            "id": "wood-cp-018",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-19",
+            "design_name": "PR-NC-19",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "color_name": "PR-NC-19"
           },
           {
-            "id": "wood-cp-005",
+            "id": "wood-cp-019",
             "product_type": "wood",
             "category": "Classic Parquet",
-            "design_code": "PR-NC-06",
-            "design_name": "PR-NC-06",
+            "design_code": "PR-NC-20",
+            "design_name": "PR-NC-20",
             "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-06.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-06.jpg",
-            "color_name": "PR-NC-06"
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "color_name": "PR-NC-20"
           },
           {
             "id": "wood-cp-006",
@@ -3344,38 +3343,17 @@
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-07.jpg",
             "color_name": "PR-NC-07"
           },
+
           {
-            "id": "wood-cp-007",
+            "id": "wood-cp-004",
             "product_type": "wood",
             "category": "Classic Parquet",
-            "design_code": "PR-NC-08",
-            "design_name": "PR-NC-08",
+            "design_code": "PR-NC-05",
+            "design_name": "PR-NC-05",
             "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-08.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-08.jpg",
-            "color_name": "PR-NC-08"
-          },
-          {
-            "id": "wood-cp-008",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-09",
-            "design_name": "PR-NC-09",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-09.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-09.jpg",
-            "color_name": "PR-NC-09"
-          },
-          {
-            "id": "wood-cp-009",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-10",
-            "design_name": "PR-NC-10",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-10.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-10.jpg",
-            "color_name": "PR-NC-10"
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-05.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-05.jpg",
+            "color_name": "PR-NC-05"
           },
           {
             "id": "wood-cp-010",
@@ -3421,6 +3399,7 @@
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-14.jpg",
             "color_name": "PR-NC-14"
           },
+
           {
             "id": "wood-cp-014",
             "product_type": "wood",
@@ -3443,16 +3422,17 @@
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-16.jpg",
             "color_name": "PR-NC-16"
           },
+
           {
-            "id": "wood-cp-016",
+            "id": "wood-cp-005",
             "product_type": "wood",
             "category": "Classic Parquet",
-            "design_code": "PR-NC-17",
-            "design_name": "PR-NC-17",
+            "design_code": "PR-NC-06",
+            "design_name": "PR-NC-06",
             "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-17.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-17.jpg",
-            "color_name": "PR-NC-17"
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "color_name": "PR-NC-06"
           },
           {
             "id": "wood-cp-017",
@@ -3465,28 +3445,7 @@
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-18.jpg",
             "color_name": "PR-NC-18"
           },
-          {
-            "id": "wood-cp-018",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-19",
-            "design_name": "PR-NC-19",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-19.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-19.jpg",
-            "color_name": "PR-NC-19"
-          },
-          {
-            "id": "wood-cp-019",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-20",
-            "design_name": "PR-NC-20",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-20.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-20.jpg",
-            "color_name": "PR-NC-20"
-          },
+
           {
             "id": "wood-cp-020",
             "product_type": "wood",
@@ -3497,6 +3456,17 @@
             "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-21.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-21.jpg",
             "color_name": "PR-NC-21"
+          },
+          {
+            "id": "wood-cp-016",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-17",
+            "design_name": "PR-NC-17",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-17.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-17.jpg",
+            "color_name": "PR-NC-17"
           },
           {
             "id": "wood-cp-021",
@@ -3554,6 +3524,17 @@
             "color_name": "PR-NC-26"
           },
           {
+            "id": "wood-cp-007",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-08",
+            "design_name": "PR-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "color_name": "PR-NC-08"
+          },
+          {
             "id": "wood-cp-026",
             "product_type": "wood",
             "category": "Classic Parquet",
@@ -3596,6 +3577,17 @@
             "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-30.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-30.jpg",
             "color_name": "PR-NC-30"
+          },
+          {
+            "id": "wood-cp-008",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-09",
+            "design_name": "PR-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "color_name": "PR-NC-09"
           }
         ]
       },
@@ -3668,18 +3660,11 @@
     "id": "fabrics",
     "name": "Fabrics",
     "active": true,
-    "sizes": [
-      "1200x2400",
-      "1200x2800"
-    ],
+    "sizes": ["1200x2400", "1200x2800"],
     "densities": [],
     "patterns": [],
     "colors": [],
-    "thicknesses": [
-      "12mm (PET Panel)",
-      "25mm (PET Panel)",
-      "PET Wool"
-    ],
+    "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
     "categories": [
       {
         "id": "fabrics-luxury-textures",
@@ -4025,17 +4010,11 @@
     "id": "ombre",
     "name": "Ombre",
     "active": true,
-    "sizes": [
-      "1200x2800",
-      "1200x2400"
-    ],
+    "sizes": ["1200x2800", "1200x2400"],
     "densities": [],
     "patterns": [],
     "colors": [],
-    "thicknesses": [
-      "12mm (PET Panel)",
-      "25mm (PET Panel)"
-    ],
+    "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)"],
     "categories": [
       {
         "id": "ombre-color-core-ombre",
@@ -4057,17 +4036,9 @@
     "id": "vicstrip",
     "name": "Univic Strip",
     "active": true,
-    "sizes": [
-      "600x600",
-      "600x2400"
-    ],
+    "sizes": ["600x600", "600x2400"],
     "densities": [],
-    "patterns": [
-      "Single Groove",
-      "Double Groove",
-      "Square",
-      "Double Square"
-    ],
+    "patterns": ["Single Groove", "Double Groove", "Square", "Double Square"],
     "colors": [
       "#FFFFFF",
       "#F5F5F5",
@@ -4086,10 +4057,7 @@
       "#2196F3",
       "#42A5F5"
     ],
-    "thicknesses": [
-      "12 mm",
-      "25 mm"
-    ],
+    "thicknesses": ["12 mm", "25 mm"],
     "categories": [
       {
         "id": "vicstrip-single-groove",
@@ -4098,56 +4066,215 @@
         "emboss_available": false,
         "designs": [
           {
-            "id": "vicstrip-design-1",
+            "id": "vicstrip-sg-01",
             "product_type": "vicstrip",
             "category": "Single Groove",
             "design_code": "VCS-0001",
-            "design_name": "Single Groove - Pure White",
-            "texture_color": "#FFFFFF",
+            "design_name": "Single Groove - Alpine Frost",
+            "texture_color": "#BCB9AB",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Single Groove",
-            "color": "#FFFFFF",
-            "color_name": "Pure White"
+            "color": "#BCB9AB",
+            "color_name": "Alpine Frost"
           },
           {
-            "id": "vicstrip-design-2",
+            "id": "vicstrip-sg-02",
             "product_type": "vicstrip",
             "category": "Single Groove",
             "design_code": "VCS-0002",
-            "design_name": "Single Groove - Cloud",
-            "texture_color": "#F5F5F5",
+            "design_name": "Single Groove - Amber Walnut",
+            "texture_color": "#A4A499",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Single Groove",
-            "color": "#F5F5F5",
-            "color_name": "Cloud"
+            "color": "#A4A499",
+            "color_name": "Amber Walnut"
           },
           {
-            "id": "vicstrip-design-3",
+            "id": "vicstrip-sg-06",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0006",
+            "design_name": "Single Groove - Glacier White",
+            "texture_color": "#F8F8F8",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#F8F8F8",
+            "color_name": "Glacier White"
+          },
+          {
+            "id": "vicstrip-sg-07",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0007",
+            "design_name": "Single Groove - Lunar Ash",
+            "texture_color": "#B0B0B0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#B0B0B0",
+            "color_name": "Lunar Ash"
+          },
+          {
+            "id": "vicstrip-sg-13",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0013",
+            "design_name": "Single Groove - Silver Birch",
+            "texture_color": "#C7BAA5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#C7BAA5",
+            "color_name": "Silver Birch"
+          },
+          {
+            "id": "vicstrip-sg-03",
             "product_type": "vicstrip",
             "category": "Single Groove",
             "design_code": "VCS-0003",
-            "design_name": "Single Groove - Silver",
-            "texture_color": "#E0E0E0",
+            "design_name": "Single Groove - Auburn Oak",
+            "texture_color": "#C99E61",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Single Groove",
-            "color": "#E0E0E0",
-            "color_name": "Silver"
+            "color": "#C99E61",
+            "color_name": "Auburn Oak"
           },
           {
-            "id": "vicstrip-design-4",
+            "id": "vicstrip-sg-04",
             "product_type": "vicstrip",
             "category": "Single Groove",
             "design_code": "VCS-0004",
-            "design_name": "Single Groove - Pewter",
-            "texture_color": "#BDBDBD",
+            "design_name": "Single Groove - Bourbon Walnut",
+            "texture_color": "#41322B",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Single Groove",
-            "color": "#BDBDBD",
-            "color_name": "Pewter"
+            "color": "#41322B",
+            "color_name": "Bourbon Walnut"
+          },
+          {
+            "id": "vicstrip-sg-05",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0005",
+            "design_name": "Single Groove - Carbon Black",
+            "texture_color": "#1C1C1C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#1C1C1C",
+            "color_name": "Carbon Black"
+          },
+
+          {
+            "id": "vicstrip-sg-08",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0008",
+            "design_name": "Single Groove - Merlot",
+            "texture_color": "#721F1F",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#721F1F",
+            "color_name": "Merlot"
+          },
+
+          {
+            "id": "vicstrip-sg-10",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0010",
+            "design_name": "Single Groove - Obsidian Black",
+            "texture_color": "#5B5849",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#5B5849",
+            "color_name": "Obsidian Black"
+          },
+          {
+            "id": "vicstrip-sg-11",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0011",
+            "design_name": "Single Groove - Sage Green",
+            "texture_color": "#838E7C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#838E7C",
+            "color_name": "Sage Green"
+          },
+          {
+            "id": "vicstrip-sg-09",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0009",
+            "design_name": "Single Groove - Monarch Oak",
+            "texture_color": "#8B5A2B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#8B5A2B",
+            "color_name": "Monarch Oak"
+          },
+          {
+            "id": "vicstrip-sg-12",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0012",
+            "design_name": "Single Groove - Sierra Elm",
+            "texture_color": "#9D5B37",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#9D5B37",
+            "color_name": "Sierra Elm"
+          },
+
+          {
+            "id": "vicstrip-sg-14",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0014",
+            "design_name": "Single Groove - Solara",
+            "texture_color": "#78756C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#78756C",
+            "color_name": "Solara"
+          },
+          {
+            "id": "vicstrip-sg-15",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0015",
+            "design_name": "Single Groove - Toffee Oak",
+            "texture_color": "#B17547",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#B17547",
+            "color_name": "Toffee Oak"
+          },
+          {
+            "id": "vicstrip-sg-16",
+            "product_type": "vicstrip",
+            "category": "Single Groove",
+            "design_code": "VCS-0016",
+            "design_name": "Single Groove - Windsor Oak",
+            "texture_color": "#B5A680",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Single Groove",
+            "color": "#B5A680",
+            "color_name": "Windsor Oak"
           }
         ]
       },
@@ -4158,56 +4285,215 @@
         "emboss_available": false,
         "designs": [
           {
-            "id": "vicstrip-design-5",
+            "id": "vicstrip-dg-01",
             "product_type": "vicstrip",
             "category": "Double Groove",
-            "design_code": "VCS-0005",
-            "design_name": "Double Groove - Pure White",
-            "texture_color": "#FFFFFF",
+            "design_code": "VCS-0001",
+            "design_name": "Double Groove - Alpine Frost",
+            "texture_color": "#BCB9AB",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Groove",
-            "color": "#FFFFFF",
-            "color_name": "Pure White"
+            "color": "#BCB9AB",
+            "color_name": "Alpine Frost"
           },
           {
-            "id": "vicstrip-design-6",
+            "id": "vicstrip-dg-02",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0002",
+            "design_name": "Double Groove - Amber Walnut",
+            "texture_color": "#A4A499",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#A4A499",
+            "color_name": "Amber Walnut"
+          },
+          {
+            "id": "vicstrip-dg-06",
             "product_type": "vicstrip",
             "category": "Double Groove",
             "design_code": "VCS-0006",
-            "design_name": "Double Groove - Cloud",
-            "texture_color": "#F5F5F5",
+            "design_name": "Double Groove - Glacier White",
+            "texture_color": "#F8F8F8",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Groove",
-            "color": "#F5F5F5",
-            "color_name": "Cloud"
+            "color": "#F8F8F8",
+            "color_name": "Glacier White"
           },
           {
-            "id": "vicstrip-design-7",
+            "id": "vicstrip-dg-07",
             "product_type": "vicstrip",
             "category": "Double Groove",
             "design_code": "VCS-0007",
-            "design_name": "Double Groove - Silver",
-            "texture_color": "#E0E0E0",
+            "design_name": "Double Groove - Lunar Ash",
+            "texture_color": "#B0B0B0",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Groove",
-            "color": "#E0E0E0",
-            "color_name": "Silver"
+            "color": "#B0B0B0",
+            "color_name": "Lunar Ash"
           },
           {
-            "id": "vicstrip-design-8",
+            "id": "vicstrip-dg-13",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0013",
+            "design_name": "Double Groove - Silver Birch",
+            "texture_color": "#C7BAA5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#C7BAA5",
+            "color_name": "Silver Birch"
+          },
+          {
+            "id": "vicstrip-dg-03",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0003",
+            "design_name": "Double Groove - Auburn Oak",
+            "texture_color": "#C99E61",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#C99E61",
+            "color_name": "Auburn Oak"
+          },
+          {
+            "id": "vicstrip-dg-04",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0004",
+            "design_name": "Double Groove - Bourbon Walnut",
+            "texture_color": "#41322B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#41322B",
+            "color_name": "Bourbon Walnut"
+          },
+          {
+            "id": "vicstrip-dg-05",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0005",
+            "design_name": "Double Groove - Carbon Black",
+            "texture_color": "#1C1C1C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#1C1C1C",
+            "color_name": "Carbon Black"
+          },
+
+          {
+            "id": "vicstrip-dg-08",
             "product_type": "vicstrip",
             "category": "Double Groove",
             "design_code": "VCS-0008",
-            "design_name": "Double Groove - Pewter",
-            "texture_color": "#BDBDBD",
+            "design_name": "Double Groove - Merlot",
+            "texture_color": "#721F1F",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Groove",
-            "color": "#BDBDBD",
-            "color_name": "Pewter"
+            "color": "#721F1F",
+            "color_name": "Merlot"
+          },
+
+          {
+            "id": "vicstrip-dg-10",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0010",
+            "design_name": "Double Groove - Obsidian Black",
+            "texture_color": "#5B5849",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#5B5849",
+            "color_name": "Obsidian Black"
+          },
+          {
+            "id": "vicstrip-dg-11",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0011",
+            "design_name": "Double Groove - Sage Green",
+            "texture_color": "#838E7C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#838E7C",
+            "color_name": "Sage Green"
+          },
+          {
+            "id": "vicstrip-dg-09",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0009",
+            "design_name": "Double Groove - Monarch Oak",
+            "texture_color": "#8B5A2B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#8B5A2B",
+            "color_name": "Monarch Oak"
+          },
+          {
+            "id": "vicstrip-dg-12",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0012",
+            "design_name": "Double Groove - Sierra Elm",
+            "texture_color": "#9D5B37",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#9D5B37",
+            "color_name": "Sierra Elm"
+          },
+
+          {
+            "id": "vicstrip-dg-14",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0014",
+            "design_name": "Double Groove - Solara",
+            "texture_color": "#78756C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#78756C",
+            "color_name": "Solara"
+          },
+          {
+            "id": "vicstrip-dg-15",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0015",
+            "design_name": "Double Groove - Toffee Oak",
+            "texture_color": "#B17547",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#B17547",
+            "color_name": "Toffee Oak"
+          },
+          {
+            "id": "vicstrip-dg-16",
+            "product_type": "vicstrip",
+            "category": "Double Groove",
+            "design_code": "VCS-0016",
+            "design_name": "Double Groove - Windsor Oak",
+            "texture_color": "#B5A680",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Groove",
+            "color": "#B5A680",
+            "color_name": "Windsor Oak"
           }
         ]
       },
@@ -4218,56 +4504,215 @@
         "emboss_available": false,
         "designs": [
           {
-            "id": "vicstrip-design-9",
+            "id": "vicstrip-sq-01",
             "product_type": "vicstrip",
             "category": "Square",
-            "design_code": "VCS-0009",
-            "design_name": "Square - Pure White",
-            "texture_color": "#FFFFFF",
+            "design_code": "VCS-0001",
+            "design_name": "Square - Alpine Frost",
+            "texture_color": "#BCB9AB",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Square",
-            "color": "#FFFFFF",
-            "color_name": "Pure White"
+            "color": "#BCB9AB",
+            "color_name": "Alpine Frost"
           },
           {
-            "id": "vicstrip-design-10",
+            "id": "vicstrip-sq-02",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0002",
+            "design_name": "Square - Amber Walnut",
+            "texture_color": "#A4A499",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#A4A499",
+            "color_name": "Amber Walnut"
+          },
+          {
+            "id": "vicstrip-sq-06",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0006",
+            "design_name": "Square - Glacier White",
+            "texture_color": "#F8F8F8",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#F8F8F8",
+            "color_name": "Glacier White"
+          },
+          {
+            "id": "vicstrip-sq-07",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0007",
+            "design_name": "Square - Lunar Ash",
+            "texture_color": "#B0B0B0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#B0B0B0",
+            "color_name": "Lunar Ash"
+          },
+          {
+            "id": "vicstrip-sq-13",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0013",
+            "design_name": "Square - Silver Birch",
+            "texture_color": "#C7BAA5",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#C7BAA5",
+            "color_name": "Silver Birch"
+          },
+          {
+            "id": "vicstrip-sq-03",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0003",
+            "design_name": "Square - Auburn Oak",
+            "texture_color": "#C99E61",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#C99E61",
+            "color_name": "Auburn Oak"
+          },
+          {
+            "id": "vicstrip-sq-04",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0004",
+            "design_name": "Square - Bourbon Walnut",
+            "texture_color": "#41322B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#41322B",
+            "color_name": "Bourbon Walnut"
+          },
+          {
+            "id": "vicstrip-sq-05",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0005",
+            "design_name": "Square - Carbon Black",
+            "texture_color": "#1C1C1C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#1C1C1C",
+            "color_name": "Carbon Black"
+          },
+
+          {
+            "id": "vicstrip-sq-08",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0008",
+            "design_name": "Square - Merlot",
+            "texture_color": "#721F1F",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#721F1F",
+            "color_name": "Merlot"
+          },
+
+          {
+            "id": "vicstrip-sq-10",
             "product_type": "vicstrip",
             "category": "Square",
             "design_code": "VCS-0010",
-            "design_name": "Square - Cloud",
-            "texture_color": "#F5F5F5",
+            "design_name": "Square - Obsidian Black",
+            "texture_color": "#5B5849",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Square",
-            "color": "#F5F5F5",
-            "color_name": "Cloud"
+            "color": "#5B5849",
+            "color_name": "Obsidian Black"
           },
           {
-            "id": "vicstrip-design-11",
+            "id": "vicstrip-sq-11",
             "product_type": "vicstrip",
             "category": "Square",
             "design_code": "VCS-0011",
-            "design_name": "Square - Silver",
-            "texture_color": "#E0E0E0",
+            "design_name": "Square - Sage Green",
+            "texture_color": "#838E7C",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Square",
-            "color": "#E0E0E0",
-            "color_name": "Silver"
+            "color": "#838E7C",
+            "color_name": "Sage Green"
           },
           {
-            "id": "vicstrip-design-12",
+            "id": "vicstrip-sq-09",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0009",
+            "design_name": "Square - Monarch Oak",
+            "texture_color": "#8B5A2B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#8B5A2B",
+            "color_name": "Monarch Oak"
+          },
+          {
+            "id": "vicstrip-sq-12",
             "product_type": "vicstrip",
             "category": "Square",
             "design_code": "VCS-0012",
-            "design_name": "Square - Pewter",
-            "texture_color": "#BDBDBD",
+            "design_name": "Square - Sierra Elm",
+            "texture_color": "#9D5B37",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Square",
-            "color": "#BDBDBD",
-            "color_name": "Pewter"
+            "color": "#9D5B37",
+            "color_name": "Sierra Elm"
+          },
+
+          {
+            "id": "vicstrip-sq-14",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0014",
+            "design_name": "Square - Solara",
+            "texture_color": "#78756C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#78756C",
+            "color_name": "Solara"
+          },
+          {
+            "id": "vicstrip-sq-15",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0015",
+            "design_name": "Square - Toffee Oak",
+            "texture_color": "#B17547",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#B17547",
+            "color_name": "Toffee Oak"
+          },
+          {
+            "id": "vicstrip-sq-16",
+            "product_type": "vicstrip",
+            "category": "Square",
+            "design_code": "VCS-0016",
+            "design_name": "Square - Windsor Oak",
+            "texture_color": "#B5A680",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Square",
+            "color": "#B5A680",
+            "color_name": "Windsor Oak"
           }
         ]
       },
@@ -4278,56 +4723,215 @@
         "emboss_available": false,
         "designs": [
           {
-            "id": "vicstrip-design-13",
+            "id": "vicstrip-ds-01",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0001",
+            "design_name": "Double Square - Alpine Frost",
+            "texture_color": "#BCB9AB",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#BCB9AB",
+            "color_name": "Alpine Frost"
+          },
+          {
+            "id": "vicstrip-ds-02",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0002",
+            "design_name": "Double Square - Amber Walnut",
+            "texture_color": "#A4A499",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#A4A499",
+            "color_name": "Amber Walnut"
+          },
+          {
+            "id": "vicstrip-ds-06",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0006",
+            "design_name": "Double Square - Glacier White",
+            "texture_color": "#F8F8F8",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#F8F8F8",
+            "color_name": "Glacier White"
+          },
+          {
+            "id": "vicstrip-ds-07",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0007",
+            "design_name": "Double Square - Lunar Ash",
+            "texture_color": "#B0B0B0",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#B0B0B0",
+            "color_name": "Lunar Ash"
+          },
+          {
+            "id": "vicstrip-ds-13",
             "product_type": "vicstrip",
             "category": "Double Square",
             "design_code": "VCS-0013",
-            "design_name": "Double Square - Pure White",
-            "texture_color": "#FFFFFF",
+            "design_name": "Double Square - Silver Birch",
+            "texture_color": "#C7BAA5",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Square",
-            "color": "#FFFFFF",
-            "color_name": "Pure White"
+            "color": "#C7BAA5",
+            "color_name": "Silver Birch"
           },
           {
-            "id": "vicstrip-design-14",
+            "id": "vicstrip-ds-03",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0003",
+            "design_name": "Double Square - Auburn Oak",
+            "texture_color": "#C99E61",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#C99E61",
+            "color_name": "Auburn Oak"
+          },
+          {
+            "id": "vicstrip-ds-04",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0004",
+            "design_name": "Double Square - Bourbon Walnut",
+            "texture_color": "#41322B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#41322B",
+            "color_name": "Bourbon Walnut"
+          },
+          {
+            "id": "vicstrip-ds-05",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0005",
+            "design_name": "Double Square - Carbon Black",
+            "texture_color": "#1C1C1C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#1C1C1C",
+            "color_name": "Carbon Black"
+          },
+
+          {
+            "id": "vicstrip-ds-08",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0008",
+            "design_name": "Double Square - Merlot",
+            "texture_color": "#721F1F",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#721F1F",
+            "color_name": "Merlot"
+          },
+
+          {
+            "id": "vicstrip-ds-10",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0010",
+            "design_name": "Double Square - Obsidian Black",
+            "texture_color": "#5B5849",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#5B5849",
+            "color_name": "Obsidian Black"
+          },
+          {
+            "id": "vicstrip-ds-11",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0011",
+            "design_name": "Double Square - Sage Green",
+            "texture_color": "#838E7C",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#838E7C",
+            "color_name": "Sage Green"
+          },
+          {
+            "id": "vicstrip-ds-09",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0009",
+            "design_name": "Double Square - Monarch Oak",
+            "texture_color": "#8B5A2B",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#8B5A2B",
+            "color_name": "Monarch Oak"
+          },
+          {
+            "id": "vicstrip-ds-12",
+            "product_type": "vicstrip",
+            "category": "Double Square",
+            "design_code": "VCS-0012",
+            "design_name": "Double Square - Sierra Elm",
+            "texture_color": "#9D5B37",
+            "texture_url": null,
+            "thumbnail_url": null,
+            "pattern": "Double Square",
+            "color": "#9D5B37",
+            "color_name": "Sierra Elm"
+          },
+
+          {
+            "id": "vicstrip-ds-14",
             "product_type": "vicstrip",
             "category": "Double Square",
             "design_code": "VCS-0014",
-            "design_name": "Double Square - Cloud",
-            "texture_color": "#F5F5F5",
+            "design_name": "Double Square - Solara",
+            "texture_color": "#78756C",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Square",
-            "color": "#F5F5F5",
-            "color_name": "Cloud"
+            "color": "#78756C",
+            "color_name": "Solara"
           },
           {
-            "id": "vicstrip-design-15",
+            "id": "vicstrip-ds-15",
             "product_type": "vicstrip",
             "category": "Double Square",
             "design_code": "VCS-0015",
-            "design_name": "Double Square - Silver",
-            "texture_color": "#E0E0E0",
+            "design_name": "Double Square - Toffee Oak",
+            "texture_color": "#B17547",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Square",
-            "color": "#E0E0E0",
-            "color_name": "Silver"
+            "color": "#B17547",
+            "color_name": "Toffee Oak"
           },
           {
-            "id": "vicstrip-design-16",
+            "id": "vicstrip-ds-16",
             "product_type": "vicstrip",
             "category": "Double Square",
             "design_code": "VCS-0016",
-            "design_name": "Double Square - Pewter",
-            "texture_color": "#BDBDBD",
+            "design_name": "Double Square - Windsor Oak",
+            "texture_color": "#B5A680",
             "texture_url": null,
             "thumbnail_url": null,
             "pattern": "Double Square",
-            "color": "#BDBDBD",
-            "color_name": "Pewter"
+            "color": "#B5A680",
+            "color_name": "Windsor Oak"
           }
         ]
       }

@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview, { preloadImages } from "@/components/FlatEmbossedPreview";
 import VicStripPreview from "@/components/VicStripPreview";
-import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS, WOOD_PERFORATION_SIZES, WOOD_PERFORATION_PATTERNS, WOOD_PERFORATION_EXCLUSIONS, COLOR_CORE_COLORS, COLOR_CORE_FABRIC_STRUCTURES, getColorCorePanelUrl, getColorCoreThumbnailUrl, COLOR_CORE_EMBOSS_PATTERNS, COLOR_CORE_SIZES, getColorCoreEmbossUrl, OMBRE_COLOR_CORE_BASE_COLORS, OMBRE_COLOR_CORE_OVERLAYS, getOmbreColorCorePanelUrl, OMBRE_COLOR_CORE_EMBOSS_PATTERNS, getOmbreEmbossPanelUrl, OMBRE_COLOR_CORE_GROOVE_PATTERNS, getOmbreGroovePanelUrl, DESIGNER_TEXTILE_COLOR_GROUPS, DESIGNER_TEXTILE_FABRICS, DESIGNER_TEXTILE_SIZES, DESIGNER_TEXTILE_THICKNESSES, getDesignerTextileThumbnailUrl, DESIGNER_TEXTILE_EMBOSS_PATTERNS, getDesignerTextileEmbossUrl } from "@/data/skus";
+import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS, WOOD_PERFORATION_SIZES, WOOD_PERFORATION_PATTERNS, WOOD_PERFORATION_EXCLUSIONS, COLOR_CORE_COLORS, COLOR_CORE_FABRIC_STRUCTURES, getColorCorePanelUrl, getColorCoreThumbnailUrl, COLOR_CORE_EMBOSS_PATTERNS, COLOR_CORE_SIZES, getColorCoreEmbossUrl, OMBRE_COLOR_CORE_BASE_COLORS, OMBRE_COLOR_CORE_OVERLAYS, getOmbreColorCorePanelUrl, OMBRE_COLOR_CORE_EMBOSS_PATTERNS, getOmbreEmbossPanelUrl, OMBRE_COLOR_CORE_GROOVE_PATTERNS, getOmbreGroovePanelUrl, DESIGNER_TEXTILE_COLOR_GROUPS, DESIGNER_TEXTILE_FABRICS, DESIGNER_TEXTILE_SIZES, DESIGNER_TEXTILE_THICKNESSES, getDesignerTextileThumbnailUrl, DESIGNER_TEXTILE_EMBOSS_PATTERNS, getDesignerTextileEmbossUrl, getVicstripThumbnailUrl } from "@/data/skus";
 import { useBlobPanel, useMultiBlobPanels } from "@/hooks/use-blob-panel";
 import { downloadPanelImages } from "@/lib/downloadPanelImages";
 import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
@@ -28,7 +28,7 @@ import ChatWidget from "@/components/ChatWidget";
 // const API = `${BACKEND_URL}/api`;
 // Products catalog + tech specs are now fetched as static JSON from the CDN.
 // const ASSETS_URL = process.env.REACT_APP_ASSETS_URL
-const ASSETS_URL ="http://localhost:8001";
+const ASSETS_URL ="http://localhost:8001"; 
 
 // Boot loader toggles (quickly reversible without touching JSX)
 const ENABLE_BOOT_WHITE_OVERLAY = true;
@@ -174,9 +174,21 @@ const TechSpecsPanel = memo(({ specs }) => (
 ));
 TechSpecsPanel.displayName = "TechSpecsPanel";
 
+// Maps raw vicstrip category/pattern names to display-friendly labels
+const VICSTRIP_DISPLAY_LABEL = (name) => {
+  if (!name) return name;
+  const n = name.toLowerCase().replace(/[-_\s]+/g, ' ').trim();
+  if (n === 'double groove') return 'Double Groove';
+  if (n === 'single groove') return 'Single Groove';
+  if (n === 'square') return 'Single Groove';
+  if (n === 'double square') return 'Double Groove';
+  return name;
+};
+
 const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
   const bgColor = design.texture_color || "#CCCCCC";
   const thumbUrl = resolveAssetUrl(design.thumbnail_url || design.texture_url || null);
+  const isVicstrip = design.product_type === 'vicstrip';
   return (
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
@@ -211,13 +223,7 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
             {design.category && (
               <div className="flex justify-between">
                 <span className="text-[hsl(215,16%,47%)]">Category</span>
-                <span className="font-medium">{design.category}</span>
-              </div>
-            )}
-            {design.pattern && (
-              <div className="flex justify-between">
-                <span className="text-[hsl(215,16%,47%)]">Pattern</span>
-                <span className="font-medium">{design.pattern}</span>
+                <span className="font-medium">{isVicstrip ? VICSTRIP_DISPLAY_LABEL(design.category) : design.category}</span>
               </div>
             )}
           </div>
@@ -597,6 +603,7 @@ const Configurator = () => {
   // FVP single panel — flat-embossed, wood, non-CC/DT fabrics (non-continuous design)
   const fvpSingleUrl = (
     selectedProductType?.id !== "ombre" &&
+    selectedProductType?.id !== "vicstrip" &&
     selectedCategory?.id !== "fabrics-color-core" &&
     selectedCategory?.id !== "fabrics-designer-textile" &&
     selectedDesign?.panel_variant !== "continuous"
@@ -724,6 +731,19 @@ const Configurator = () => {
     while (lens.firstChild) lens.removeChild(lens.firstChild);
     // Deep-clone the preview node — synchronous, images already cached
     const clone = node.cloneNode(true);
+    // Copy canvas pixel data — cloneNode creates blank canvases, so we manually
+    // drawImage from each original canvas into its cloned counterpart.
+    const origCanvases = Array.from(node.querySelectorAll('canvas'));
+    const cloneCanvases = Array.from(clone.querySelectorAll('canvas'));
+    origCanvases.forEach((orig, i) => {
+      const dest = cloneCanvases[i];
+      if (!dest) return;
+      dest.width = orig.width;
+      dest.height = orig.height;
+      try {
+        dest.getContext('2d')?.drawImage(orig, 0, 0);
+      } catch (_) {}
+    });
     clone.style.cssText = [
       'position:absolute',
       'top:0',
@@ -1039,6 +1059,33 @@ const Configurator = () => {
       setSelectedCategory(null);
     }
   };
+
+  // Preload + async-decode vicstrip thumbnail images when pattern/category changes
+  useEffect(() => {
+    if (selectedProductType?.id !== "vicstrip") return;
+    const urls = [];
+    const apiCategory = selectedProductType?.categories?.find(c => c.id === `vicstrip-${selectedPattern?.id}`);
+    if (apiCategory?.designs?.length > 0) {
+      apiCategory.designs.forEach((d) => {
+        const url = getVicstripThumbnailUrl(selectedPattern?.id, d.design_code);
+        if (url) urls.push(url);
+      });
+    } else if (selectedPattern) {
+      const pid = selectedPattern.id || selectedPattern.name;
+      (selectedPattern.colors || []).forEach((c, i) => {
+        const code = `VCS-${(i + 1).toString().padStart(4, '0')}`;
+        const url = getVicstripThumbnailUrl(pid, code);
+        if (url) urls.push(url);
+      });
+    }
+
+    urls.forEach((u) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = u;
+      if (img.decode) img.decode().catch(() => {});
+    });
+  }, [selectedProductType?.id, selectedProductType?.categories, selectedPattern?.id, selectedSize]);
 
   // VicStrip: handle pattern change
   const handlePatternChange = (patternId) => {
@@ -1428,7 +1475,7 @@ const Configurator = () => {
                     <SelectContent>
                       {VICSTRIP_PRODUCT.patterns.filter(p => p.sizes.includes(selectedSize || "600x600")).map((pattern) => (
                         <SelectItem key={pattern.id} value={pattern.id} data-testid={`pattern-${pattern.id}`}>
-                          {pattern.name}
+                          {pattern.id === 'square' ? 'Single Groove' : pattern.id === 'double-square' ? 'Double Groove' : pattern.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1471,20 +1518,37 @@ const Configurator = () => {
                   <Label className="section-header">Designs</Label>
                   <div className="thumbnail-grid" data-testid="design-grid">
                       {(() => {
-                        // Prefer category designs if available, otherwise fall back to pattern colors
-                        const designs = (selectedCategory?.designs && selectedCategory.designs.length > 0)
-                          ? selectedCategory.designs
-                          : (selectedPattern?.colors || []).map((c, i) => ({
+                        // Use the API category order from products.json for this pattern
+                        const apiCategory = selectedProductType?.categories?.find(c => c.id === `vicstrip-${selectedPattern?.id}`);
+                        const patternColors = selectedPattern?.colors || [];
+                        const designs = (apiCategory?.designs?.length > 0)
+                          ? apiCategory.designs.map((d) => {
+                              const colorIdx = parseInt((d.design_code || '').replace('VCS-', ''), 10) - 1;
+                              const color = patternColors[colorIdx] || patternColors.find(c => c.name === d.color_name) || null;
+                              return {
+                                id: `vicstrip-color-${color?.id || d.id}`,
+                                product_type: 'vicstrip',
+                                category: selectedPattern?.name,
+                                design_code: d.design_code,
+                                design_name: d.design_name,
+                                texture_color: color?.hex || d.texture_color || d.color,
+                                thumbnail_url: d.thumbnail_url || getVicstripThumbnailUrl(selectedPattern?.id, d.design_code),
+                                color_name: color?.name || d.color_name,
+                                pattern: selectedPattern?.name,
+                                color: color,
+                              };
+                            })
+                          : patternColors.map((c, i) => ({
                               id: `vicstrip-color-${c.id || i}`,
                               product_type: 'vicstrip',
                               category: selectedPattern?.name,
                               design_code: `VCS-${(i+1).toString().padStart(4,'0')}`,
                               design_name: `${selectedPattern?.name} - ${c.name}`,
                               texture_color: c.hex,
-                              thumbnail_url: null,
+                              thumbnail_url: getVicstripThumbnailUrl(selectedPattern?.id || selectedPattern?.name, `VCS-${(i+1).toString().padStart(4,'0')}`),
                               color_name: c.name,
                               pattern: selectedPattern?.name,
-                              color: c, // Pass the full color object here
+                              color: c,
                             }));
 
                         return designs.map((design) => (
@@ -1736,7 +1800,22 @@ const Configurator = () => {
                       </Select>
                     </div>
 
-                    {/* Designer Textile: 2. Color — all groups + shades in one compact card */}
+                    {/* Designer Textile: 2. Thickness */}
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Thickness</Label>
+                      <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="dt-thickness-select">
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select thickness" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DESIGNER_TEXTILE_THICKNESSES.map((t) => (
+                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Designer Textile: 3. Color — all groups + shades in one compact card */}
                     <div className="config-section space-y-3">
                       <Label className="section-header">Color</Label>
                       {DESIGNER_TEXTILE_COLOR_GROUPS.map((group) => (
@@ -1784,7 +1863,7 @@ const Configurator = () => {
                       )}
                     </div>
 
-                    {/* Designer Textile: 3. Fabric Texture — live thumbnails, cannot unselect */}
+                    {/* Designer Textile: 4. Fabric Texture — live thumbnails, cannot unselect */}
                     <div className="config-section space-y-2">
                       <Label className="section-header">Fabric Texture</Label>
                       <div className="grid grid-cols-3 gap-2" data-testid="dt-fabric-grid">
@@ -1835,21 +1914,6 @@ const Configurator = () => {
                       {selectedDTFabric && (
                         <p className="text-xs text-[hsl(215,16%,47%)] pt-0.5">{selectedDTFabric.name} selected</p>
                       )}
-                    </div>
-
-                    {/* Designer Textile: 4. Thickness */}
-                    <div className="config-section space-y-2">
-                      <Label className="section-header">Thickness</Label>
-                      <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="dt-thickness-select">
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select thickness" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DESIGNER_TEXTILE_THICKNESSES.map((t) => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
 
                     {/* Designer Textile: 5. Emboss */}
@@ -2029,6 +2093,23 @@ const Configurator = () => {
                       <div style={{ fontSize: 11, color: '#8a8480' }}>1200 × 2800 mm · 3-Panel Wall Setup</div>
                     </div>
 
+                    {/* Thickness — above Ombre Colors */}
+                    {selectedProductType?.thicknesses?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Thickness</Label>
+                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="so-thickness-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select thickness" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.thicknesses.map((t) => (
+                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
                     {/* Ombre Colors */}
                     <div className="config-section space-y-3">
                       <Label className="section-header">Ombre Colors</Label>
@@ -2109,22 +2190,7 @@ const Configurator = () => {
                       <SignatureOmbreLightRing rotation={soLightRotation} onChange={setSoLightRotation} />
                     </div>
 
-                    {/* Thickness */}
-                    {selectedProductType?.thicknesses?.length > 0 && (
-                      <div className="config-section space-y-2">
-                        <Label className="section-header">Thickness</Label>
-                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="so-thickness-select">
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select thickness" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedProductType.thicknesses.map((t) => (
-                              <SelectItem key={t} value={t}>{t}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
+                    {/* Thickness — removed from here, now shown above Ombre Colors */}
                   </>
                 ) : selectedCategory?.id === "ombre-color-core-ombre" ? (
                   <>
@@ -2145,6 +2211,23 @@ const Configurator = () => {
                         </Select>
                       </div>
                     )}
+
+                {/* 1b. Thickness — above Base Color */}
+                {selectedProductType?.thicknesses?.length > 0 && (
+                  <div className="config-section space-y-2">
+                    <Label className="section-header">Thickness</Label>
+                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="ombre-thickness-select">
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select thickness" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedProductType.thicknesses.map((t) => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* 2. Base Colors */}
                 <div className="config-section space-y-2">
@@ -2339,22 +2422,7 @@ const Configurator = () => {
                   )}
                 </div>
 
-                {/* 5. Thickness */}
-                {selectedProductType?.thicknesses?.length > 0 && (
-                  <div className="config-section space-y-2">
-                    <Label className="section-header">Thickness</Label>
-                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="ombre-thickness-select">
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select thickness" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {selectedProductType.thicknesses.map((t) => (
-                          <SelectItem key={t} value={t}>{t}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {/* 5. Thickness — removed, now shown above Base Color */}
                   </>
                 ) : null}
               </div>
@@ -3037,7 +3105,7 @@ const Configurator = () => {
       <button
         onClick={() => setChatOpen((v) => !v)}
         className="fixed bottom-6 right-6 z-[300] w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-        style={{ background: 'hsl(26,21%,65%)' }}
+        style={{ background: 'hsl(7, 62%, 62%)' }}
         aria-label="Chat with us"
         data-testid="chat-fab"
       >

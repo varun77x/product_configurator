@@ -92,18 +92,22 @@ export default function ChatWidget({ open, onClose }) {
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: "hsl(25,40%,46%)" }}
+        style={{ background: "#da5142" }}
       >
         <div className="flex items-center gap-2">
           <img
             src="/chat-icon.png"
             alt=""
-            className="w-6 h-6 object-contain"
+            className="w-10 h-10 object-contain"
             aria-hidden="true"
           />
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">
-              UniVicoustic Assistant
+            <p className="text-white font-semibold text-md leading-tight" style={{ 
+              fontFamily: "'Quintessential', serif",
+               fontStyle: 'normal',
+                fontWeight: 400 }}>
+
+              UNIVICOUSTIC Assistant
             </p>
             <p className="text-white/70 text-[11px]">Ask about our panels</p>
           </div>
