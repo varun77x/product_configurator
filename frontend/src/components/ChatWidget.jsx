@@ -1,21 +1,51 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, Loader2 } from "lucide-react";
+import { X, Send, Loader2, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
 
 const WELCOME_MESSAGE = {
-  role: "model",
+  role: "assistant",
   content:
     "Hi! I'm the UniVicoustic assistant. Ask me anything about our acoustic panels — products, sizes, specs, or how to use the configurator.",
 };
 
+// Maps product keywords → configurator URL slug + chip label + optional surface type
+const PRODUCT_CHIPS = [
+  { regex: /\b(flat\s+panel|flat\s+vmt|flat_pet|flat\s+pet)\b/i, slug: "flat-embossed-vmd", label: "Flat VMT", surfaceType: "flat" },
+  { regex: /\b(embossed\s+vmt|embossed\s+panel|embossed_pet)\b/i, slug: "flat-embossed-vmd", label: "Embossed VMT", surfaceType: "embossed" },
+  { regex: /\b(vicstrip|vic\s+strip|groove|grooving|grooved)\b/i, slug: "vicstrip", label: "VicStrip", surfaceType: null },
+  { regex: /\b(ombre|ombrè|ombré|signature\s+ombre)\b/i, slug: "ombre", label: "Signature Ombré", surfaceType: null },
+  { regex: /\b(wood\s+panel|wood\s+acoustic|perforated\s+wood)\b/i, slug: "wood", label: "Wood", surfaceType: null },
+  { regex: /\b(designer\s+textile|color\s+core|colour\s+core|fabric\s+panel)\b/i, slug: "fabrics", label: "Fabrics" },
+];
+
+function getProductChips(text) {
+  const seen = new Set();
+  return PRODUCT_CHIPS.filter(({ regex, slug, surfaceType }) => {
+    const key = slug + (surfaceType ?? "");
+    if (regex.test(text) && !seen.has(key)) { seen.add(key); return true; }
+    return false;
+  });
+}
+
+// Client-side rate limit: max messages per window
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
+
 export default function ChatWidget({ open, onClose }) {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [rateCooldown, setRateCooldown] = useState(0); // seconds until next message allowed
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const sendTimestamps = useRef([]); // rolling window of send times
+  const cooldownTimer = useRef(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -31,8 +61,26 @@ export default function ChatWidget({ open, onClose }) {
 
   const sendMessage = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || rateCooldown > 0) return;
 
+    // Client-side rate limit check
+    const now = Date.now();
+    sendTimestamps.current = sendTimestamps.current.filter(t => now - t < RATE_WINDOW_MS);
+    if (sendTimestamps.current.length >= RATE_LIMIT) {
+      const oldestInWindow = sendTimestamps.current[0];
+      const msUntilFree = RATE_WINDOW_MS - (now - oldestInWindow);
+      const secsUntilFree = Math.ceil(msUntilFree / 1000);
+      setRateCooldown(secsUntilFree);
+      clearInterval(cooldownTimer.current);
+      cooldownTimer.current = setInterval(() => {
+        setRateCooldown(prev => {
+          if (prev <= 1) { clearInterval(cooldownTimer.current); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+      return;
+    }
+    sendTimestamps.current.push(now);
     const userMessage = { role: "user", content: text };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
@@ -60,7 +108,7 @@ export default function ChatWidget({ open, onClose }) {
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
-        { role: "model", content: data.reply },
+        { role: "assistant", content: data.reply },
       ]);
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -123,28 +171,69 @@ export default function ChatWidget({ open, onClose }) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 min-h-0">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+        {messages.map((msg, i) => {
+          const chips = msg.role === "assistant" ? getProductChips(msg.content) : [];
+          return (
             <div
-              className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "text-white rounded-br-sm"
-                  : "text-[hsl(215,25%,27%)] rounded-bl-sm"
-              }`}
-              style={{
-                background:
-                  msg.role === "user"
-                    ? "hsl(25,40%,46%)"
-                    : "hsl(215,16%,94%)",
-              }}
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {msg.content}
+              <div className={msg.role === "assistant" ? "flex flex-col items-start max-w-[80%]" : "max-w-[80%]"}>
+                <div
+                  className={`rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "text-white rounded-br-sm whitespace-pre-wrap"
+                      : "text-[hsl(215,25%,27%)] rounded-bl-sm"
+                  }`}
+                  style={{
+                    background:
+                      msg.role === "user"
+                        ? "hsl(9, 57%, 56%)"
+                        : "hsl(215,16%,94%)",
+                  }}
+                >
+                  {msg.role === "user" ? (
+                    msg.content
+                  ) : (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 mb-1 space-y-0.5">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-1 space-y-0.5">{children}</ol>,
+                        li: ({ children }) => <li>{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        a: ({ href, children }) => (
+                          <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-[hsl(25,40%,46%)]">{children}</a>
+                        ),
+                        code: ({ children }) => <code className="bg-black/10 px-1 rounded text-xs">{children}</code>,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  )}
+                </div>
+                {chips.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1.5 px-1">
+                    {chips.map(({ slug, label, surfaceType }) => (
+                      <button
+                        key={slug + (surfaceType ?? "")}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/${slug}`, surfaceType ? { state: { surfaceType } } : undefined);
+                        }}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors hover:bg-[hsl(25,40%,46%)] hover:text-white hover:border-transparent"
+                        style={{ borderColor: "hsl(25,40%,46%)", color: "hsl(25,40%,46%)" }}
+                      >
+                        Explore {label} <ArrowRight className="h-3 w-3" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div className="flex justify-start">
@@ -171,39 +260,46 @@ export default function ChatWidget({ open, onClose }) {
 
       {/* Input */}
       <div
-        className="flex items-end gap-2 px-3 py-3 flex-shrink-0 border-t"
+        className="flex flex-col gap-1.5 px-3 py-3 flex-shrink-0 border-t"
         style={{ borderColor: "hsl(215,16%,87%)" }}
       >
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask a question…"
-          rows={1}
-          maxLength={500}
-          disabled={loading}
-          className="flex-1 resize-none rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50"
-          style={{
-            borderColor: "hsl(215,16%,87%)",
-            maxHeight: 96,
-            lineHeight: "1.4",
-            focusRingColor: "hsl(25,40%,46%)",
-          }}
-          onInput={(e) => {
-            e.target.style.height = "auto";
-            e.target.style.height = `${Math.min(e.target.scrollHeight, 96)}px`;
-          }}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!input.trim() || loading}
-          aria-label="Send message"
-          className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40"
-          style={{ background: "hsl(25,40%,46%)" }}
-        >
-          <Send className="h-4 w-4 text-white" />
-        </button>
+        {rateCooldown > 0 && (
+          <p className="text-xs text-center text-amber-600 bg-amber-50 rounded-lg px-2 py-1">
+            Slow down — wait {rateCooldown}s before sending again.
+          </p>
+        )}
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask a question…"
+            rows={1}
+            maxLength={500}
+            disabled={loading || rateCooldown > 0}
+            className="flex-1 resize-none rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:opacity-50"
+            style={{
+              borderColor: "hsl(215,16%,87%)",
+              maxHeight: 96,
+              lineHeight: "1.4",
+              focusRingColor: "hsl(25,40%,46%)",
+            }}
+            onInput={(e) => {
+              e.target.style.height = "auto";
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 96)}px`;
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim() || loading || rateCooldown > 0}
+            aria-label="Send message"
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40"
+            style={{ background: "hsl(25,40%,46%)" }}
+          >
+            <Send className="h-4 w-4 text-white" />
+          </button>
+        </div>
       </div>
     </div>
   );

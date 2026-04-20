@@ -876,7 +876,9 @@ export const getDesignerTextilePanelUrl = (fabricId, shadeId) =>
 // export const getDesignerTextileThumbnailUrl = (fabricId, shadeId) =>
 //   `${BACKEND_URL}/thumb/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`;
 export const getDesignerTextileThumbnailUrl = (fabricId, shadeId) =>
-  `${ASSETS_URL}/static/_thumbcache/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`;
+  (fabricId && shadeId)
+    ? `${ASSETS_URL}/static/_thumbcache/fabric/designer_textile/panels/${fabricId}_${shadeId}.jpg`
+    : null;
 
 /**
  * Returns the pre-rendered embossed panel URL (reserved for future use).

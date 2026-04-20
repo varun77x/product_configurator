@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useCallback, useRef, memo, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
 // import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview, { preloadImages } from "@/components/FlatEmbossedPreview";
@@ -27,8 +28,7 @@ import ChatWidget from "@/components/ChatWidget";
 // const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 // const API = `${BACKEND_URL}/api`;
 // Products catalog + tech specs are now fetched as static JSON from the CDN.
-// const ASSETS_URL = process.env.REACT_APP_ASSETS_URL
-const ASSETS_URL ="http://localhost:8001"; 
+const ASSETS_URL = process.env.REACT_APP_ASSETS_URL || "http://localhost:8001";
 
 // Boot loader toggles (quickly reversible without touching JSX)
 const ENABLE_BOOT_WHITE_OVERLAY = true;
@@ -50,6 +50,13 @@ const SO_PAT_ICONS = {
   'ribbed-duo':  'M3,2v20M5,2v20M10,2v20M12,2v20M17,2v20M19,2v20',
   'tapered':     'M4,2v20M8,4v16M12,6v12M16,4v16M20,2v20',
   'flux-ribbed': 'M3,2v20M6,2v20M10,2v20M14,2v20M17,2v20M21,2v20',
+};
+
+// NRC hover hints for flat-embossed-vmd thickness options
+const THICKNESS_NRC_HINTS = {
+  "12mm (PET Panel)": "0.45 NRC can be increased to 0.9 (See Tech Specs for further details)",
+  "25mm (PET Panel)": "0.6 NRC can be increased to 0.9 (See Tech Specs for further details)",
+  "PET Wool":         "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
 };
 
 // Technical specs data (fallback)
@@ -220,6 +227,12 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
               <span className="text-[hsl(215,16%,47%)]">Product Code</span>
               <span className="font-mono font-medium">{design.design_code}</span>
             </div>
+            {isVicstrip && design.color_name && (
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Color</span>
+                <span className="font-medium">{design.color_name}</span>
+              </div>
+            )}
             {design.category && (
               <div className="flex justify-between">
                 <span className="text-[hsl(215,16%,47%)]">Category</span>
@@ -433,6 +446,7 @@ function getCategoriesForSurface(categories, surfaceType, productId) {
 const Configurator = () => {
   const { productType: productTypeParam } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Products from API
   const [products, setProducts] = useState([]);
@@ -904,6 +918,15 @@ const Configurator = () => {
   }, [loading]);
 
   // Load tech specs from CDN JSON (replaces /api/products/{id}/specs)
+  // Handle surfaceType hint from chat widget navigation state
+  useEffect(() => {
+    const st = location.state?.surfaceType;
+    if (!st || loading) return;
+    handleSurfaceTypeChange(st);
+    // Clear the state so re-renders don't re-fire this
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state?.surfaceType, loading]);
+
   useEffect(() => {
     const fetchSpecs = async () => {
       if (selectedProductType?.id) {
@@ -1357,49 +1380,62 @@ const Configurator = () => {
             variant="outline"
             size="sm"
             onClick={() => {
+              const productId = selectedProductType?.id;
+              const catId = selectedCategory?.id;
+
+              // Products where thickness determines which PDF to show
+              const needsThickness = (
+                productId === "flat-embossed-vmd" ||
+                productId === "wood" ||
+                (productId === "fabrics" && catId !== "fabrics-color-core") ||
+                (productId === "ombre" && catId === "signature-ombre")
+              );
+
+              if (needsThickness && !selectedThickness) {
+                toast.error("Please select a thickness first");
+                return;
+              }
+
               const isPetWool = selectedThickness?.includes("PET Wool");
+              const isEmbossedSurface = selectedSurfaceType === 'embossed';
+
               let pdfFile;
-              if (selectedProductType?.id === "flat-embossed-vmd") {
-                pdfFile = selectedEmbossPattern
+              if (productId === "flat-embossed-vmd") {
+                pdfFile = isEmbossedSurface
                   ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
                   : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-              } else if (selectedProductType?.id === "fabrics") {
-                const catId = selectedCategory?.id;
-                if (catId === "fabrics-color-core") {
-                  // Color Core has no PET Wool option
-                  pdfFile = selectedColorCoreEmboss ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
-                } else if (catId === "fabrics-designer-textile") {
-                  pdfFile = selectedDTEmboss
+              } else if (productId === "wood") {
+                if (catId === "wood-classic-parquet") {
+                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
+                } else {
+                  pdfFile = isEmbossedSurface
                     ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
                     : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-                } else {
-                  // luxury-textures, modern-corporate — flat only
-                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
                 }
-              } else if (selectedProductType?.id === "ombre") {
-                if (selectedCategory?.id === "ombre-color-core-ombre") {
-                  // Color Core Ombre has no PET Wool option
-                  pdfFile = selectedOmbreEmbossPattern ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
+              } else if (productId === "fabrics") {
+                if (catId === "fabrics-color-core") {
+                  // Color Core has no PET Wool option
+                  pdfFile = isEmbossedSurface ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
+                } else {
+                  // designer-textile, luxury-textures, modern-corporate
+                  pdfFile = isEmbossedSurface
+                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+                }
+              } else if (productId === "ombre") {
+                if (catId === "ombre-color-core-ombre") {
+                  // Color Core Ombre has no PET Wool; grooving tab → flat PDF
+                  pdfFile = selectedSurfaceType === 'embossed'
+                    ? "Embossed VMT Series (PET).pdf"
+                    : "Flat Panel VMT (PET).pdf";
                 } else {
                   // Signature Ombre — always embossed
                   pdfFile = isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf";
                 }
-              } else if (selectedProductType?.id === "wood") {
-                const catId = selectedCategory?.id;
-                if (catId === "wood-classic-parquet") {
-                  // Classic Parquet — flat only
-                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
-                } else {
-                  // wood-classics, wood-perforations — emboss available
-                  pdfFile = selectedEmbossPattern
-                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
-                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-                }
-              } else if (selectedProductType?.id === "vicstrip") {
-                // VicStrip — flat only, no PET Wool
+              } else if (productId === "vicstrip") {
                 pdfFile = "Flat Panel VMT (PET).pdf";
               } else {
-                pdfFile = "Flat Panel VMT (PET).pdf";
+                pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
               }
               window.open(`${ASSETS_URL}/static/technical_specification_pdfs/${encodeURIComponent(pdfFile)}`, "_blank");
             }}
@@ -1626,11 +1662,27 @@ const Configurator = () => {
                         <SelectValue placeholder="Select thickness" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.thicknesses.map((thickness) => (
-                          <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
-                            {thickness}
-                          </SelectItem>
-                        ))}
+                        {selectedProductType.thicknesses.map((thickness) => {
+                          const nrcHint = selectedProductType.id === "flat-embossed-vmd"
+                            ? THICKNESS_NRC_HINTS[thickness]
+                            : null;
+                          return nrcHint ? (
+                            <Tooltip key={thickness}>
+                              <TooltipTrigger asChild>
+                                <SelectItem value={thickness} data-testid={`thickness-${thickness}`}>
+                                  {thickness}
+                                </SelectItem>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="max-w-[220px] text-center">
+                                {nrcHint}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
+                              {thickness}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1656,6 +1708,21 @@ const Configurator = () => {
                 {/* 3. Print / Designer Textile Sections */}
                 {selectedCategory?.id === "fabrics-color-core" ? (
                   <>
+
+                    {/* Color Core: Size */}
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Size</Label>
+                      <Select value={selectedSize || ""} onValueChange={(v) => { setSelectedSize(v); setSelectedColorCoreEmboss(null); }} data-testid="color-core-size-select">
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COLOR_CORE_SIZES.map((s) => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                     {/* Color Core: Base Color swatches */}
                     <div className="config-section space-y-2">
@@ -1744,44 +1811,31 @@ const Configurator = () => {
                       </AccordionItem>
                     </Accordion>
 
-                    {/* Color Core: Size */}
-                    <div className="config-section space-y-2">
-                      <Label className="section-header">Size</Label>
-                      <Select value={selectedSize || ""} onValueChange={(v) => { setSelectedSize(v); setSelectedColorCoreEmboss(null); }} data-testid="color-core-size-select">
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {COLOR_CORE_SIZES.map((s) => (
-                            <SelectItem key={s} value={s}>{s}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
                     {/* Color Core: Emboss */}
-                    <div className="config-section space-y-2">
-                      <Label className="section-header">Emboss</Label>
-                      <div className="thumbnail-grid" data-testid="color-core-emboss-grid">
-                        {COLOR_CORE_EMBOSS_PATTERNS
-                          .filter(pattern => !selectedSize || pattern.availableSizes.includes(selectedSize))
-                          .map(pattern => (
-                            <EmbossThumbnail
-                              key={pattern.id}
-                              pattern={pattern}
-                              isSelected={selectedColorCoreEmboss?.id === pattern.id}
-                              onSelect={(p) => setSelectedColorCoreEmboss(prev => prev?.id === p.id ? null : p)}
-                            />
-                          ))
-                        }
-                      </div>
-                      {selectedColorCoreEmboss && (
-                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
-                          <p className="font-medium text-sm">{selectedColorCoreEmboss.name}</p>
-                          <button onClick={() => setSelectedColorCoreEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                    {selectedSurfaceType !== 'flat' && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Emboss</Label>
+                        <div className="thumbnail-grid" data-testid="color-core-emboss-grid">
+                          {COLOR_CORE_EMBOSS_PATTERNS
+                            .filter(pattern => !selectedSize || pattern.availableSizes.includes(selectedSize))
+                            .map(pattern => (
+                              <EmbossThumbnail
+                                key={pattern.id}
+                                pattern={pattern}
+                                isSelected={selectedColorCoreEmboss?.id === pattern.id}
+                                onSelect={(p) => setSelectedColorCoreEmboss(prev => prev?.id === p.id ? null : p)}
+                              />
+                            ))
+                          }
                         </div>
-                      )}
-                    </div>
+                        {selectedColorCoreEmboss && (
+                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                            <p className="font-medium text-sm">{selectedColorCoreEmboss.name}</p>
+                            <button onClick={() => setSelectedColorCoreEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </>
                 ) : selectedCategory?.id === "fabrics-designer-textile" ? (
                   <>
@@ -1866,79 +1920,87 @@ const Configurator = () => {
                     {/* Designer Textile: 4. Fabric Texture — live thumbnails, cannot unselect */}
                     <div className="config-section space-y-2">
                       <Label className="section-header">Fabric Texture</Label>
-                      <div className="grid grid-cols-3 gap-2" data-testid="dt-fabric-grid">
-                        {DESIGNER_TEXTILE_FABRICS
-                          .filter(f => !selectedDTColorGroup || f.supportedColorGroups.includes(selectedDTColorGroup.id))
-                          .map((fabric) => {
-                            const isSelected = selectedDTFabric?.id === fabric.id;
-                            const thumbUrl = getDesignerTextileThumbnailUrl(fabric.id, selectedDTShade?.id);
-                            return (
-                              <HoverCard key={fabric.id} openDelay={200} closeDelay={100}>
-                                <HoverCardTrigger asChild>
-                                  <button
-                                    title={fabric.name}
-                                    onClick={() => setSelectedDTFabric(fabric)}
-                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
-                                      isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                                    }`}
-                                    data-testid={`dt-fabric-${fabric.id}`}
-                                  >
-                                    <img
-                                      src={thumbUrl}
-                                      alt={fabric.name}
-                                      className="absolute inset-0 w-full h-full object-cover"
-                                    />
-                                    <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center font-semibold text-white bg-black/40 py-0.5">
-                                      {fabric.name}
-                                    </span>
-                                  </button>
-                                </HoverCardTrigger>
-                                <HoverCardContent side="right" align="start" className="w-56 p-0 overflow-hidden">
-                                  <div className="relative w-full h-40 overflow-hidden">
-                                    <img
-                                      src={thumbUrl}
-                                      alt={fabric.name}
-                                      className="absolute inset-0 w-full h-full object-cover"
-                                    />
-                                  </div>
-                                  <div className="px-3 py-2">
-                                    <p className="font-manrope font-bold text-sm">{fabric.name}</p>
-                                    <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
-                                  </div>
-                                </HoverCardContent>
-                              </HoverCard>
-                            );
-                          })
-                        }
-                      </div>
-                      {selectedDTFabric && (
-                        <p className="text-xs text-[hsl(215,16%,47%)] pt-0.5">{selectedDTFabric.name} selected</p>
+                      {!selectedDTShade ? (
+                        <p className="text-sm text-[hsl(215,16%,47%)]">Select a shade above to view fabric textures.</p>
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-3 gap-2" data-testid="dt-fabric-grid">
+                            {DESIGNER_TEXTILE_FABRICS
+                              .filter(f => !selectedDTColorGroup || f.supportedColorGroups.includes(selectedDTColorGroup.id))
+                              .map((fabric) => {
+                                const isSelected = selectedDTFabric?.id === fabric.id;
+                                const thumbUrl = getDesignerTextileThumbnailUrl(fabric.id, selectedDTShade?.id);
+                                return (
+                                  <HoverCard key={fabric.id} openDelay={200} closeDelay={100}>
+                                    <HoverCardTrigger asChild>
+                                      <button
+                                        title={fabric.name}
+                                        onClick={() => setSelectedDTFabric(fabric)}
+                                        className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
+                                          isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                        }`}
+                                        data-testid={`dt-fabric-${fabric.id}`}
+                                      >
+                                        <img
+                                          src={thumbUrl}
+                                          alt={fabric.name}
+                                          className="absolute inset-0 w-full h-full object-cover"
+                                        />
+                                        <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center font-semibold text-white bg-black/40 py-0.5">
+                                          {fabric.name}
+                                        </span>
+                                      </button>
+                                    </HoverCardTrigger>
+                                    <HoverCardContent side="right" align="start" className="w-56 p-0 overflow-hidden">
+                                      <div className="relative w-full h-40 overflow-hidden">
+                                        <img
+                                          src={thumbUrl}
+                                          alt={fabric.name}
+                                          className="absolute inset-0 w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="px-3 py-2">
+                                        <p className="font-manrope font-bold text-sm">{fabric.name}</p>
+                                        <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                      </div>
+                                    </HoverCardContent>
+                                  </HoverCard>
+                                );
+                              })
+                            }
+                          </div>
+                          {selectedDTFabric && (
+                            <p className="text-xs text-[hsl(215,16%,47%)] pt-0.5">{selectedDTFabric.name} selected</p>
+                          )}
+                        </>
                       )}
                     </div>
 
                     {/* Designer Textile: 5. Emboss */}
-                    <div className="config-section space-y-2">
-                      <Label className="section-header">Emboss</Label>
-                      <div className="thumbnail-grid" data-testid="dt-emboss-grid">
-                        {DESIGNER_TEXTILE_EMBOSS_PATTERNS
-                          .filter(pattern => !selectedDTSize || pattern.availableSizes.includes(selectedDTSize))
-                          .map(pattern => (
-                            <EmbossThumbnail
-                              key={pattern.id}
-                              pattern={pattern}
-                              isSelected={selectedDTEmboss?.id === pattern.id}
-                              onSelect={(p) => setSelectedDTEmboss(prev => prev?.id === p.id ? null : p)}
-                            />
-                          ))
-                        }
-                      </div>
-                      {selectedDTEmboss && (
-                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
-                          <p className="font-medium text-sm">{selectedDTEmboss.name}</p>
-                          <button onClick={() => setSelectedDTEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                    {selectedSurfaceType !== 'flat' && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Emboss</Label>
+                        <div className="thumbnail-grid" data-testid="dt-emboss-grid">
+                          {DESIGNER_TEXTILE_EMBOSS_PATTERNS
+                            .filter(pattern => !selectedDTSize || pattern.availableSizes.includes(selectedDTSize))
+                            .map(pattern => (
+                              <EmbossThumbnail
+                                key={pattern.id}
+                                pattern={pattern}
+                                isSelected={selectedDTEmboss?.id === pattern.id}
+                                onSelect={(p) => setSelectedDTEmboss(prev => prev?.id === p.id ? null : p)}
+                              />
+                            ))
+                          }
                         </div>
-                      )}
-                    </div>
+                        {selectedDTEmboss && (
+                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                            <p className="font-medium text-sm">{selectedDTEmboss.name}</p>
+                            <button onClick={() => setSelectedDTEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </>
                 ) : selectedCategory?.id === "wood-perforations" && !selectedWoodPerfSize ? (
                     <div className="config-section">
