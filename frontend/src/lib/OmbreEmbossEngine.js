@@ -235,16 +235,15 @@ export class OmbreEmbossEngine {
     }
     const meanL = pixCount > 0 ? totalL / pixCount : 200;
 
-    // Build ombre gradient as pixel data
-    const pct = Math.min(0.95, Math.max(0.05, ombrePercent / 100));
+    // Build ombre gradient via the shared smoothstep-based builder so the flat
+    // and embossed paths stay in sync AND neither shows the Mach band that a
+    // naive 3-stop linear gradient produces at the gradient→solid junction.
+    // baseColor is kept in the options for API compatibility but the pale top
+    // is now derived from overlayColor inside buildOmbreGradient.
     const ombreCv = document.createElement('canvas');
     ombreCv.width = cropped.width; ombreCv.height = cropped.height;
     const octx = ombreCv.getContext('2d');
-    const grad = octx.createLinearGradient(0, 0, 0, ombreCv.height);
-    grad.addColorStop(0, baseColor);
-    grad.addColorStop(1 - pct, baseColor);
-    grad.addColorStop(1, overlayColor);
-    octx.fillStyle = grad;
+    octx.fillStyle = OmbreEmbossEngine.buildOmbreGradient(octx, ombreCv.width, ombreCv.height, overlayColor, ombrePercent);
     octx.fillRect(0, 0, ombreCv.width, ombreCv.height);
     const ombreImg = octx.getImageData(0, 0, ombreCv.width, ombreCv.height);
     const od = ombreImg.data;
@@ -269,6 +268,92 @@ export class OmbreEmbossEngine {
     comp.getContext('2d').putImageData(ombreImg, 0, 0);
 
     return { dataUrl: comp.toDataURL('image/png'), width: comp.width, height: comp.height };
+  }
+
+  // Blend `hex` toward white by `1 - strength` (strength=0.22 → 22% hex, 78% white).
+  // Shared with the flat-panel rendering path in Configurator.jsx so both
+  // surfaces produce the same pale top tint for a given overlay color.
+  //
+  // Why 0.22: a 10% strength produced a near-pure-white top, which made the
+  // gradient read as washed-out compared to the prerendered Color Core Ombre
+  // reference. 0.22 keeps the top clearly pale while preserving enough of the
+  // overlay hue to read as the same colour family as the bottom.
+  static tintColor(hex, strength = 0.22) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    const w = 1 - strength;
+    return `rgb(${Math.round(r * strength + 255 * w)},${Math.round(g * strength + 255 * w)},${Math.round(b * strength + 255 * w)})`;
+  }
+
+  // Build the vertical ombre gradient used by both flat and embossed panels.
+  //
+  // Shape target: match the prerendered Color Core Ombre panels — warm pale
+  // tint for the first ~15% from the top, steepest transition through the
+  // middle, then eases into a deeply saturated overlay at the bottom.
+  //
+  // Construction:
+  //   1. Biased coordinate  t = y ^ exp   where exp = ln(0.5) / ln(1 - pct),
+  //      which shifts the curve so blend = 0.5 at y = 1 - pct.  `blendPct`
+  //      keeps its "overlay coverage" feel: higher → midpoint moves upward,
+  //      lower → midpoint moves downward.
+  //   2. Smootherstep       blend = 6t⁵ - 15t⁴ + 10t³
+  //      Flatter near t=0 and t=1 than cubic smoothstep and steeper through
+  //      the middle — produces the "long pale top, fast middle, long
+  //      saturated bottom" reading the Color Core reference shows.  C²
+  //      continuous at both endpoints (first AND second derivatives are
+  //      zero) so there is no kink for Mach banding to form against.
+  //
+  // Top tint strength 0.22 keeps the top clearly pale while retaining enough
+  // overlay hue so the panel reads as one colour family, not overlay dropped
+  // onto white.
+  //
+  // 32 intermediate stops keep the curve visually smooth without needing
+  // pixel-by-pixel painting.
+  static buildOmbreGradient(ctx, width, height, overlayHex, blendPct) {
+    // Intensity bias: the raw slider reads as "lighter than the setting
+    // implies" — smootherstep's flat tails make the pale zone long and the
+    // saturated zone short, so soBlend=50 visually lands near 30% overlay
+    // coverage.  Adding a constant 0.15 to the internal pct shifts the
+    // perceptual midpoint upward on the panel so 50 reads as ~50/50.  Applied
+    // to every setting, so 30 and 40 benefit identically.  Tune BIAS down
+    // toward 0 to weaken the correction, up toward 0.25 to strengthen it.
+    const BIAS = 0.15;
+    const pct = Math.max(0.05, Math.min(0.95, blendPct / 100 + BIAS));
+    const topColor = OmbreEmbossEngine.tintColor(overlayHex); // uses default strength 0.22
+    const grad = ctx.createLinearGradient(0, 0, 0, height);
+
+    // Parse colors once for interpolation
+    const parse = (c) => {
+      if (c.startsWith('rgb')) {
+        const m = c.match(/\d+/g);
+        return [+m[0], +m[1], +m[2]];
+      }
+      const h = c.replace('#', '');
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    };
+    const [tr, tg, tb] = parse(topColor);
+    const [or, og, ob] = parse(overlayHex);
+    const mix = (s) => `rgb(${Math.round(tr + (or - tr) * s)},${Math.round(tg + (og - tg) * s)},${Math.round(tb + (ob - tb) * s)})`;
+
+    const mid = Math.max(0.05, Math.min(0.95, 1 - pct));
+    const exponent = Math.log(0.5) / Math.log(mid);
+
+    const STEPS = 32;
+    for (let i = 0; i <= STEPS; i++) {
+      const y = i / STEPS;
+      const t = Math.pow(y, exponent);
+      // Perlin quintic smootherstep: 6t⁵ - 15t⁴ + 10t³.
+      // Flatter near t=0 and t=1 than cubic smoothstep and steeper through the
+      // middle — matches the Color Core reference's "long pale top, fast
+      // middle, long saturated bottom" profile, and still has C² continuity
+      // at both endpoints (first and second derivatives are zero) so there is
+      // no kink for Mach banding.
+      const blend = t * t * t * (t * (t * 6 - 15) + 10);
+      grad.addColorStop(y, mix(blend));
+    }
+    return grad;
   }
 
   dispose() {

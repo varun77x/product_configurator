@@ -11,6 +11,19 @@ body {
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     height: 100vh;
+    /* Never allow horizontal scroll, regardless of viewport. */
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Mobile: unlock the body so the page itself can scroll vertically.
+   Horizontal stays clipped via the rules above. */
+@media (max-width: 767px) {
+    body {
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
+    }
 }
 
 h1, h2, h3, h4, h5, h6 {

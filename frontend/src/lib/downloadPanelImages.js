@@ -41,14 +41,25 @@ export async function downloadPanelImages({ design, categoryId }) {
         urls.forEach((u) => u && window.open(u, '_blank'));
       }
     } else {
-      // Single image path: prefer explicit texture_url, else construct from categoryId + design_code
-      let url = design.texture_url || (categoryId && design.design_code ? `/static/images/flat-embossed-vmt/panels/${categoryId}/${design.design_code}.jpg` : null);
-      if (!url) {
-        // Additional fallbacks (vicstrip / other product types)
-        if (design?.pattern && design?.color?.id) {
-          // vicstrip style
-          url = `/static/images/vicstrip/${design.pattern}/${design.color.id}.jpg`;
-        }
+      // Single image path — what we serve up depends on product type.
+      //
+      // VicStrip: route to the pre-cropped panel cutouts under
+      //   /static/images/vicstrip/panels/<category-slug>/<color-id>.jpg
+      // generated from the full-room JPGs (814×1900 right-anchored).  The
+      // caller already slugifies design.category into categoryId (e.g.
+      // "Single Groove" → "single-groove"), so we use that directly — the
+      // previous code used design.pattern raw which contained the display
+      // name with spaces/caps and didn't match the folder names.
+      //
+      // Everything else: the existing flat-embossed-vmt panel layout, or an
+      // explicit design.texture_url when present.
+      let url = null;
+      if (design?.product_type === 'vicstrip' && categoryId && design?.color?.id) {
+        url = `/static/images/vicstrip/panels/${categoryId}/${design.color.id}.jpg`;
+      } else {
+        url = design.texture_url || (categoryId && design.design_code
+          ? `/static/images/flat-embossed-vmt/panels/${categoryId}/${design.design_code}.jpg`
+          : null);
       }
       if (!url) return;
       const abs = toAbsolute(url);

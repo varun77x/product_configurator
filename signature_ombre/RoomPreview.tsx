@@ -28,27 +28,12 @@ export const RoomPreview: React.FC<RoomPreviewProps> = ({
   const overlayRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load room setup image and convert black → transparent
+  // Load room setup image as-is (no pixel manipulation — furniture stays intact)
   useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const cv = document.createElement('canvas');
-      cv.width = img.width; cv.height = img.height;
-      const ctx = cv.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      const d = ctx.getImageData(0, 0, cv.width, cv.height);
-      const px = d.data;
-      for (let i = 0; i < px.length; i += 4) {
-        if (px[i] < 15 && px[i + 1] < 15 && px[i + 2] < 15) px[i + 3] = 0;
-      }
-      ctx.putImageData(d, 0, 0);
-      if (overlayRef.current) {
-        overlayRef.current.onload = () => { overlayRef.current!.style.display = 'block'; };
-        overlayRef.current.src = cv.toDataURL('image/png');
-      }
-    };
-    img.src = ROOM_SETUP_URL;
+    if (overlayRef.current) {
+      overlayRef.current.onload = () => { overlayRef.current!.style.display = 'block'; };
+      overlayRef.current.src = ROOM_SETUP_URL;
+    }
   }, []);
 
   // Tile panel image on wall whenever it changes

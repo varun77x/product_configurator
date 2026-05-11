@@ -322,6 +322,7 @@ export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
   { id: "triangle",   name: "Triangle",   thumbnailUrl: FVP_EMBOSS_THUMB("triangle.png")   },
   { id: "square_30",  name: "Square 30",  thumbnailUrl: FVP_EMBOSS_THUMB("square_30.png")  },
   { id: "deck",       name: "Deck",       thumbnailUrl: FVP_EMBOSS_THUMB("deck.png")       },
+  { id: "aqualine",   name: "Aqualine",   thumbnailUrl: FVP_EMBOSS_THUMB("aqualine.png")   },
 ];
 
 /**
@@ -400,7 +401,7 @@ export const COLOR_CORE_COLORS = [
   { id: "CC-04", name: "Straw",         hex: "#f9d698" },
   { id: "CC-05", name: "Arabian Spice", hex: "#9e5239" },
   { id: "CC-06", name: "Coral Haze",    hex: "#b87857" },
-  { id: "CC-07", name: "Fog",           hex: "#ffffff" },
+  { id: "CC-07", name: "Fog",           hex: "#f0efef" },
   { id: "CC-08", name: "Glacier",       hex: "#b6b5b8" },
   { id: "CC-09", name: "Birch",         hex: "#95948d" },
   { id: "CC-10", name: "Graphite",      hex: "#5b5f64" },
@@ -416,11 +417,13 @@ export const COLOR_CORE_COLORS = [
   { id: "CC-20", name: "Alloy",         hex: "#767a82" },
 ];
 
-/** 3 fabric structures for Color Core */
+/** 3 fabric structures for Color Core.
+ *  Display order is reversed from the legacy order; `id` still maps to the
+ *  underlying panel filename ({id}_{colorId}.jpg) so files/URLs are unchanged. */
 export const COLOR_CORE_FABRIC_STRUCTURES = [
-  { id: "FB-GY-03", name: "FB-GY-03" },
-  { id: "FB-GY-28", name: "FB-GY-28" },
-  { id: "FB-NE-06", name: "FB-NE-06" },
+  { id: "FB-NE-06", name: "FB-CC-01" },
+  { id: "FB-GY-28", name: "FB-CC-02" },
+  { id: "FB-GY-03", name: "FB-CC-03" },
 ];
 
 /**
@@ -496,10 +499,10 @@ export const OMBRE_COLOR_CORE_OVERLAYS = {
     { hex: "#6d2932", filename: "Ombre-#6d2932-CoralHaze_1200x2800.jpg" },
     { hex: "#735138", filename: "Ombre-#735138-CoralHaze_1200x2800.jpg" },
     { hex: "#7e2404", filename: "Ombre-#7e2404-CoralHaze_1200x2800.jpg" },
-    { hex: "#7b7d7d", filename: "Ombre-#7b7d7d-CoralHaze_1200x2800.jpg" },
-    { hex: "#717474", filename: "Ombre-#717474-CoralHaze_1200x2800.jpg" },
-    { hex: "#5e6060", filename: "Ombre-#5e6060-CoralHaze_1200x2800.jpg" },
-    { hex: "#5c5e5e", filename: "Ombre-#5c5e5e-CoralHaze_1200x2800.jpg" },
+    // { hex: "#7b7d7d", filename: "Ombre-#7b7d7d-CoralHaze_1200x2800.jpg" },
+    // { hex: "#717474", filename: "Ombre-#717474-CoralHaze_1200x2800.jpg" },
+    // { hex: "#5e6060", filename: "Ombre-#5e6060-CoralHaze_1200x2800.jpg" },
+    // { hex: "#5c5e5e", filename: "Ombre-#5c5e5e-CoralHaze_1200x2800.jpg" },
   ],
   apricot: [
     { hex: "#641e16", filename: "Ombre-#641e16-Apricot_1200x2800.jpg" },
@@ -631,13 +634,18 @@ export const getOmbreColorCorePanelUrl = (baseColorId, filename) =>
 
 // const OMBRE_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/embossed_line_thumbnails/${file}`;
 const OMBRE_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/ombre/color-core-ombre/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+// Ombre Color Core emboss patterns now render at BOTH product sizes —
+// previously 1200x2400 was groove-only, but that restriction was lifted
+// (both sizes carry both emboss and groove panels now).  availableSizes
+// feeds the size-dropdown filter: both entries here → the Size select shows
+// both sizes under Embossed + Color Core Ombre, matching Grooving.
 export const OMBRE_COLOR_CORE_EMBOSS_PATTERNS = [
-  { id: "flux_ribbed", name: "Flux Ribbed", suffix: "Flux Ribbed", thumbnailUrl: OMBRE_EMBOSS_THUMB("flux_ribbed.png") },
-  { id: "ribbed_25mm", name: "Ribbed 25mm", suffix: "Ribbed 25mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_25mm.png") },
-  { id: "ribbed_45mm", name: "Ribbed 45mm", suffix: "Ribbed 45mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_45mm.png") },
-  { id: "ribbed_60mm", name: "Ribbed 60mm", suffix: "Ribbed 60mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_60mm.png") },
-  { id: "ribbed_duo",  name: "Ribbed Duo",  suffix: "Ribbed Duo",  thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_duo.png")  },
-  { id: "tappered",   name: "Tappered",    suffix: "Tappered",    thumbnailUrl: OMBRE_EMBOSS_THUMB("tappered.png")   },
+  { id: "flux_ribbed", name: "Flux Ribbed", suffix: "Flux Ribbed", thumbnailUrl: OMBRE_EMBOSS_THUMB("flux_ribbed.png"), availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "ribbed_25mm", name: "Ribbed 25mm", suffix: "Ribbed 25mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_25mm.png"), availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "ribbed_45mm", name: "Ribbed 45mm", suffix: "Ribbed 45mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_45mm.png"), availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "ribbed_60mm", name: "Ribbed 60mm", suffix: "Ribbed 60mm", thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_60mm.png"), availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "ribbed_duo",  name: "Ribbed Duo",  suffix: "Ribbed Duo",  thumbnailUrl: OMBRE_EMBOSS_THUMB("ribbed_duo.png"),  availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "tappered",   name: "Tappered",    suffix: "Tappered",    thumbnailUrl: OMBRE_EMBOSS_THUMB("tappered.png"),    availableSizes: ["1200x2400", "1200x2800"] },
 ];
 
 /** Derives emboss panel URL from the selected overlay filename + emboss pattern.
@@ -652,16 +660,19 @@ export const getOmbreEmbossPanelUrl = (pattern, overlayFilename) => {
 
 // const GROOVE_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/groove_thumbnails/${file}`;
 const GROOVE_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/ombre/color-core-ombre/groove_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+// Ombre Color Core groove patterns work at both of the Ombre product sizes.
+// Under Grooving + Ombre, every size in this union stays visible in the Size
+// dropdown.
 export const OMBRE_COLOR_CORE_GROOVE_PATTERNS = [
-  { id: "aqualine", name: "Aqualine", suffix: "Aqualine", thumbnailUrl: GROOVE_THUMB("AQUALINE.png") },
-  { id: "arcane",   name: "Arcane",   suffix: "Arcane",   thumbnailUrl: GROOVE_THUMB("ARCANE.png")   },
-  { id: "arcadia",  name: "Arcadia",  suffix: "Arcadia",  thumbnailUrl: GROOVE_THUMB("ARCADIA.png")  },
-  { id: "drift",    name: "Drift",    suffix: "Drift",    thumbnailUrl: GROOVE_THUMB("DRIFT.png")    },
-  { id: "ellis",    name: "Ellis",    suffix: "Ellis",    thumbnailUrl: GROOVE_THUMB("ELLIS.png")    },
-  { id: "stripe",   name: "Stripe",   suffix: "Stripe",   thumbnailUrl: GROOVE_THUMB("STRIPE.png")   },
-  { id: "sway",     name: "Sway",     suffix: "Sway",     thumbnailUrl: GROOVE_THUMB("SWAY.png")     },
-  { id: "twine",    name: "Twine",    suffix: "Twine",    thumbnailUrl: GROOVE_THUMB("TWINE.png")    },
-  { id: "vault",    name: "Vault",    suffix: "Vault",    thumbnailUrl: GROOVE_THUMB("VAULT.png")    },
+  { id: "aqualine", name: "Aqualine", suffix: "Aqualine", thumbnailUrl: GROOVE_THUMB("AQUALINE.png"), availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "arcane",   name: "Arcane",   suffix: "Arcane",   thumbnailUrl: GROOVE_THUMB("ARCANE.png"),   availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "arcadia",  name: "Arcadia",  suffix: "Arcadia",  thumbnailUrl: GROOVE_THUMB("ARCADIA.png"),  availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "drift",    name: "Drift",    suffix: "Drift",    thumbnailUrl: GROOVE_THUMB("DRIFT.png"),    availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "ellis",    name: "Ellis",    suffix: "Ellis",    thumbnailUrl: GROOVE_THUMB("ELLIS.png"),    availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "stripe",   name: "Stripe",   suffix: "Stripe",   thumbnailUrl: GROOVE_THUMB("STRIPE.png"),   availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "sway",     name: "Sway",     suffix: "Sway",     thumbnailUrl: GROOVE_THUMB("SWAY.png"),     availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "twine",    name: "Twine",    suffix: "Twine",    thumbnailUrl: GROOVE_THUMB("TWINE.png"),    availableSizes: ["1200x2400", "1200x2800"] },
+  { id: "vault",    name: "Vault",    suffix: "Vault",    thumbnailUrl: GROOVE_THUMB("VAULT.png"),    availableSizes: ["1200x2400", "1200x2800"] },
 ];
 
 /** Derives groove panel URL from the selected overlay filename + groove pattern.
@@ -745,11 +756,11 @@ export const DESIGNER_TEXTILE_COLOR_GROUPS = [
     id: "Yellow",
     name: "Yellow",
     shades: [
-      { id: "Yellow_1", hex: "#E0B026" },
-      { id: "Yellow_2", hex: "#F1B93E" },
-      { id: "Yellow_3", hex: "#EBCA42" },
-      { id: "Yellow_4", hex: "#F2D66A" },
-      { id: "Yellow_5", hex: "#EDD388" },
+      { id: "Yellow_1", hex: "#E3D043" },
+      { id: "Yellow_2", hex: "#BFAE46" },
+      { id: "Yellow_3", hex: "#C99132" },
+      { id: "Yellow_4", hex: "#E3B941" },
+      { id: "Yellow_5", hex: "#EDBB3C" },
     ],
   },
   {

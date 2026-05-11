@@ -31,7 +31,7 @@
     height: calc(100vh - 48px);
     min-height: 0;
     overflow: hidden;
-    background: rgb(240, 240, 240);
+    background: rgb(245, 245, 245);
 }
 
 @media (min-width: 768px) {
@@ -43,7 +43,7 @@
 /* Sidebar */
 .config-sidebar {
     width: 100%;
-    background: white;
+    background: #fbfafa !important; /* TEST: bright magenta */
     border-right: 1px solid hsl(var(--border));
     overflow: hidden;
     display: flex;
@@ -126,6 +126,9 @@
     border: 1px solid hsl(var(--border));
     background-size: cover;
     background-position: center;
+    /* position: relative so the .selected ::after checkmark badge can be
+       anchored to the top-right corner regardless of where this tile sits. */
+    position: relative;
 }
 
 .thumbnail-item:hover {
@@ -159,8 +162,46 @@
 }
 
 .thumbnail-item.selected {
+    /* Selected state = accent border + corner check badge (defined via
+       ::after below).  The badge does the heavy lifting; the 2-px border
+       is just a subtle peripheral cue.  Dropped the outer glow we tried
+       earlier — it washed out on dark panels and competed with the badge. */
     border: 2px solid hsl(var(--accent));
-    box-shadow: 0 0 0 2px hsl(var(--accent) / 0.3);
+}
+
+/* Shared check-mark badge for ANY selected element.
+   Three trigger paths covered:
+     1. .thumbnail-item.selected   — DesignThumbnail / EmbossThumbnail
+     2. .color-swatch.selected     — generic color-grid swatches
+     3. [data-uv-selected="true"]  — universal opt-in for any element
+        whose selected styling lives in inline Tailwind classes (e.g.
+        Color Core base swatches, Designer Textile color cells, Ombre
+        base/overlay swatches, etc.)  Add `data-uv-selected={isSelected}`
+        to a button / div and it gets the badge automatically.
+   Auto-sizes via `min(20px, 35%)` so a 600-px wide thumbnail and a
+   30-px overlay swatch both get a sensibly-proportioned badge.  SVG
+   inlined as a data: URI so there's no extra HTTP request. */
+.thumbnail-item.selected::after,
+.color-swatch.selected::after,
+[data-uv-selected="true"]::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: min(20px, 35%);
+    height: min(20px, 35%);
+    min-width: 12px;
+    min-height: 12px;
+    border-radius: 50%;
+    background-color: hsl(var(--accent));
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 65% 65%;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* Color Swatches */
@@ -177,6 +218,8 @@
     cursor: pointer;
     border: 2px solid transparent;
     transition: all 0.15s ease;
+    /* Anchor for the .selected ::after corner-check badge. */
+    position: relative;
 }
 
 .color-swatch:hover {
@@ -184,8 +227,10 @@
 }
 
 .color-swatch.selected {
+    /* Match thumbnail-item.selected — accent border + corner check badge
+       (defined alongside .thumbnail-item.selected::after above). */
+    border-width: 2px;
     border-color: hsl(var(--accent));
-    box-shadow: 0 0 0 2px hsl(var(--accent) / 0.3);
 }
 
 /* Action Buttons */
@@ -277,4 +322,98 @@
 @keyframes uv-loader-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.6; transform: scale(0.92); }
+}
+
+/* ── Mobile layout (under 768px) ──────────────────────────────────────────
+   On mobile, the sidebar + canvas stack vertically. The root and content
+   wrappers become page-scrollable (not fixed-height), the sidebar takes
+   its natural content height, and the canvas-area gets a full viewport
+   height (100dvh) so the preview is large once the user scrolls to it. */
+@media (max-width: 767px) {
+    .configurator-root {
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: visible;
+        max-width: 100vw;
+    }
+
+    .configurator-content {
+        height: auto;
+        min-height: calc(100dvh - 48px);
+        overflow-x: hidden;
+        overflow-y: visible;
+        flex-direction: column;
+        max-width: 100vw;
+    }
+
+    .config-sidebar {
+        overflow: visible;
+        height: auto;
+        flex: 0 0 auto;
+        border-right: none;
+        border-bottom: 1px solid hsl(var(--border));
+    }
+
+    /* Neutralize Radix ScrollArea on mobile so the page itself scrolls.
+       Without this, the sidebar's ScrollArea intercepts all touch swipes
+       and the user gets stuck at the top of the page. */
+    .config-sidebar > .relative.overflow-hidden {
+        overflow: visible !important;
+        flex: 0 0 auto;
+    }
+    .config-sidebar [data-radix-scroll-area-viewport] {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .canvas-area {
+        flex: 0 0 auto;
+        width: 100%;
+        height: 70dvh;
+        min-height: 70dvh;
+    }
+
+    /* The FlatEmbossedPreview component renders a wallCanvasRef div with
+       inline `display: inline-block` that shrink-wraps to the furniture
+       image.  The image itself has `max-height: calc(100vh - 220px)` set
+       in the component, which on mobile makes the image taller than our
+       70dvh canvas-area, causing it to overflow / get cropped weirdly.
+       Scope the image to fit the mobile viewport so the wrapper shrinks
+       to a sensible size. */
+    [data-testid="wall-canvas"] > img {
+        max-height: calc(70dvh - 24px) !important;
+        max-width: 100% !important;
+    }
+}
+
+/* "View Preview" FAB — mobile-only, scrolls user down to the canvas. */
+.view-preview-fab {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    background: hsl(25, 40%, 46%);
+    color: white;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    border: none;
+    cursor: pointer;
+}
+
+.view-preview-fab:active {
+    transform: translateY(1px);
+}
+
+@media (min-width: 768px) {
+    .view-preview-fab {
+        display: none;
+    }
 }

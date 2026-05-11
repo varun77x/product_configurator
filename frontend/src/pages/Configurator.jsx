@@ -3,7 +3,11 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
 // import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText, MessageCircle } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText, MessageCircle, SplitSquareHorizontal, ArrowDown, User, LogOut, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { getUser, logout, onAuthChange } from "@/lib/auth";
+import { track } from "@/lib/analytics";
+import { toPng } from "html-to-image";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -21,7 +25,6 @@ import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED
 import { useBlobPanel, useMultiBlobPanels } from "@/hooks/use-blob-panel";
 import { downloadPanelImages } from "@/lib/downloadPanelImages";
 import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
-import SignatureOmbreLightRing from "@/components/SignatureOmbreLightRing";
 import { OmbreEmbossEngine } from "@/lib/OmbreEmbossEngine";
 import ChatWidget from "@/components/ChatWidget";
 
@@ -35,28 +38,87 @@ const ENABLE_BOOT_WHITE_OVERLAY = true;
 const BOOT_OVERLAY_EXTRA_MS = 500;
 
 // ── Signature Ombre: 6 emboss patterns with OBJ models ──────────────────────
+// thumbnailUrl points at the pre-resized 400×400 center-cropped PNGs under
+// /thumbs/ — the originals under /images/emboss_thumbnails/*.png are
+// 2000×4655 portrait rectangles that alias badly when the browser has to
+// downsample them ~17× to the grid tile.  The /thumbs/ set mirrors what the
+// Designer Textile backend thumbnailer produces (200×200 center-crop), just
+// done once at build time rather than on-demand at request time.  Originals
+// are preserved next to the thumbs in case higher-res is needed elsewhere.
 const SO_PATTERNS = [
-  { id: 'ribbed-25',   name: 'Ribbed 25',   modelUrl: '/models/emboss/ribbed-25.obj' },
-  { id: 'ribbed-45',   name: 'Ribbed 45',   modelUrl: '/models/emboss/ribbed-45.obj' },
-  { id: 'ribbed-60',   name: 'Ribbed 60',   modelUrl: '/models/emboss/ribbed-60.obj' },
-  { id: 'ribbed-duo',  name: 'Ribbed Duo',  modelUrl: '/models/emboss/ribbed-duo.obj' },
-  { id: 'tapered',     name: 'Tapered',     modelUrl: '/models/emboss/tapered.obj' },
-  { id: 'flux-ribbed', name: 'Flux Ribbed', modelUrl: '/models/emboss/flux-ribbed.obj' },
+  { id: 'ribbed-25',   name: 'Ribbed 25',   modelUrl: '/models/emboss/ribbed-25.obj',   thumbnailUrl: '/images/emboss_thumbnails/thumbs/ribbed_25mm.png' },
+  { id: 'ribbed-45',   name: 'Ribbed 45',   modelUrl: '/models/emboss/ribbed-45.obj',   thumbnailUrl: '/images/emboss_thumbnails/thumbs/ribbed_45mm.png' },
+  { id: 'ribbed-60',   name: 'Ribbed 60',   modelUrl: '/models/emboss/ribbed-60.obj',   thumbnailUrl: '/images/emboss_thumbnails/thumbs/ribbed_60mm.png' },
+  { id: 'ribbed-duo',  name: 'Ribbed Duo',  modelUrl: '/models/emboss/ribbed-duo.obj',  thumbnailUrl: '/images/emboss_thumbnails/thumbs/ribbed_duo.png' },
+  { id: 'tapered',     name: 'Tapered',     modelUrl: '/models/emboss/tapered.obj',     thumbnailUrl: '/images/emboss_thumbnails/thumbs/tappered.png' },
+  { id: 'flux-ribbed', name: 'Flux Ribbed', modelUrl: '/models/emboss/flux-ribbed.obj', thumbnailUrl: '/images/emboss_thumbnails/thumbs/flux_ribbed.png' },
 ];
-const SO_PAT_ICONS = {
-  'ribbed-25':   'M4,2v20M8,2v20M12,2v20M16,2v20M20,2v20',
-  'ribbed-45':   'M3,2v20M7,2v20M11,2v20M15,2v20M19,2v20M21,2v20',
-  'ribbed-60':   'M2,2v20M6,2v20M10,2v20M18,2v20M22,2v20',
-  'ribbed-duo':  'M3,2v20M5,2v20M10,2v20M12,2v20M17,2v20M19,2v20',
-  'tapered':     'M4,2v20M8,4v16M12,6v12M16,4v16M20,2v20',
-  'flux-ribbed': 'M3,2v20M6,2v20M10,2v20M14,2v20M17,2v20M21,2v20',
-};
+// ── Signature Ombre: overlay color palette (grouped by hue family) ────────
+const SO_COLORS_BY_GROUP = [
+  { group: 'Blue',    colors: ['#7cabc5','#355270','#828fa3','#91bad9','#a0b7c9','#006f8a','#7cb3bd','#93cbc9'] },
+  { group: 'Brown',   colors: ['#7c4d25','#6e512d','#543d24','#ab8d70'] },
+  { group: 'Green',   colors: ['#5f855a','#708b6d','#689885','#578d79','#928b48','#a5a35d'] },
+  { group: 'Grey',    colors: ['#d9d9d9','#edece1','#8e8e8e','#7c807e','#797374','#858283','#c3cbcd','#cac6c3','#7a7e80','#b2aab1'] },
+  { group: 'Neutral', colors: ['#ebdfd9','#e7d0bd','#845e4f','#e8c9ab','#e9c5a4','#bc9c7a','#ccbfa6','#e3b692','#806449','#f4d1a8','#f0e1d4'] },
+  { group: 'Pink',    colors: ['#b57777','#ac827d','#d3a7ae','#d69fa0','#ddbac8'] },
+  { group: 'Rust',    colors: ['#813923','#5d241b','#9d6632','#9b3b22','#8e4725'] },
+  { group: 'Yellow',  colors: ['#e4b01f','#fdb81d','#fad427','#fada54','#f7da88'] },
+];
 
-// NRC hover hints for flat-embossed-vmd thickness options
+// ── Signature Ombre: blend presets (dark zone % from bottom → top = white) ─
+const SO_BLEND_PRESETS = [
+  { label: '30/70', value: 30 },
+  { label: '40/60', value: 40 },
+  { label: '50/50', value: 50 },
+];
+
+// NRC hover hints applied to every thickness dropdown across the app.
+// Every product's thickness options are one of these three PET variants
+// (VicStrip labels have been reconciled with the rest).  These are the
+// defaults; per-product overrides go in THICKNESS_NRC_HINTS_BY_PRODUCT.
 const THICKNESS_NRC_HINTS = {
   "12mm (PET Panel)": "0.45 NRC can be increased to 0.9 (See Tech Specs for further details)",
   "25mm (PET Panel)": "0.6 NRC can be increased to 0.9 (See Tech Specs for further details)",
   "PET Wool":         "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
+};
+
+// Per-product NRC overrides. Anything not listed here falls back to the
+// THICKNESS_NRC_HINTS default. Add a new productId key + thickness map to
+// override values for a specific product line.
+const THICKNESS_NRC_HINTS_BY_PRODUCT = {
+  vicstrip: {
+    "12mm (PET Panel)": "0.5 NRC can be increased to 0.9 (See Tech Specs for further details)",
+    "25mm (PET Panel)": "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
+  },
+};
+
+// Resolves the NRC hint for a (productId, thickness) pair — override wins,
+// otherwise falls back to the global default. Returns undefined when no
+// hint is defined (the dropdown skips the tooltip in that case).
+const resolveThicknessHint = (productId, thickness) =>
+  THICKNESS_NRC_HINTS_BY_PRODUCT[productId]?.[thickness] ?? THICKNESS_NRC_HINTS[thickness];
+
+// Shared SelectItem that auto-wraps in a Tooltip when the thickness has an
+// NRC hint defined.  Use this in every thickness dropdown so the "floater"
+// hover behaviour is consistent across products/categories.
+const ThicknessSelectItem = ({ thickness, testIdPrefix = "thickness", disabled = false, disabledReason, productId }) => {
+  const hint = resolveThicknessHint(productId, thickness);
+  const item = (
+    <SelectItem value={thickness} disabled={disabled} data-testid={`${testIdPrefix}-${thickness}`}>
+      {thickness}
+    </SelectItem>
+  );
+  // When disabled, the disabledReason replaces the NRC hint as the tooltip content.
+  const tooltipText = disabled ? disabledReason : hint;
+  if (!tooltipText) return item;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{item}</TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[220px] text-center">
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
+  );
 };
 
 // Technical specs data (fallback)
@@ -272,7 +334,7 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
       <div
         className={`thumbnail-item emboss-thumbnail ${isSelected && !disabled ? "selected" : ""} ${disabled ? "disabled" : ""}`}
         style={{
-          backgroundColor: "#E5E7EB",
+          backgroundColor: "transparent",
           cursor: disabled ? "default" : "pointer",
           position: "relative",
         }}
@@ -309,11 +371,22 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
         )}
       </div>
     </HoverCardTrigger>
-    <HoverCardContent side="right" align="start" className="w-52 p-0 overflow-hidden">
+    <HoverCardContent side="right" align="start" className="w-64 p-0 overflow-hidden">
       {pattern.thumbnailUrl ? (
-        <img src={pattern.thumbnailUrl} alt={pattern.name} className="w-full h-32 object-cover" />
+        // aspect-square + w-64 (256px) matches the native 1:1 ratio of every
+        // emboss source PNG and roughly halves the downsample factor versus the
+        // old 208×128 sizing.  That's what keeps sub-pixel patterns like
+        // Ribbed Duo's paired thin lines from turning into Moiré/broken lines.
+        <img
+          src={pattern.thumbnailUrl}
+          alt={pattern.name}
+          loading="lazy"
+          decoding="async"
+          className="w-full aspect-square object-cover"
+          style={{ imageRendering: 'auto' }}
+        />
       ) : (
-        <div className="h-32 w-full bg-gray-100" />
+        <div className="aspect-square w-full bg-gray-100" />
       )}
       <div className="p-3">
         <p className="font-manrope font-bold text-sm">{pattern.name}</p>
@@ -416,7 +489,7 @@ const PRODUCT_ID_TO_URL_SLUG = Object.fromEntries(
 // ── New top-level taxonomy: Flat | Embossed | Grooving ───────────────────────
 // Maps each surface type to the product-line IDs that belong there.
 const SURFACE_SERIES_MAP = {
-  flat:     ['flat-embossed-vmd', 'wood', 'fabrics'],
+  flat:     ['flat-embossed-vmd', 'wood', 'fabrics', 'ombre'],
   embossed: ['flat-embossed-vmd', 'wood', 'fabrics', 'ombre'],
   grooving: ['ombre', 'vicstrip'],
 };
@@ -428,6 +501,11 @@ function getCategoriesForSurface(categories, surfaceType, productId) {
   if (surfaceType === 'flat') {
     if (productId === 'flat-embossed-vmd' || productId === 'wood')
       return categories.filter(c => !c.emboss_available || c.flat_available);
+    // ombre: Color Core Ombre stays under Flat (renders as the flat ombre
+    // gradient).  Signature Ombre is excluded from Flat — it's embossed-only.
+    // This mirrors the Grooving branch below where the same filter applies.
+    if (productId === 'ombre')
+      return categories.filter(c => c.id === 'ombre-color-core-ombre');
     return categories; // fabrics: all categories visible under Flat
   }
   if (surfaceType === 'embossed') {
@@ -443,10 +521,60 @@ function getCategoriesForSurface(categories, surfaceType, productId) {
   return categories;
 }
 
+// ── Size filtering by surface type ───────────────────────────────────────────
+// Given a category id + surface type, returns either a Set<string> of sizes
+// that should be visible in the Size dropdown, or null meaning "no filter
+// applies" (e.g. surface is Flat, or the matching pattern set has no
+// availableSizes metadata yet, or the category isn't known here).
+//
+// Driven entirely by each pattern set's `availableSizes` arrays so adding
+// restrictions later is a pure data change.  Under Embossed we union the
+// emboss patterns for that category; under Grooving we union the groove
+// patterns; under Flat we short-circuit to null (Flat has no relief overlay
+// so every size is fine).
+function getAvailableSizesForSurface(categoryId, surfaceType, patternSets) {
+  if (!categoryId || !surfaceType) return null;
+  if (surfaceType === 'flat') return null; // no emboss/groove restriction on Flat
+
+  const pick = (which) => {
+    if (which === 'emboss') {
+      if (categoryId === 'fabrics-color-core')       return patternSets.colorCore;
+      if (categoryId === 'fabrics-designer-textile') return patternSets.designerTextile;
+      if (categoryId === 'ombre-color-core-ombre')   return patternSets.ombreEmboss;
+      return patternSets.flatEmbossed; // FE-VMD / wood / other fabrics
+    }
+    // which === 'groove'
+    if (categoryId === 'ombre-color-core-ombre')     return patternSets.ombreGroove;
+    return null; // no groove patterns known for this category
+  };
+
+  const patterns = pick(surfaceType === 'grooving' ? 'groove' : 'emboss');
+  if (!patterns || !patterns.length) return null;
+
+  const union = new Set();
+  let anyHasMetadata = false;
+  for (const p of patterns) {
+    if (Array.isArray(p.availableSizes)) {
+      anyHasMetadata = true;
+      p.availableSizes.forEach(s => union.add(s));
+    }
+  }
+  // If NO pattern in this set declares availableSizes, we can't filter —
+  // signal "no filter" so the caller just shows the full size list.
+  return anyHasMetadata ? union : null;
+}
+
 const Configurator = () => {
-  const { productType: productTypeParam } = useParams();
+  // URL shape: /:surfaceType/:productType — e.g. /flat/bespoke-graphics.
+  // Both params are optional so the route tree `/`, `/:surfaceType`, and
+  // `/:surfaceType/:productType` all land here; validation happens inside.
+  const { surfaceType: surfaceTypeParam, productType: productTypeParam } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Whitelist of valid surface tab slugs — used both for URL validation and
+  // for mapping to the internal `selectedSurfaceType` state.
+  const VALID_SURFACES = ['flat', 'embossed', 'grooving'];
 
   // Products from API
   const [products, setProducts] = useState([]);
@@ -459,7 +587,24 @@ const Configurator = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   // Surface type: new top-level filter (Flat | Embossed | Grooving)
   const [selectedSurfaceType, setSelectedSurfaceType] = useState('flat');
-  
+
+  // ── Per-tab state snapshots ──────────────────────────────────────────────
+  // Each surface tab (Flat | Embossed | Grooving) keeps its own configuration
+  // so switching tabs restores exactly what the user had there last time,
+  // instead of carrying the current tab's series/category/colours/etc. onto
+  // the new tab.
+  //
+  // Starts null for every tab — the first time a tab is visited we fall
+  // through to `handleProductTypeChange` (first valid series for that
+  // surface) instead of restoring.  On every tab switch we capture the
+  // outgoing tab's state into this ref before restoring the incoming one.
+  //
+  // IMPORTANT: `captureTabState` / `applyTabState` below must list EVERY
+  // piece of state that's per-tab.  If a new useState is added that binds to
+  // a user selection, add it to both helpers or its value will leak across
+  // tabs (or get wiped on tab switch).
+  const tabStatesRef = useRef({ flat: null, embossed: null, grooving: null });
+
   // Generic product state (for non-VicStrip products like VMD, Ombre)
   const [selectedDesign, setSelectedDesign] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -490,11 +635,15 @@ const Configurator = () => {
   const [selectedOmbreGroovePattern, setSelectedOmbreGroovePattern] = useState(null);
   const [ombreFinishType, setOmbreFinishType] = useState("emboss"); // "emboss" | "groove"
   // Signature Ombre real-time 3D configurator state
-  const [soBaseColor, setSoBaseColor] = useState('#C47A4A');
-  const [soOverlayColor, setSoOverlayColor] = useState('#6B3A2A');
-  const [soBlend, setSoBlend] = useState(50);
-  const [soLightRotation, setSoLightRotation] = useState(-10 * (Math.PI / 180)); // 10° CCW from Front
-  const [soSelectedPattern, setSoSelectedPattern] = useState(SO_PATTERNS[0].id);
+  const [soBaseColor, setSoBaseColor] = useState('#ffffff');
+  // Overlay + emboss start unset — the preview stays blank until the user
+  // picks a color.  Once a color is picked the flat ombre gradient renders;
+  // once a pattern is picked on top, the embossed version renders.
+  const [soOverlayColor, setSoOverlayColor] = useState(null);
+  const [soBlend, setSoBlend] = useState(30);
+  const [soColorGroup, setSoColorGroup] = useState('Blue');
+  const [soLightRotation] = useState(-55 * (Math.PI / 180)); // fixed -55° (CCW from front) since the visual HDRI dial was removed
+  const [soSelectedPattern, setSoSelectedPattern] = useState(null);
   const [soPanelImage, setSoPanelImage] = useState(null);
   const [soIsLoading, setSoIsLoading] = useState(false);
   const soEngineRef = useRef(null);
@@ -530,53 +679,167 @@ const Configurator = () => {
     return designs;
   }, [selectedCategory, selectedSurfaceType]);
 
-  // ── True when the user has filled all required sections (patti toggle is always optional) ──
+  // ── Sizes visible in each size dropdown for the current surface tab ───────
+  // Wraps getAvailableSizesForSurface so the component doesn't hand-wire each
+  // pattern set.  Returns a Set<string> of allowed size ids, or null meaning
+  // "no restriction — show every size".  Individual size selectors below use
+  // `isSizeAllowedForSurface(sizeId)` to gate each SelectItem.
+  const availableSizesForSurface = useMemo(
+    () => getAvailableSizesForSurface(selectedCategory?.id, selectedSurfaceType, {
+      colorCore:       COLOR_CORE_EMBOSS_PATTERNS,
+      designerTextile: DESIGNER_TEXTILE_EMBOSS_PATTERNS,
+      ombreEmboss:     OMBRE_COLOR_CORE_EMBOSS_PATTERNS,
+      ombreGroove:     OMBRE_COLOR_CORE_GROOVE_PATTERNS,
+      flatEmbossed:    FLAT_EMBOSSED_EMBOSS_PATTERNS,
+    }),
+    [selectedCategory, selectedSurfaceType]
+  );
+  const isSizeAllowedForSurface = useCallback(
+    (size) => availableSizesForSurface == null || availableSizesForSurface.has(size),
+    [availableSizesForSurface]
+  );
+
+  // Clear the currently-selected size when a surface / category change makes
+  // it invalid (e.g. user switches from Grooving→Embossed while the size was
+  // a groove-only size).  Shouldn't fire in practice with the tab-snapshot
+  // machinery, but guards against it leaking.  Covers both selectedSize (most
+  // products) and selectedDTSize (Designer Textile's separate state).
+  useEffect(() => {
+    if (!availableSizesForSurface) return;
+    if (selectedSize && !availableSizesForSurface.has(selectedSize)) {
+      setSelectedSize(null);
+    }
+    if (selectedDTSize && !availableSizesForSurface.has(selectedDTSize)) {
+      setSelectedDTSize(null);
+    }
+  }, [availableSizesForSurface, selectedSize, selectedDTSize]);
+
+  // Keep ombreFinishType in lock-step with the surface tab.  The on-screen
+  // Emboss|Groove toggle was removed (the surface tab dictates the mode), but
+  // a few places still read ombreFinishType so we keep it coherent here
+  // instead of hunting every read site.  Also clears the opposite-type
+  // pattern selection so a stale groove pattern can't leak into Embossed
+  // rendering and vice versa.
+  useEffect(() => {
+    if (selectedProductType?.id !== 'ombre') return;
+    if (selectedSurfaceType === 'embossed' && ombreFinishType !== 'emboss') {
+      setOmbreFinishType('emboss');
+      setSelectedOmbreGroovePattern(null);
+    } else if (selectedSurfaceType === 'grooving' && ombreFinishType !== 'groove') {
+      setOmbreFinishType('groove');
+      setSelectedOmbreEmbossPattern(null);
+    }
+  }, [selectedSurfaceType, selectedProductType?.id, ombreFinishType]);
+
+  // ── True when the user has filled every visible required field. Defaults
+  //    (Blend, Studio Lighting, base white in Signature Ombre) count as filled
+  //    since they're pre-populated; T-Profile toggle is always optional.
+  //    Under Embossed surface, the emboss/pattern selection is required for
+  //    every category that has one. Under Grooving (Color Core Ombre only),
+  //    the groove pattern is required.
   const isConfigComplete = useMemo(() => {
     if (!selectedProductType) return false;
     const id = selectedProductType.id;
     const needsSize  = (selectedProductType.sizes?.length ?? 0) > 0;
     const needsThick = (selectedProductType.thicknesses?.length ?? 0) > 0;
+    const requiresEmboss = selectedSurfaceType === 'embossed';
+    const requiresGroove = selectedSurfaceType === 'grooving';
 
     if (id === "vicstrip") {
+      // VicStrip has no emboss step.
       return !!(selectedPattern && selectedDesign && selectedSize && selectedThickness);
     }
 
     if (id === "ombre") {
       if (!selectedCategory) return false;
       if (selectedCategory.id === "signature-ombre") {
-        return !!((!needsThick || selectedThickness));
+        // Base is fixed white, Blend has a default. Required: thickness +
+        // overlay colour, plus the 3D pattern when on the Embossed tab.
+        return !!(
+          (!needsThick || selectedThickness) &&
+          soOverlayColor &&
+          (!requiresEmboss || soSelectedPattern)
+        );
       }
+      // Color Core Ombre — base + overlay + size + thickness, plus the
+      // surface-tied finish pattern (emboss/groove). Flat is a colour-gradient
+      // only product so no finish pattern is required there.
       const base = !!(selectedOmbreBaseColor && selectedOmbreOverlay);
-      return base && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness);
+      const sizeAndThick = (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness);
+      const finishOk =
+        requiresEmboss ? !!selectedOmbreEmbossPattern :
+        requiresGroove ? !!selectedOmbreGroovePattern :
+        true;
+      return base && sizeAndThick && finishOk;
     }
 
     if (id === "flat-embossed-vmd" || id === "wood") {
       if (!selectedCategory) return false;
       if (selectedCategory.id === "wood-perforations") {
-        return !!(selectedWoodPerfSize && selectedDesign && (!needsThick || !!selectedThickness));
+        // Wood Perforations: size + design + thickness + the perforation pattern
+        // (defaults to the first valid pattern on entry, so this is effectively
+        // always filled — included here for correctness).
+        return !!(
+          selectedWoodPerfSize &&
+          selectedDesign &&
+          selectedPerforation &&
+          (!needsThick || !!selectedThickness)
+        );
       }
-      return !!(selectedDesign && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+      // Generic Bespoke Graphics / Wood Classics — design + size + thickness,
+      // plus an emboss pattern under the Embossed tab.
+      return !!(
+        selectedDesign &&
+        (!needsSize || !!selectedSize) &&
+        (!needsThick || !!selectedThickness) &&
+        (!requiresEmboss || selectedEmbossPattern)
+      );
     }
 
     if (id === "fabrics") {
       if (!selectedCategory) return false;
       if (selectedCategory.id === "fabrics-color-core") {
-        return !!(selectedColorCoreColor && selectedFabricStructure && !!selectedSize);
+        return !!(
+          selectedColorCoreColor &&
+          selectedFabricStructure &&
+          selectedSize &&
+          (!needsThick || selectedThickness) &&
+          (!requiresEmboss || selectedColorCoreEmboss)
+        );
       }
       if (selectedCategory.id === "fabrics-designer-textile") {
-        return !!(selectedDTShade && selectedDTFabric && selectedDTSize && selectedThickness);
+        return !!(
+          selectedDTShade &&
+          selectedDTFabric &&
+          selectedDTSize &&
+          selectedThickness &&
+          (!requiresEmboss || selectedDTEmboss)
+        );
       }
-      return !!(selectedDesign && (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+      return !!(
+        selectedDesign &&
+        (!needsSize || !!selectedSize) &&
+        (!needsThick || !!selectedThickness) &&
+        (!requiresEmboss || selectedEmbossPattern)
+      );
     }
 
     // Generic fallback
-    return !!(selectedCategory && selectedDesign &&
-      (!needsSize || !!selectedSize) && (!needsThick || !!selectedThickness));
+    return !!(
+      selectedCategory && selectedDesign &&
+      (!needsSize || !!selectedSize) &&
+      (!needsThick || !!selectedThickness) &&
+      (!requiresEmboss || selectedEmbossPattern)
+    );
   }, [
-    selectedProductType, selectedPattern, selectedDesign, selectedCategory,
+    selectedProductType, selectedSurfaceType, selectedPattern, selectedDesign, selectedCategory,
     selectedSize, selectedThickness, selectedDTSize,
-    selectedWoodPerfSize, selectedColorCoreColor, selectedFabricStructure,
-    selectedDTShade, selectedDTFabric, selectedOmbreBaseColor, selectedOmbreOverlay,
+    selectedWoodPerfSize, selectedPerforation,
+    selectedColorCoreColor, selectedFabricStructure, selectedColorCoreEmboss,
+    selectedDTShade, selectedDTFabric, selectedDTEmboss,
+    selectedOmbreBaseColor, selectedOmbreOverlay,
+    selectedOmbreEmbossPattern, selectedOmbreGroovePattern,
+    selectedEmbossPattern, soOverlayColor, soSelectedPattern,
   ]);
 
   // Designer Textile — Blob URL panel manager (exactly 1 full-res image in memory)
@@ -686,6 +949,43 @@ const Configurator = () => {
   const { blobUrl: canvasBlobUrl } = useBlobPanel(canvasPreviewUrl);
 
   const canvasRef = useRef(null);
+
+  // ── Auth state — drives the header (Sign in vs logged-in dropdown). ──
+  // Reads from localStorage on mount and re-reads whenever the auth client
+  // dispatches a change (login / logout / cross-tab update). Falls back to
+  // null when logged out.
+  const [authUser, setAuthUser] = useState(() => getUser());
+  useEffect(() => {
+    const unsubscribe = onAuthChange((next) => setAuthUser(next?.user ?? null));
+    return unsubscribe;
+  }, []);
+  const handleLogout = () => {
+    logout();
+    toast.success("Signed out.");
+  };
+
+  // ── Analytics snapshot — every "outcome" event (Save / Download / Compare /
+  // TechSpecs) and most input events ride along with the user's full current
+  // configuration so the dashboard can slice by any dimension (PRD 4.6).
+  // Defined as a closure (no useCallback) — recomputed cheaply on each call.
+  const analyticsSnap = () => ({
+    surface: selectedSurfaceType,
+    product_type: selectedProductType?.id,
+    product_type_name: selectedProductType?.name,
+    category: selectedCategory?.id,
+    category_name: selectedCategory?.name,
+    design_code: selectedDesign?.design_code,
+    size: selectedSize,
+    thickness: selectedThickness,
+    emboss_pattern:
+      selectedColorCoreEmboss?.id ||
+      selectedDTEmboss?.id ||
+      selectedEmbossPattern?.id ||
+      soSelectedPattern ||
+      selectedOmbreEmbossPattern?.id ||
+      null,
+  });
+
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -694,11 +994,60 @@ const Configurator = () => {
   const panStartRef = useRef({ x: 0, y: 0 });
   const [hdriLighting, setHdriLighting] = useState('none'); // 'none' | 'warm' | 'soft'
   const [lightAngle, setLightAngle] = useState(40); // degrees: 0=top, 90=right, 180=bottom, 270=left
+  // Mobile: hide the "View Preview" FAB once the canvas is on-screen.
+  const [canvasInView, setCanvasInView] = useState(false);
+  useEffect(() => {
+    const canvas = document.querySelector('[data-testid="canvas-area"]');
+    if (!canvas || typeof IntersectionObserver === 'undefined') return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setCanvasInView(entry.isIntersecting),
+      { threshold: 0.3 }
+    );
+    obs.observe(canvas);
+    return () => obs.disconnect();
+  }, []);
   const ZOOM_STEP = 0.50;
   const ZOOM_MIN = 1.0;
   const ZOOM_MAX = selectedProductType?.id === "ombre" ? 1.5 : 8.0;
-  const zoomIn = () => setZoomLevel(prev => Math.min(parseFloat((prev + ZOOM_STEP).toFixed(2)), ZOOM_MAX));
-  const zoomOut = () => setZoomLevel(prev => Math.max(parseFloat((prev - ZOOM_STEP).toFixed(2)), ZOOM_MIN));
+  const zoomIn = () => setZoomLevel(prev => {
+    const next = Math.min(parseFloat((prev + ZOOM_STEP).toFixed(2)), ZOOM_MAX);
+    if (next !== prev) track("zoom_in", { from: prev, to: next });
+    return next;
+  });
+  const zoomOut = () => setZoomLevel(prev => {
+    const next = Math.max(parseFloat((prev - ZOOM_STEP).toFixed(2)), ZOOM_MIN);
+    if (next !== prev) track("zoom_out", { from: prev, to: next });
+    return next;
+  });
+
+  // ── Custom zoom % inputter ──────────────────────────────────────────────────
+  // Click the % readout → it becomes an editable input. Enter/blur commits the
+  // value clamped to [ZOOM_MIN, ZOOM_MAX]; Escape cancels.  Width is held by
+  // the same wrapping div so the surrounding +/- buttons don't shift.
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState("");
+  const zoomInputRef = useRef(null);
+  const beginEditZoom = () => {
+    setZoomInputValue(String(Math.round(zoomLevel * 100)));
+    setIsEditingZoom(true);
+  };
+  const commitZoomInput = () => {
+    const parsed = parseFloat(zoomInputValue);
+    if (Number.isFinite(parsed)) {
+      const clamped = Math.min(Math.max(parsed / 100, ZOOM_MIN), ZOOM_MAX);
+      setZoomLevel(parseFloat(clamped.toFixed(2)));
+    }
+    setIsEditingZoom(false);
+  };
+  const cancelZoomInput = () => setIsEditingZoom(false);
+  // Auto-focus + select-all the moment the inputter appears, so the user can
+  // just start typing.
+  useEffect(() => {
+    if (isEditingZoom && zoomInputRef.current) {
+      zoomInputRef.current.focus();
+      zoomInputRef.current.select();
+    }
+  }, [isEditingZoom]);
 
   // Reset pan when zoom returns to 1
   useEffect(() => {
@@ -736,7 +1085,166 @@ const Configurator = () => {
   const MAGNIFIER_SIZE = 200;
   const MAGNIFIER_ZOOM = 2.5;
 
+  // ── Compare slider state ────────────────────────────────────────────────
+  // Session-local A/B comparison.  Flow:
+  //   1. User clicks "Compare" in the header → compareMode=true, sidebar
+  //      stays active so they can configure each slot freely.
+  //   2. Two slot tiles appear over the preview.  Clicking a slot captures
+  //      a PNG of the currently-rendered preview + a text label.
+  //   3. Once both slots are filled, "Apply" turns on compareApplied —
+  //      live preview is replaced by the two captured images with a
+  //      vertical draggable divider; the slider position is sliderPos% from
+  //      the left edge, with Slot A visible on the left and Slot B on the
+  //      right.
+  //   4. Clicking the × on the slider exits compare mode entirely.
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSlots, setCompareSlots] = useState([null, null]); // each: { imageUrl, label }
+  const [compareApplied, setCompareApplied] = useState(false);
+  // Slider position is kept in a ref (NOT React state) so dragging doesn't
+  // re-render the entire Configurator on every pointermove — that was the
+  // source of the observable lag.  The divider/handle/clip-path elements get
+  // their styles mutated directly via refs while dragging, and the ref is
+  // also what we read if we ever need the current position for logic.
+  const sliderPosRef = useRef(50);
+  const sliderContainerRef = useRef(null);
+  const sliderDividerRef = useRef(null);
+  const sliderHandleRef = useRef(null);
+  const sliderImgBRef = useRef(null);
+  // Points at the zoom-wrapper div — the node that contains ONLY the live
+  // preview (wall + furniture).  captureSlot uses this instead of
+  // magnifierRef so the slot-tile overlay and the slider overlay (both
+  // siblings of the zoom wrapper) don't get burned into the captured PNG.
+  const previewContentRef = useRef(null);
+
+  // Build a human-readable label from the current state — shows under each
+  // slot so the user remembers which is which.  Short: "Surface • Series •
+  // Category" truncated.
+  const buildCompareLabel = useCallback(() => {
+    const parts = [];
+    if (selectedSurfaceType) parts.push(selectedSurfaceType.charAt(0).toUpperCase() + selectedSurfaceType.slice(1));
+    if (selectedProductType?.name) parts.push(selectedProductType.name);
+    if (selectedCategory?.name) parts.push(selectedCategory.name);
+    return parts.join(' • ') || 'Current view';
+  }, [selectedSurfaceType, selectedProductType, selectedCategory]);
+
+  // Capture the currently-rendered preview area as a PNG data URL, then store
+  // it in the given slot.  Uses html-to-image the same way FlatEmbossedPreview
+  // does its Download — skipFonts silences cross-origin font-walk errors.
+  const captureSlot = useCallback(async (slotIndex) => {
+    // Capture the zoom-wrapper (preview content only), not magnifierRef —
+    // otherwise the slot-tile overlay itself gets burned into the PNG and
+    // appears inside the slider after Apply is clicked.
+    const node = previewContentRef.current;
+    if (!node) return;
+    try {
+      const dataUrl = await toPng(node, { pixelRatio: 2, skipFonts: true, cacheBust: false });
+      const label = buildCompareLabel();
+      setCompareSlots(prev => {
+        const next = [...prev];
+        next[slotIndex] = { imageUrl: dataUrl, label };
+        return next;
+      });
+    } catch (err) {
+      console.error('[Compare] capture failed:', err);
+      toast.error('Could not capture preview — try again.');
+    }
+  }, [buildCompareLabel]);
+
+  const clearSlot = useCallback((slotIndex) => {
+    setCompareSlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = null;
+      return next;
+    });
+  }, []);
+
+  // Toggle compare button: enter compare mode if off; fully exit (including
+  // applied slider) if on.  Slider position lives in a ref, reset on mount of
+  // the slider overlay rather than here.
+  const toggleCompareMode = useCallback(() => {
+    setCompareMode(prev => {
+      const next = !prev;
+      track(next ? "compare_opened" : "compare_closed");
+      if (prev) {
+        setCompareSlots([null, null]);
+        setCompareApplied(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const applyCompare = useCallback(() => {
+    if (compareSlots[0] && compareSlots[1]) {
+      sliderPosRef.current = 50;
+      setCompareApplied(true);
+    }
+  }, [compareSlots]);
+
+  const exitCompare = useCallback(() => {
+    setCompareMode(false);
+    setCompareApplied(false);
+    setCompareSlots([null, null]);
+    sliderPosRef.current = 50;
+  }, []);
+
+  // Mutate the slider DOM directly without going through React state.  Called
+  // on every pointermove during a drag — keeps the interaction at 60 fps
+  // regardless of how expensive the surrounding component tree is to render.
+  const updateSliderVisually = useCallback((pct) => {
+    const p = Math.max(0, Math.min(100, pct));
+    sliderPosRef.current = p;
+    if (sliderDividerRef.current) sliderDividerRef.current.style.left = `calc(${p}% - 1px)`;
+    if (sliderHandleRef.current) sliderHandleRef.current.style.left = `${p}%`;
+    if (sliderImgBRef.current) sliderImgBRef.current.style.clipPath = `inset(0 0 0 ${p}%)`;
+  }, []);
+
+  // Start a drag.  Uses window-level move/up listeners (no setPointerCapture)
+  // because capture was swallowing click events on the close button, and the
+  // window-listener pattern naturally handles the pointer leaving the preview
+  // area while dragging.
+  const startSliderDrag = useCallback((initialEvent) => {
+    const container = sliderContainerRef.current;
+    if (!container) return;
+    initialEvent.preventDefault();
+
+    const setFromEvent = (ev) => {
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0) return;
+      updateSliderVisually(((ev.clientX - rect.left) / rect.width) * 100);
+    };
+    // Apply the initial click position immediately so a click-to-jump feels
+    // responsive even if the user doesn't move before releasing.
+    setFromEvent(initialEvent);
+
+    const onMove = (ev) => setFromEvent(ev);
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  }, [updateSliderVisually]);
+
+  // Container-level pointerdown: starts a drag unless the click originated
+  // from an element that opts out (e.g. the close button or the labels).
+  // The data-compare-nodrag attribute is the opt-out flag.
+  const handleSliderContainerPointerDown = useCallback((e) => {
+    if (e.target.closest?.('[data-compare-nodrag]')) return;
+    startSliderDrag(e);
+  }, [startSliderDrag]);
+
   const handleMagnifierEnter = useCallback(() => {
+    // Suppress the magnifier while Compare is open — in compare mode the
+    // preview is either covered by the slot-tile overlay (picking) or the
+    // slider overlay (applied), and zooming into either is unhelpful and
+    // interferes with the slot/slider interactions.  Without this guard,
+    // Signature Ombre (whose isConfigComplete flips true as soon as a
+    // thickness is picked, independent of colour) would still activate the
+    // lens while every other product happened to stay gated because their
+    // isConfigComplete requires a design/colour the user hasn't set yet.
+    if (compareMode) return;
     if (!isConfigComplete || isDraggingRef.current) return;
     const node = magnifierRef.current;
     const lens = magnifierDivRef.current;
@@ -771,7 +1279,19 @@ const Configurator = () => {
     lens.appendChild(clone);
     lensCloneRef.current = clone;
     setMagnifierActive(true);
-  }, [isConfigComplete]);
+  }, [isConfigComplete, compareMode]);
+
+  // If compare mode is toggled on while the lens is already on screen
+  // (e.g. user hovers, then clicks the Compare button without moving the
+  // cursor away), tear the lens down immediately so it doesn't linger over
+  // the slot-tile overlay.
+  useEffect(() => {
+    if (!compareMode) return;
+    setMagnifierActive(false);
+    const lens = magnifierDivRef.current;
+    if (lens) while (lens.firstChild) lens.removeChild(lens.firstChild);
+    lensCloneRef.current = null;
+  }, [compareMode]);
 
   // Clamp zoom when switching to ombre (which has a lower max)
   useEffect(() => {
@@ -815,18 +1335,20 @@ const Configurator = () => {
   useEffect(() => {
     if (selectedProductType?.id !== 'ombre' || selectedCategory?.id !== 'signature-ombre') return;
     const engine = soEngineRef.current;
+    // No color picked yet → wall reads as bare white (handled by the preview
+    // component's null-panelImage fallback).  Nothing renders, nothing tiles.
+    if (!soOverlayColor) {
+      setSoPanelImage(null);
+      return;
+    }
     if (!soSelectedPattern) {
-      // No emboss selected — render a plain 2D ombre gradient (same as HTML prototype)
+      // Color picked but no emboss — render the flat 2D ombre gradient via
+      // the shared smoothstep-based builder (kept in sync with the embossed
+      // path and free of the Mach band a naive 3-stop linear gradient produces).
       const cv = document.createElement('canvas');
       cv.width = 512; cv.height = 1024;
       const ctx2 = cv.getContext('2d');
-      const pct = Math.min(0.95, Math.max(0.05, soBlend / 100));
-      const transStart = 1 - pct;
-      const g = ctx2.createLinearGradient(0, 0, 0, cv.height);
-      g.addColorStop(0, soBaseColor);
-      g.addColorStop(transStart, soBaseColor);
-      g.addColorStop(1, soOverlayColor);
-      ctx2.fillStyle = g;
+      ctx2.fillStyle = OmbreEmbossEngine.buildOmbreGradient(ctx2, cv.width, cv.height, soOverlayColor, soBlend);
       ctx2.fillRect(0, 0, cv.width, cv.height);
       setSoPanelImage(cv.toDataURL('image/png'));
       return;
@@ -836,7 +1358,7 @@ const Configurator = () => {
     soDebounceRef.current = setTimeout(() => {
       try {
         const result = engine.render({
-          baseColor: soBaseColor,
+          baseColor: '#ffffff',
           overlayColor: soOverlayColor,
           ombrePercent: soBlend,
           patternId: soSelectedPattern,
@@ -848,6 +1370,111 @@ const Configurator = () => {
       }
     }, 80);
   }, [soBaseColor, soOverlayColor, soBlend, soSelectedPattern, soLightRotation, soIsLoading, selectedProductType?.id, selectedCategory?.id]);
+
+  // ── Analytics: configurator_loaded (once on mount, PRD 4.2) ───────────────
+  useEffect(() => { track("configurator_loaded"); }, []);
+
+  // ── Analytics: preview_rendered — fires the moment isConfigComplete flips
+  //    false → true (i.e., the user has filled every required field). PRD 4.2. ──
+  const previousReadyRef = useRef(false);
+  useEffect(() => {
+    if (isConfigComplete && !previousReadyRef.current) {
+      track("preview_rendered", analyticsSnap());
+    }
+    previousReadyRef.current = isConfigComplete;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConfigComplete]);
+
+  // ── Analytics: configuration_abandoned (PRD 4.2). Fires on tab close /
+  //    unload. Uses sendBeacon so the request survives the page tearing down. ──
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      // Only worth reporting if the user actually started configuring something.
+      if (!selectedProductType) return;
+      track("configuration_abandoned", { ...analyticsSnap(), config_complete: !!isConfigComplete });
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProductType, isConfigComplete]);
+
+  // ── Analytics: category_dwell (PRD 4.3). Per-category dwell timer that
+  //    starts on category selection, pauses when the tab is backgrounded
+  //    (Page Visibility API), resumes on re-focus, and emits a single
+  //    "category_dwell" event with duration_ms when:
+  //      - the user picks a different category
+  //      - the user closes the tab while on a category
+  //
+  //    Refs (not state) so handlers always read the latest values without
+  //    re-running on every category switch.
+  // ─────────────────────────────────────────────────────────────────────────
+  const dwellCategoryRef = useRef(null);     // current category snapshot
+  const dwellStartRef = useRef(null);        // ms timestamp when active period started (null = paused)
+  const dwellAccumulatedRef = useRef(0);     // total ms accumulated across pause/resume cycles
+
+  const flushDwell = (extraProps = {}) => {
+    const cat = dwellCategoryRef.current;
+    if (!cat) return;
+    const liveMs = dwellStartRef.current ? Date.now() - dwellStartRef.current : 0;
+    const totalMs = dwellAccumulatedRef.current + liveMs;
+    // Discard sub-second blips — selecting then immediately switching isn't
+    // signal, just exploration noise.
+    if (totalMs < 1000) return;
+    track("category_dwell", {
+      category: cat.id,
+      category_name: cat.name,
+      product_type: selectedProductType?.id,
+      surface: selectedSurfaceType,
+      duration_ms: totalMs,
+      duration_seconds: Math.round(totalMs / 1000),
+      ...extraProps,
+    });
+  };
+
+  // Fire on every category change — flush the OLD category's dwell, then
+  // start the timer for the new one.
+  useEffect(() => {
+    flushDwell();
+    if (selectedCategory) {
+      dwellCategoryRef.current = selectedCategory;
+      dwellStartRef.current = Date.now();
+      dwellAccumulatedRef.current = 0;
+    } else {
+      dwellCategoryRef.current = null;
+      dwellStartRef.current = null;
+      dwellAccumulatedRef.current = 0;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory?.id]);
+
+  // Pause/resume on tab visibility — so a user who alt-tabs for 10 minutes
+  // doesn't inflate the dwell stat for the category they left open.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) {
+        // Bank elapsed time and pause.
+        if (dwellStartRef.current) {
+          dwellAccumulatedRef.current += Date.now() - dwellStartRef.current;
+          dwellStartRef.current = null;
+        }
+      } else {
+        // Resume — only if we actually have a category being timed.
+        if (dwellCategoryRef.current && !dwellStartRef.current) {
+          dwellStartRef.current = Date.now();
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  // Final flush on tab close so the last category isn't lost.
+  useEffect(() => {
+    const onUnload = () => flushDwell({ ended_by: "unload" });
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Render logging (remove when done profiling) ────────────────────────────
   useRenderLog("Configurator", {
@@ -874,19 +1501,37 @@ const Configurator = () => {
         const response = await fetch(`${ASSETS_URL}/data/products.json`);
         const apiProducts = await response.json();
         setProducts(apiProducts);
-        
-        // Set default selection: use URL param if provided, else first active product
+
+        // ── URL → initial state resolution ──────────────────────────────
+        // URL shape is /:surfaceType/:productType.  Rules (per spec):
+        //   /                                         → /flat,    no series
+        //   /flat | /embossed | /grooving             → that tab, no series
+        //   /<surface>/<series>  (valid combo)        → both set
+        //   /<surface>/<series>  (invalid combo)      → redirect to /flat
+        //   /<invalid-surface>[/...]                  → redirect to /flat
+        //   /<series>    (legacy, no surface prefix)  → redirect to /flat
+        // Only a valid (surface × series) pair hydrates selectedProductType;
+        // anything else lands on Flat with no series so the user picks fresh.
+        const surfaceValid = surfaceTypeParam && VALID_SURFACES.includes(surfaceTypeParam);
         const resolvedId = productTypeParam ? (URL_SLUG_TO_PRODUCT_ID[productTypeParam] || productTypeParam) : null;
         const urlProduct = resolvedId ? apiProducts.find(p => p.id === resolvedId && p.active) : null;
-        const firstActive = urlProduct || apiProducts.find(p => p.active);
-        if (firstActive) {
-          setSelectedProductType(firstActive);
-          // Nothing else pre-filled — user selects everything from scratch.
-          if (firstActive.id === "ombre") {
-            // Keep finish-type state consistent; no visible selections yet
-            setSelectedOmbreEmbossPattern(null);
-            setSelectedOmbreGroovePattern(null);
-            setOmbreFinishType("emboss");
+        const combinationValid = surfaceValid && urlProduct &&
+          (SURFACE_SERIES_MAP[surfaceTypeParam] ?? []).includes(urlProduct.id);
+
+        if (combinationValid) {
+          setSelectedSurfaceType(surfaceTypeParam);
+          setSelectedProductType(urlProduct);
+        } else if (surfaceValid && !productTypeParam) {
+          // Bare /flat | /embossed | /grooving — show that tab, no series.
+          setSelectedSurfaceType(surfaceTypeParam);
+          setSelectedProductType(null);
+        } else {
+          // Root /, legacy series-only paths, invalid surface, or invalid
+          // (surface × series) combination — redirect to /flat and clear.
+          setSelectedSurfaceType('flat');
+          setSelectedProductType(null);
+          if (location.pathname !== '/flat') {
+            navigate('/flat', { replace: true });
           }
         }
         setLoading(false);
@@ -897,6 +1542,7 @@ const Configurator = () => {
       }
     };
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -926,6 +1572,59 @@ const Configurator = () => {
     // Clear the state so re-renders don't re-fire this
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.state?.surfaceType, loading]);
+
+  // ── Walkthrough (Shepherd.js) demo-fill helper ────────────────────────────
+  // The public/univicoustic-tour.js script calls window.__uvTourFillDemo()
+  // before it launches so every sidebar section (Category, Size, Thickness,
+  // Designs, Emboss, Angle dial) is already rendered and each step's tooltip
+  // has a real element to anchor to.  Without this, the tour hits orphan
+  // floating dialogs on steps whose target is conditionally rendered.
+  //
+  // Fills: Embossed → Wood → Wood Classics → first design + size + thickness
+  // + first emboss pattern, and turns Studio Lighting to Warm (so the Angle
+  // dial becomes visible).  Chose Wood Classics because it exercises the
+  // most section types with the least cross-category complexity.
+  useEffect(() => {
+    if (!products?.length) return;
+    window.__uvTourFillDemo = () => {
+      const wood = products.find(p => p.id === 'wood');
+      if (!wood) return;
+      const classics = wood.categories?.find(c => c.id === 'wood-wood-classics');
+      if (!classics) return;
+      // Pick the first design that ACTUALLY supports emboss — Wood Classics
+      // has many designs with empty available_emboss[] (flat-only renders),
+      // and the post-emboss-first refactor hides the Emboss tile grid for
+      // those, leaving the tour pointing at an empty section. Falling back
+      // to designs[0] if none declare emboss so the demo still mostly works.
+      const firstDesign =
+        classics.designs?.find(d => Array.isArray(d.available_emboss) && d.available_emboss.length > 0)
+        ?? classics.designs?.[0];
+      const firstSize = wood.sizes?.[0];
+      const firstThick = wood.thicknesses?.[0];
+      // Choose an emboss pattern the chosen design supports, so the tile
+      // appears as "selected" in the grid (instead of falling through to a
+      // pattern that's been filtered out by the design's available_emboss).
+      const allowedEmbossIds = firstDesign?.available_emboss ?? [];
+      const firstEmboss =
+        FLAT_EMBOSSED_EMBOSS_PATTERNS?.find(p => allowedEmbossIds.includes(p.id))
+        ?? FLAT_EMBOSSED_EMBOSS_PATTERNS?.[0]
+        ?? null;
+
+      // Batched inside one event loop so React renders once.
+      setSelectedSurfaceType('embossed');
+      setSelectedProductType(wood);
+      setSelectedCategory(classics);
+      if (firstDesign) setSelectedDesign(firstDesign);
+      if (firstSize) setSelectedSize(firstSize);
+      if (firstThick) setSelectedThickness(firstThick);
+      if (firstEmboss) setSelectedEmbossPattern(firstEmboss);
+      setHdriLighting('warm');
+      // Keep the URL in sync so a refresh during the tour doesn't reset state.
+      navigate('/embossed/wood');
+    };
+    return () => { try { delete window.__uvTourFillDemo; } catch (_) {} };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, navigate]);
 
   useEffect(() => {
     const fetchSpecs = async () => {
@@ -968,7 +1667,18 @@ const Configurator = () => {
   const handleProductTypeChange = (productId, overrideSurfaceType) => {
     const product = products.find(p => p.id === productId);
     if (product && product.active) {
-      navigate('/' + (PRODUCT_ID_TO_URL_SLUG[productId] || productId));
+      track("series_changed", {
+        from: selectedProductType?.id,
+        to: productId,
+        surface: overrideSurfaceType ?? selectedSurfaceType,
+      });
+      // URL now includes the active surface tab: /<surface>/<series>.
+      // overrideSurfaceType handles the case where handleSurfaceTypeChange
+      // flips the tab and immediately picks a series before React has
+      // flushed the setSelectedSurfaceType update.
+      const surface = overrideSurfaceType ?? selectedSurfaceType;
+      const slug = PRODUCT_ID_TO_URL_SLUG[productId] || productId;
+      navigate(`/${surface}/${slug}`);
       setSelectedProductType(product);
       
       // Clear all state first
@@ -1013,6 +1723,13 @@ const Configurator = () => {
   const handleCategoryChange = (categoryId) => {
     const category = selectedProductType?.categories?.find(c => c.id === categoryId);
     if (category) {
+      track("category_changed", {
+        from: selectedCategory?.id,
+        to: categoryId,
+        category_name: category.name,
+        surface: selectedSurfaceType,
+        product_type: selectedProductType?.id,
+      });
       setSelectedCategory(category);
       setIsEmbossed(false);
       setSelectedEmbossPattern(null);
@@ -1031,6 +1748,7 @@ const Configurator = () => {
         setSelectedColorCoreEmboss(null);
         setSelectedSize(null);
         setSelectedDesign(null);
+        if (selectedThickness?.includes("PET Wool")) setSelectedThickness(null);
       } else if (category.id === "fabrics-designer-textile") {
         // Designer Textile: auto-select first color + first compatible fabric so textures are immediately visible
         const firstGroup = DESIGNER_TEXTILE_COLOR_GROUPS[0];
@@ -1055,17 +1773,30 @@ const Configurator = () => {
         setOmbreFinishType(selectedSurfaceType === 'grooving' ? 'groove' : 'emboss');
         setSelectedDesign(null);
       } else if (category.id === "signature-ombre") {
-        // Signature Ombre: reset to defaults; engine inits via useEffect
+        // Signature Ombre: clear all selections — user picks from scratch.
+        // Overlay color and emboss start null so the preview stays blank until
+        // the user picks a color.  Light rotation is locked to the -55° value
+        // since the visual HDRI dial was removed; blend stays at the default.
         setSoPanelImage(null);
-        setSoBaseColor('#C47A4A');
-        setSoOverlayColor('#6B3A2A');
+        setSoBaseColor('#ffffff');
+        setSoOverlayColor(null);
         setSoBlend(50);
-        setSoLightRotation(-60 * (Math.PI / 180)); // 60° CCW from Front
-        setSoSelectedPattern(SO_PATTERNS[0].id);
+        setSoSelectedPattern(null);
         setSelectedDesign(null);
         setSelectedThickness(selectedProductType?.thicknesses?.[0] || null);
       } else if (category.designs?.length > 0) {
-        setSelectedDesign(category.designs[0]);
+        // Under Embossed/Grooving the new emboss-first sidebar order requires
+        // that no panel renders until the user has picked BOTH an emboss
+        // pattern AND a design. Auto-selecting the first design here would
+        // paint a non-embossed colour panel into the preview the moment the
+        // user opens the category — exactly the thing the emboss-first move
+        // was meant to prevent. Keep the auto-select only for Flat (where
+        // panels are inherently un-embossed by design).
+        if (selectedSurfaceType === 'flat') {
+          setSelectedDesign(category.designs[0]);
+        } else {
+          setSelectedDesign(null);
+        }
       } else {
         setSelectedDesign(null);
       }
@@ -1124,6 +1855,17 @@ const Configurator = () => {
   // Handle design selection (accept design object or color id for VicStrip)
   const handleDesignSelect = (designOrColor) => {
     if (!designOrColor) return;
+    // PRD 4.2: track print/design selection. Treated as a "color swatch" event
+    // for VicStrip (design tile = colour) and a "design_selected" for everything
+    // else where the print is its own concept.
+    track(selectedProductType?.id === "vicstrip" ? "color_swatch_clicked" : "design_selected", {
+      design_id: designOrColor?.id,
+      design_code: designOrColor?.design_code,
+      design_name: designOrColor?.design_name,
+      product_type: selectedProductType?.id,
+      category: selectedCategory?.id,
+      surface: selectedSurfaceType,
+    });
     if (selectedProductType?.id === "vicstrip") {
       // VicStrip flow
       if (typeof designOrColor === 'object' && designOrColor.color) {
@@ -1138,19 +1880,31 @@ const Configurator = () => {
     } else {
       // Generic product flow (VMD, Ombre, etc.)
       if (selectedDesign?.id !== designOrColor?.id) {
-        setSelectedEmbossPattern(null);
+        // With the new "emboss-first" sidebar order users can pre-select an
+        // emboss pattern before any design. Keep the selection across design
+        // changes when the new design supports it; otherwise clear it. Toast
+        // only when the new design has its own emboss options (i.e. the user
+        // would have noticed a tile getting deselected).
+        const newAvailable = designOrColor?.available_emboss ?? [];
+        if (selectedEmbossPattern && !newAvailable.includes(selectedEmbossPattern.id)) {
+          if (newAvailable.length > 0) {
+            toast.info(`${selectedEmbossPattern.name} isn't available for ${designOrColor.design_code} — emboss cleared`);
+          }
+          setSelectedEmbossPattern(null);
+        }
       }
       setSelectedDesign(designOrColor);
     }
   };
 
   // Handle ombre size change — force groove when 1200x2400 is selected
+  // Ombre size change used to also force ombreFinishType="groove" when the
+  // user picked 1200x2400 because that size was groove-only.  Both sizes now
+  // carry both emboss + groove panels, so the forced switch is gone and this
+  // handler just sets the size — the surface-type sync effect keeps
+  // ombreFinishType coherent with the active tab.
   const handleOmbreSizeChange = useCallback((size) => {
     setSelectedSize(size);
-    if (size === "1200x2400") {
-      setOmbreFinishType("groove");
-      setSelectedOmbreEmbossPattern(null);
-    }
   }, []);
 
   // Toggle emboss pattern selection (clicking the selected pattern deselects it)
@@ -1158,6 +1912,13 @@ const Configurator = () => {
     setSelectedEmbossPattern(prev => {
       const isDeselecting = prev?.id === pattern.id;
       if (!isDeselecting) setShowTpatti(false);
+      track("emboss_pattern_selected", {
+        pattern_id: pattern?.id,
+        pattern_name: pattern?.name,
+        action: isDeselecting ? "deselect" : "select",
+        category: selectedCategory?.id,
+        product_type: selectedProductType?.id,
+      });
       return isDeselecting ? null : pattern;
     });
   };
@@ -1171,8 +1932,11 @@ const Configurator = () => {
   const saveToFavorites = () => {
     if (!selectedDesign) {
       toast.error("Please select a design first");
+      track("save_clicked", { ...analyticsSnap(), result: "no_design" });
       return;
     }
+    // PRD 4.6: every Save event ships the full config snapshot.
+    track("save_clicked", { ...analyticsSnap(), result: "saved" });
 
     const config = {
       id: Date.now().toString(),
@@ -1256,6 +2020,8 @@ const Configurator = () => {
 
   // Download rendered image
   const downloadImage = () => {
+    // PRD 4.6: full config snapshot accompanies every download event.
+    track("download_clicked", analyticsSnap());
     // Signature Ombre: composite wall canvas + room overlay
     if (selectedProductType?.id === 'ombre' && selectedCategory?.id === 'signature-ombre') {
       const wallCanvas = document.querySelector('.so-room canvas');
@@ -1267,7 +2033,7 @@ const Configurator = () => {
       if (overlayImg?.complete && overlayImg.naturalWidth) ctx.drawImage(overlayImg, 0, 0, 2000, 2000);
       const url = out.toDataURL('image/png');
       const a = document.createElement('a'); a.href = url;
-      a.download = `SignatureOmbre_${soSelectedPattern}_${soBaseColor.replace('#', '')}_${soOverlayColor.replace('#', '')}.png`;
+      a.download = `SignatureOmbre_${soSelectedPattern ?? 'flat'}_${soBaseColor.replace('#', '')}_${(soOverlayColor ?? 'nocolor').replace('#', '')}.png`;
       a.click();
       return;
     }
@@ -1276,39 +2042,254 @@ const Configurator = () => {
     }
   };
 
+  // View Tech Specs — opens the right PDF for the current configuration.
+  // Extracted so both the desktop header and the mobile sidebar button can call it.
+  const handleViewTechSpecs = () => {
+    track("tech_specs_viewed", analyticsSnap());
+    const productId = selectedProductType?.id;
+    const catId = selectedCategory?.id;
+
+    const isPetWool = selectedThickness?.includes("PET Wool");
+    const isEmbossedSurface = selectedSurfaceType === 'embossed';
+    const isGroovingSurface = selectedSurfaceType === 'grooving';
+
+    // ── Required-selection gate ───────────────────────────────────────────
+    // Products that have a single fixed PDF (VicStrip; anything under the
+    // Grooving surface) can open the spec without further selection — those
+    // PDFs are product-line documents that don't vary by category/thickness.
+    // Everything else (Flat/Embossed) needs both a category and (where
+    // applicable) a thickness picked first; otherwise we'd fall through to
+    // a default PDF that doesn't match the user's actual configuration.
+    const hasFixedPdf = (productId === "vicstrip") || isGroovingSurface;
+    if (!hasFixedPdf) {
+      if (!selectedCategory) {
+        toast.error("Please select a category first");
+        return;
+      }
+      const needsThickness = (
+        productId === "flat-embossed-vmd" ||
+        productId === "wood" ||
+        (productId === "fabrics" && catId !== "fabrics-color-core") ||
+        (productId === "ombre" && catId === "signature-ombre")
+      );
+      if (needsThickness && !selectedThickness) {
+        toast.error("Please select a thickness first");
+        return;
+      }
+    }
+
+    let pdfFile;
+    // ── Priority overrides (checked before product-specific logic) ─────────
+    // VicStrip always uses its own PDF, even under Grooving. SURFACE_SERIES_MAP
+    // only puts VicStrip under Grooving, but we keep this explicit so the
+    // intent survives any future surface-mapping change.
+    if (productId === "vicstrip") {
+      pdfFile = "Univic Strip Series.pdf";
+    }
+    // Any non-VicStrip product under the Grooving surface tab shares one PDF.
+    // Today that's only Ombre (per SURFACE_SERIES_MAP); future products that
+    // gain grooving will pick this up automatically.
+    else if (isGroovingSurface) {
+      pdfFile = "Groove series.pdf";
+    }
+    // ── Per-product logic (Flat / Embossed surfaces only) ─────────────────
+    else if (productId === "flat-embossed-vmd") {
+      pdfFile = isEmbossedSurface
+        ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+        : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+    } else if (productId === "wood") {
+      if (catId === "wood-classic-parquet") {
+        pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
+      } else {
+        pdfFile = isEmbossedSurface
+          ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+          : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+      }
+    } else if (productId === "fabrics") {
+      if (catId === "fabrics-color-core") {
+        pdfFile = isEmbossedSurface ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
+      } else {
+        pdfFile = isEmbossedSurface
+          ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
+          : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
+      }
+    } else if (productId === "ombre") {
+      // Grooving-surface Ombre is handled by the isGroovingSurface override
+      // above, so this branch only sees Flat / Embossed surfaces.
+      if (catId === "ombre-color-core-ombre") {
+        pdfFile = isEmbossedSurface
+          ? "Embossed VMT Series (PET).pdf"
+          : "Flat Panel VMT (PET).pdf";
+      } else {
+        pdfFile = isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf";
+      }
+    } else {
+      pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
+    }
+    window.open(`${ASSETS_URL}/static/technical_specification_pdfs/${encodeURIComponent(pdfFile)}`, "_blank");
+  };
+
   // Reset configuration
   const resetConfig = () => {
     if (selectedProductType) {
+      track("reset_clicked", analyticsSnap());
       handleProductTypeChange(selectedProductType.id);
       toast.success("Configuration reset");
     }
   };
 
-  // Handle surface type change (Flat / Embossed / Grooving)
-  // Selects the first available series for the new surface type and resets downstream state.
-  // If the current product type is also valid for the new surface, stays on it and
-  // preserves the selected category when it's valid for the new surface too.
+  // Snapshot every piece of per-tab state into a plain object.  Called on
+  // every tab switch so the outgoing tab's configuration is preserved.  The
+  // setters are stable so this closure over state values captures "now".
+  const captureTabState = () => ({
+    selectedProductType,
+    selectedCategory,
+    selectedDesign,
+    selectedSize,
+    selectedDensity,
+    selectedPattern,
+    selectedColor,
+    selectedThickness,
+    selectedEmbossPattern,
+    isEmbossed,
+    showTpatti,
+    selectedWoodPerfSize,
+    selectedPerforation,
+    selectedColorCoreColor,
+    selectedFabricStructure,
+    selectedColorCoreEmboss,
+    selectedDTColorGroup,
+    selectedDTShade,
+    selectedDTFabric,
+    selectedDTSize,
+    selectedDTEmboss,
+    selectedOmbreBaseColor,
+    selectedOmbreOverlay,
+    selectedOmbreEmbossPattern,
+    selectedOmbreGroovePattern,
+    ombreFinishType,
+    soBaseColor,
+    soOverlayColor,
+    soBlend,
+    soColorGroup,
+    soSelectedPattern,
+  });
+
+  // The "fresh" snapshot used for first-time tab visits.  Mirrors every
+  // useState initial value for the per-tab fields; keeping this list in sync
+  // with captureTabState is the same obligation flagged up at the ref
+  // declaration.  Used when the user opens a tab for the first time this
+  // session — no series selected, no downstream state, nothing bleeding over
+  // from whichever tab they were on before.
+  const INITIAL_TAB_SNAPSHOT = {
+    selectedProductType: null,
+    selectedCategory: null,
+    selectedDesign: null,
+    selectedSize: null,
+    selectedDensity: null,
+    selectedPattern: null,
+    selectedColor: null,
+    selectedThickness: null,
+    selectedEmbossPattern: null,
+    isEmbossed: false,
+    showTpatti: true,
+    selectedWoodPerfSize: null,
+    selectedPerforation: null,
+    selectedColorCoreColor: null,
+    selectedFabricStructure: null,
+    selectedColorCoreEmboss: null,
+    selectedDTColorGroup: null,
+    selectedDTShade: null,
+    selectedDTFabric: null,
+    selectedDTSize: null,
+    selectedDTEmboss: null,
+    selectedOmbreBaseColor: null,
+    selectedOmbreOverlay: null,
+    selectedOmbreEmbossPattern: null,
+    selectedOmbreGroovePattern: null,
+    ombreFinishType: 'emboss',
+    soBaseColor: '#ffffff',
+    soOverlayColor: null,
+    soBlend: 30,
+    soColorGroup: 'Blue',
+    soSelectedPattern: null,
+  };
+
+  // Restore a previously captured snapshot (or the fresh INITIAL_TAB_SNAPSHOT
+  // for a first-visit tab).  React batches the setter calls inside this event
+  // handler so the whole restore renders once.  `surfaceTypeForUrl` is the
+  // surface tab the snapshot belongs to — needed for the new URL shape
+  // `/:surfaceType/:productType`, since the snapshot itself is surface-
+  // agnostic.
+  const applyTabState = (snapshot, surfaceTypeForUrl) => {
+    setSelectedProductType(snapshot.selectedProductType);
+    setSelectedCategory(snapshot.selectedCategory);
+    setSelectedDesign(snapshot.selectedDesign);
+    setSelectedSize(snapshot.selectedSize);
+    setSelectedDensity(snapshot.selectedDensity);
+    setSelectedPattern(snapshot.selectedPattern);
+    setSelectedColor(snapshot.selectedColor);
+    setSelectedThickness(snapshot.selectedThickness);
+    setSelectedEmbossPattern(snapshot.selectedEmbossPattern);
+    setIsEmbossed(snapshot.isEmbossed);
+    setShowTpatti(snapshot.showTpatti);
+    setSelectedWoodPerfSize(snapshot.selectedWoodPerfSize);
+    setSelectedPerforation(snapshot.selectedPerforation);
+    setSelectedColorCoreColor(snapshot.selectedColorCoreColor);
+    setSelectedFabricStructure(snapshot.selectedFabricStructure);
+    setSelectedColorCoreEmboss(snapshot.selectedColorCoreEmboss);
+    setSelectedDTColorGroup(snapshot.selectedDTColorGroup);
+    setSelectedDTShade(snapshot.selectedDTShade);
+    setSelectedDTFabric(snapshot.selectedDTFabric);
+    setSelectedDTSize(snapshot.selectedDTSize);
+    setSelectedDTEmboss(snapshot.selectedDTEmboss);
+    setSelectedOmbreBaseColor(snapshot.selectedOmbreBaseColor);
+    setSelectedOmbreOverlay(snapshot.selectedOmbreOverlay);
+    setSelectedOmbreEmbossPattern(snapshot.selectedOmbreEmbossPattern);
+    setSelectedOmbreGroovePattern(snapshot.selectedOmbreGroovePattern);
+    setOmbreFinishType(snapshot.ombreFinishType);
+    setSoBaseColor(snapshot.soBaseColor);
+    setSoOverlayColor(snapshot.soOverlayColor);
+    setSoBlend(snapshot.soBlend);
+    setSoColorGroup(snapshot.soColorGroup);
+    setSoSelectedPattern(snapshot.soSelectedPattern);
+
+    // Auto-fix Afterflute (DT) / Alter Flute (CC) + PET Wool conflict on restore.
+    // Pattern wins per the configurator's compatibility rule, so we silently drop
+    // PET Wool. Silent (no toast) since snapshot restore is internal Compare flow.
+    const ccAfterflute = snapshot.selectedColorCoreEmboss?.id === 'alter_flute';
+    const dtAfterflute = snapshot.selectedDTEmboss?.id === 'afterflute';
+    if ((ccAfterflute || dtAfterflute) && snapshot.selectedThickness?.includes('PET Wool')) {
+      setSelectedThickness(null);
+    }
+
+    // Sync the URL to match whatever the snapshot represents.  A snapshot
+    // with a series → /<surface>/<slug>; a snapshot with no series (i.e.
+    // the INITIAL_TAB_SNAPSHOT) → /<surface> (bare).
+    const surface = surfaceTypeForUrl ?? selectedSurfaceType;
+    if (snapshot.selectedProductType?.id) {
+      const slug = PRODUCT_ID_TO_URL_SLUG[snapshot.selectedProductType.id] || snapshot.selectedProductType.id;
+      navigate(`/${surface}/${slug}`);
+    } else {
+      navigate(`/${surface}`);
+    }
+  };
+
   const handleSurfaceTypeChange = (surfaceType) => {
     if (surfaceType === selectedSurfaceType) return;
-    const prevCategory = selectedCategory;
-    const prevProductId = selectedProductType?.id;
+    track("product_type_selected", { from: selectedSurfaceType, to: surfaceType });
+
+    // 1. Save the outgoing tab's state so a later visit can restore it.
+    tabStatesRef.current[selectedSurfaceType] = captureTabState();
+
+    // 2. Switch the active tab marker.
     setSelectedSurfaceType(surfaceType);
-    const ids = SURFACE_SERIES_MAP[surfaceType] ?? [];
-    // Stay on current series if it exists in the new surface, otherwise jump to first
-    const targetId = (prevProductId && ids.includes(prevProductId))
-      ? prevProductId
-      : products.find(p => p.active && ids.includes(p.id))?.id;
-    if (targetId) {
-      handleProductTypeChange(targetId, surfaceType);
-      // Restore category if it's valid for the new surface type
-      if (prevCategory && targetId === prevProductId) {
-        const targetProduct = products.find(p => p.id === targetId);
-        const validCats = getCategoriesForSurface(targetProduct?.categories ?? [], surfaceType, targetId);
-        if (validCats.some(c => c.id === prevCategory.id)) {
-          setSelectedCategory(prevCategory);
-        }
-      }
-    }
+
+    // 3. Restore the incoming tab's saved state if we have one, otherwise
+    //    fall through to the fresh INITIAL_TAB_SNAPSHOT so the new tab
+    //    shows with no series selected and the URL becomes /<surface>.
+    const snapshot = tabStatesRef.current[surfaceType] ?? INITIAL_TAB_SNAPSHOT;
+    applyTabState(snapshot, surfaceType);
   };
 
   // Technical Specs Panel — defined outside Configurator (see below)
@@ -1327,7 +2308,8 @@ const Configurator = () => {
 
   return (
     <div className="configurator-root" data-testid="configurator-page">
-      {/* Mobile block screen */}
+      {/* Mobile block screen — temporarily disabled. Re-enable by uncommenting the block below. */}
+      {/*
       <div className="md:hidden fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center gap-4 p-8 text-center">
         <img src="/univicoustic-logo.png" alt="UniVicoustic" className="h-12 w-auto object-contain mb-2" />
         <p className="text-[hsl(215,25%,27%)] font-semibold text-lg leading-snug">
@@ -1337,6 +2319,7 @@ const Configurator = () => {
           The UniVicoustic configurator is designed for desktop use. For the best experience, open this on a laptop or desktop browser.
         </p>
       </div>
+      */}
 
       {/* Full-page loading overlay — blocks all interaction while preview image is changing */}
       {(isImageLoading || dtPanelLoading || ccPanelLoading || ombrePanelLoading || fvpSingleLoading || fvpContinuousLoading || vicstripLoading) && (
@@ -1346,13 +2329,31 @@ const Configurator = () => {
         />
       )}
 
+      {/* Mobile-only: jump-to-canvas FAB. Hidden on md+ via CSS,
+          and auto-hidden on mobile once the canvas is in view. */}
+      {!canvasInView && (
+        <button
+          type="button"
+          className="view-preview-fab"
+          onClick={() => {
+            const el = document.querySelector('[data-testid="canvas-area"]');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          data-testid="view-preview-fab"
+          aria-label="Scroll to preview"
+        >
+          <ArrowDown className="h-4 w-4" />
+          View Preview
+        </button>
+      )}
+
       {/* ── TOP HEADER BAR ───────────────────────────────────────────────── */}
       <header className="app-header" data-testid="app-header">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <img
             src="/univicoustic-logo.png"
             alt="UniVicoustic"
-            className="h-10 w-auto object-contain"
+            className="h-7 md:h-10 w-auto object-contain flex-shrink-0"
             data-testid="brand-logo"
           />
         </div>
@@ -1361,7 +2362,7 @@ const Configurator = () => {
             variant="outline"
             size="sm"
             onClick={saveToFavorites}
-            className="text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"
+            className="hidden md:inline-flex text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"
             data-testid="save-favorite-btn"
           >
             <Heart className="h-4 w-4 mr-1.5" />
@@ -1370,81 +2371,85 @@ const Configurator = () => {
           <Button
             size="sm"
             onClick={downloadImage}
-            className="bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+            className="hidden md:inline-flex bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
             data-testid="download-btn"
           >
             <Download className="h-4 w-4 mr-1.5" />
             Download
           </Button>
           <Button
+            variant={compareMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={toggleCompareMode}
+            disabled={!selectedProductType}
+            className={`hidden md:inline-flex ${compareMode
+              ? "bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+              : "text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"}`}
+            data-testid="compare-btn"
+            title={selectedProductType ? "Compare two configurations side-by-side" : "Pick a series first"}
+          >
+            <SplitSquareHorizontal className="h-4 w-4 mr-1.5" />
+            {compareMode ? 'Close Compare' : 'Compare'}
+          </Button>
+          <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              const productId = selectedProductType?.id;
-              const catId = selectedCategory?.id;
-
-              // Products where thickness determines which PDF to show
-              const needsThickness = (
-                productId === "flat-embossed-vmd" ||
-                productId === "wood" ||
-                (productId === "fabrics" && catId !== "fabrics-color-core") ||
-                (productId === "ombre" && catId === "signature-ombre")
-              );
-
-              if (needsThickness && !selectedThickness) {
-                toast.error("Please select a thickness first");
-                return;
-              }
-
-              const isPetWool = selectedThickness?.includes("PET Wool");
-              const isEmbossedSurface = selectedSurfaceType === 'embossed';
-
-              let pdfFile;
-              if (productId === "flat-embossed-vmd") {
-                pdfFile = isEmbossedSurface
-                  ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
-                  : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-              } else if (productId === "wood") {
-                if (catId === "wood-classic-parquet") {
-                  pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
-                } else {
-                  pdfFile = isEmbossedSurface
-                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
-                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-                }
-              } else if (productId === "fabrics") {
-                if (catId === "fabrics-color-core") {
-                  // Color Core has no PET Wool option
-                  pdfFile = isEmbossedSurface ? "Embossed VMT Series (PET).pdf" : "Flat Panel VMT (PET).pdf";
-                } else {
-                  // designer-textile, luxury-textures, modern-corporate
-                  pdfFile = isEmbossedSurface
-                    ? (isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf")
-                    : (isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf");
-                }
-              } else if (productId === "ombre") {
-                if (catId === "ombre-color-core-ombre") {
-                  // Color Core Ombre has no PET Wool; grooving tab → flat PDF
-                  pdfFile = selectedSurfaceType === 'embossed'
-                    ? "Embossed VMT Series (PET).pdf"
-                    : "Flat Panel VMT (PET).pdf";
-                } else {
-                  // Signature Ombre — always embossed
-                  pdfFile = isPetWool ? "Embossed VMT Series (PET WOOL).pdf" : "Embossed VMT Series (PET).pdf";
-                }
-              } else if (productId === "vicstrip") {
-                pdfFile = "Flat Panel VMT (PET).pdf";
-              } else {
-                pdfFile = isPetWool ? "Flat Panel VMT (PET WOOL).pdf" : "Flat Panel VMT (PET).pdf";
-              }
-              window.open(`${ASSETS_URL}/static/technical_specification_pdfs/${encodeURIComponent(pdfFile)}`, "_blank");
-            }}
-            className="text-[hsl(215,25%,27%)]"
+            onClick={handleViewTechSpecs}
+            className="hidden md:inline-flex text-[hsl(215,25%,27%)]"
             data-testid="tech-spec-btn"
+            title="View Tech Specs"
           >
             <FileText className="h-4 w-4 mr-1.5" />
             View Tech Specs
           </Button>
+          {/* Auth control. Logged out → "Sign in" button (routes to /login).
+              Logged in → dropdown showing the user's email + a Logout item. */}
+          {authUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden md:inline-flex text-[hsl(215,25%,27%)] border-[hsl(var(--border))] max-w-[220px]"
+                  data-testid="user-menu-btn"
+                  title={authUser.email}
+                >
+                  <User className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  <span className="truncate">{authUser.email}</span>
+                  <ChevronDown className="h-3.5 w-3.5 ml-1.5 flex-shrink-0 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] uppercase tracking-wider text-[hsl(215,16%,55%)]">Signed in as</span>
+                    <span className="text-sm text-[hsl(215,25%,27%)] truncate">{authUser.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-[hsl(215,25%,27%)] cursor-pointer"
+                  data-testid="logout-btn"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/login")}
+              className="hidden md:inline-flex text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"
+              data-testid="sign-in-btn"
+              title="Sign in or create an account"
+            >
+              <User className="h-4 w-4 mr-1.5" />
+              Sign in
+            </Button>
+          )}
         </div>
       </header>
 
@@ -1541,8 +2546,8 @@ const Configurator = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="12mm (PET Panel)">12mm (PET Panel)</SelectItem>
-                          <SelectItem value="25mm (PET Panel)">25mm (PET Panel)</SelectItem>
+                          <ThicknessSelectItem thickness="12mm (PET Panel)" productId={selectedProductType?.id} />
+                          <ThicknessSelectItem thickness="25mm (PET Panel)" productId={selectedProductType?.id} />
                         </SelectContent>
                       </Select>
                     </div>
@@ -1626,8 +2631,13 @@ const Configurator = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {/* T-Patti toggle */}
-                    {selectedCategory?.id && FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti && (
+                    {/* T-Patti toggle — hidden on the Embossed surface
+                        across all series (the embossed pattern is itself
+                        the visual interest; an extra T-Profile overlay
+                        isn't a finishing option for any embossed series). */}
+                    {selectedCategory?.id &&
+                      FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
+                      selectedSurfaceType !== 'embossed' && (
                       <div className="flex items-center justify-between mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
                         <Label htmlFor="tpatti-toggle" className="text-sm font-medium">T-Profile Overlay</Label>
                         <Switch id="tpatti-toggle" checked={showTpatti} onCheckedChange={setShowTpatti} data-testid="tpatti-toggle" />
@@ -1645,7 +2655,7 @@ const Configurator = () => {
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.sizes.map((size) => (
+                        {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((size) => (
                           <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
                         ))}
                       </SelectContent>
@@ -1662,27 +2672,11 @@ const Configurator = () => {
                         <SelectValue placeholder="Select thickness" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.thicknesses.map((thickness) => {
-                          const nrcHint = selectedProductType.id === "flat-embossed-vmd"
-                            ? THICKNESS_NRC_HINTS[thickness]
-                            : null;
-                          return nrcHint ? (
-                            <Tooltip key={thickness}>
-                              <TooltipTrigger asChild>
-                                <SelectItem value={thickness} data-testid={`thickness-${thickness}`}>
-                                  {thickness}
-                                </SelectItem>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" className="max-w-[220px] text-center">
-                                {nrcHint}
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : (
-                            <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
-                              {thickness}
-                            </SelectItem>
-                          );
-                        })}
+                        {selectedProductType.thicknesses
+                          .filter((t) => !(selectedCategory?.id === "fabrics-color-core" && t.includes("PET Wool")))
+                          .map((thickness) => (
+                            <ThicknessSelectItem key={thickness} thickness={thickness} productId={selectedProductType?.id} />
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1705,6 +2699,47 @@ const Configurator = () => {
                   </div>
                 )}
 
+                {/* Emboss (moved above the Print/colour ladder so users pre-select emboss).
+                   Color Core / Designer Textile have their OWN emboss sections inside their
+                   own branches — the guard below excludes them so we don't render two.
+                   Tiles are gated to the patterns the *category* supports (the union of
+                   available_emboss across all its designs) — Wood Classics for example
+                   only supports 4 of the 9 master patterns, so we show 4. Once a design
+                   is picked, narrow further to that design's own supported patterns. */}
+                {selectedCategory?.emboss_available && selectedSurfaceType !== 'flat' && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (() => {
+                  const availableEmbossIds = selectedDesign?.available_emboss ?? [];
+                  // Hide entirely if a design is picked and it has no emboss options.
+                  if (selectedDesign && availableEmbossIds.length === 0) return null;
+                  // No design yet → use the union across the category's designs.
+                  // Design picked → use that design's own list.
+                  const categoryEmbossIds = selectedDesign
+                    ? availableEmbossIds
+                    : Array.from(new Set((selectedCategory?.designs ?? []).flatMap(d => d.available_emboss ?? [])));
+                  const patternsToShow = FLAT_EMBOSSED_EMBOSS_PATTERNS.filter(p => categoryEmbossIds.includes(p.id));
+                  // Category has zero embossable designs → hide section entirely.
+                  if (patternsToShow.length === 0) return null;
+                  return (
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Emboss</Label>
+                      <div className="thumbnail-grid" data-testid="emboss-grid">
+                        {patternsToShow.map(pattern => (
+                          <EmbossThumbnail
+                            key={pattern.id}
+                            pattern={pattern}
+                            isSelected={selectedEmbossPattern?.id === pattern.id}
+                            onSelect={handleEmbossPatternSelect}
+                          />
+                        ))}
+                      </div>
+                      {selectedEmbossPattern && (
+                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg">
+                          <p className="font-medium text-sm">{selectedEmbossPattern.name}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* 3. Print / Designer Textile Sections */}
                 {selectedCategory?.id === "fabrics-color-core" ? (
                   <>
@@ -1717,12 +2752,48 @@ const Configurator = () => {
                           <SelectValue placeholder="Select size" />
                         </SelectTrigger>
                         <SelectContent>
-                          {COLOR_CORE_SIZES.map((s) => (
+                          {COLOR_CORE_SIZES.filter(isSizeAllowedForSurface).map((s) => (
                             <SelectItem key={s} value={s}>{s}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Color Core: Emboss (moved above colours so users pre-select emboss; selection survives across colour changes) */}
+                    {selectedSurfaceType !== 'flat' && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Emboss</Label>
+                        <div className="thumbnail-grid" data-testid="color-core-emboss-grid">
+                          {COLOR_CORE_EMBOSS_PATTERNS
+                            .filter(pattern => !selectedSize || pattern.availableSizes.includes(selectedSize))
+                            .map(pattern => (
+                              <EmbossThumbnail
+                                key={pattern.id}
+                                pattern={pattern}
+                                isSelected={selectedColorCoreEmboss?.id === pattern.id}
+                                onSelect={(p) => {
+                                  const next = selectedColorCoreEmboss?.id === p.id ? null : p;
+                                  setSelectedColorCoreEmboss(next);
+                                  // Alter Flute (= Afterflute) can't coexist with PET Wool — pattern wins.
+                                  // PET Wool is hidden from Color Core's thickness dropdown today, so this
+                                  // is defensive against snapshot/favorite restores.
+                                  if (next?.id === "alter_flute" && selectedThickness?.includes("PET Wool")) {
+                                    setSelectedThickness(null);
+                                    toast.info("PET Wool isn't available with Alter Flute — thickness cleared");
+                                  }
+                                }}
+                              />
+                            ))
+                          }
+                        </div>
+                        {selectedColorCoreEmboss && (
+                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                            <p className="font-medium text-sm">{selectedColorCoreEmboss.name}</p>
+                            <button onClick={() => setSelectedColorCoreEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Color Core: Base Color swatches */}
                     <div className="config-section space-y-2">
@@ -1741,6 +2812,7 @@ const Configurator = () => {
                                 }`}
                                 style={{ backgroundColor: color.hex }}
                                 data-testid={`color-core-color-${color.id}`}
+                                data-uv-selected={selectedColorCoreColor?.id === color.id}
                               />
                             </HoverCardTrigger>
                             <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
@@ -1777,6 +2849,7 @@ const Configurator = () => {
                                       onClick={() => setSelectedFabricStructure(structure)}
                                       className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                       data-testid={`fabric-structure-${structure.id}`}
+                                      data-uv-selected={isSelected}
                                     >
                                       <img
                                         src={thumbUrl}
@@ -1811,31 +2884,6 @@ const Configurator = () => {
                       </AccordionItem>
                     </Accordion>
 
-                    {/* Color Core: Emboss */}
-                    {selectedSurfaceType !== 'flat' && (
-                      <div className="config-section space-y-2">
-                        <Label className="section-header">Emboss</Label>
-                        <div className="thumbnail-grid" data-testid="color-core-emboss-grid">
-                          {COLOR_CORE_EMBOSS_PATTERNS
-                            .filter(pattern => !selectedSize || pattern.availableSizes.includes(selectedSize))
-                            .map(pattern => (
-                              <EmbossThumbnail
-                                key={pattern.id}
-                                pattern={pattern}
-                                isSelected={selectedColorCoreEmboss?.id === pattern.id}
-                                onSelect={(p) => setSelectedColorCoreEmboss(prev => prev?.id === p.id ? null : p)}
-                              />
-                            ))
-                          }
-                        </div>
-                        {selectedColorCoreEmboss && (
-                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
-                            <p className="font-medium text-sm">{selectedColorCoreEmboss.name}</p>
-                            <button onClick={() => setSelectedColorCoreEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </>
                 ) : selectedCategory?.id === "fabrics-designer-textile" ? (
                   <>
@@ -1847,7 +2895,7 @@ const Configurator = () => {
                           <SelectValue placeholder="Select size" />
                         </SelectTrigger>
                         <SelectContent>
-                          {DESIGNER_TEXTILE_SIZES.map((s) => (
+                          {DESIGNER_TEXTILE_SIZES.filter(s => isSizeAllowedForSurface(s.id)).map((s) => (
                             <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                           ))}
                         </SelectContent>
@@ -1863,11 +2911,52 @@ const Configurator = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {DESIGNER_TEXTILE_THICKNESSES.map((t) => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                            <ThicknessSelectItem
+                              key={t}
+                              thickness={t}
+                              testIdPrefix="dt-thickness"
+                              productId={selectedProductType?.id}
+                              disabled={t === "PET Wool" && selectedDTEmboss?.id === "afterflute"}
+                              disabledReason="Not available with Afterflute emboss"
+                            />
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Designer Textile: Emboss (moved above colour so users pre-select emboss; selection survives across colour/fabric changes) */}
+                    {selectedSurfaceType !== 'flat' && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Emboss</Label>
+                        <div className="thumbnail-grid" data-testid="dt-emboss-grid">
+                          {DESIGNER_TEXTILE_EMBOSS_PATTERNS
+                            .filter(pattern => !selectedDTSize || pattern.availableSizes.includes(selectedDTSize))
+                            .map(pattern => (
+                              <EmbossThumbnail
+                                key={pattern.id}
+                                pattern={pattern}
+                                isSelected={selectedDTEmboss?.id === pattern.id}
+                                onSelect={(p) => {
+                                  const next = selectedDTEmboss?.id === p.id ? null : p;
+                                  setSelectedDTEmboss(next);
+                                  // Afterflute can't coexist with PET Wool — pattern wins.
+                                  if (next?.id === "afterflute" && selectedThickness?.includes("PET Wool")) {
+                                    setSelectedThickness(null);
+                                    toast.info("PET Wool isn't available with Afterflute — thickness cleared");
+                                  }
+                                }}
+                              />
+                            ))
+                          }
+                        </div>
+                        {selectedDTEmboss && (
+                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                            <p className="font-medium text-sm">{selectedDTEmboss.name}</p>
+                            <button onClick={() => setSelectedDTEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Designer Textile: 3. Color — all groups + shades in one compact card */}
                     <div className="config-section space-y-3">
@@ -1895,6 +2984,7 @@ const Configurator = () => {
                                     }`}
                                     style={{ backgroundColor: shade.hex }}
                                     data-testid={`dt-shade-${shade.id}`}
+                                    data-uv-selected={selectedDTShade?.id === shade.id}
                                   />
                                 </HoverCardTrigger>
                                 <HoverCardContent side="right" align="start" className="w-44 p-0 overflow-hidden">
@@ -1940,6 +3030,7 @@ const Configurator = () => {
                                           isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                         }`}
                                         data-testid={`dt-fabric-${fabric.id}`}
+                                        data-uv-selected={isSelected}
                                       >
                                         <img
                                           src={thumbUrl}
@@ -1976,31 +3067,6 @@ const Configurator = () => {
                       )}
                     </div>
 
-                    {/* Designer Textile: 5. Emboss */}
-                    {selectedSurfaceType !== 'flat' && (
-                      <div className="config-section space-y-2">
-                        <Label className="section-header">Emboss</Label>
-                        <div className="thumbnail-grid" data-testid="dt-emboss-grid">
-                          {DESIGNER_TEXTILE_EMBOSS_PATTERNS
-                            .filter(pattern => !selectedDTSize || pattern.availableSizes.includes(selectedDTSize))
-                            .map(pattern => (
-                              <EmbossThumbnail
-                                key={pattern.id}
-                                pattern={pattern}
-                                isSelected={selectedDTEmboss?.id === pattern.id}
-                                onSelect={(p) => setSelectedDTEmboss(prev => prev?.id === p.id ? null : p)}
-                              />
-                            ))
-                          }
-                        </div>
-                        {selectedDTEmboss && (
-                          <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
-                            <p className="font-medium text-sm">{selectedDTEmboss.name}</p>
-                            <button onClick={() => setSelectedDTEmboss(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </>
                 ) : selectedCategory?.id === "wood-perforations" && !selectedWoodPerfSize ? (
                     <div className="config-section">
@@ -2033,39 +3099,6 @@ const Configurator = () => {
                   </Accordion>
                 ) : null}
 
-                {/* 4. Emboss — shown for emboss-enabled categories in Embossed/Grooving; hidden in Flat */}
-                {selectedCategory?.emboss_available && selectedSurfaceType !== 'flat' && selectedCategory?.id !== "fabrics-color-core" && selectedCategory?.id !== "fabrics-designer-textile" && (() => {
-                  const availableEmbossIds = selectedDesign?.available_emboss ?? [];
-                  // Hide the entire section if a design is selected but it has no emboss options
-                  if (selectedDesign && availableEmbossIds.length === 0) return null;
-                  return (
-                    <div className="config-section space-y-2">
-                      <Label className="section-header">Emboss</Label>
-                      {!selectedDesign && (
-                        <p className="text-xs text-[hsl(215,16%,47%)]">Select a print to enable emboss options.</p>
-                      )}
-                      <div className="thumbnail-grid" data-testid="emboss-grid">
-                        {selectedDesign && FLAT_EMBOSSED_EMBOSS_PATTERNS
-                          .filter(pattern => availableEmbossIds.includes(pattern.id))
-                          .map(pattern => (
-                            <EmbossThumbnail
-                              key={pattern.id}
-                              pattern={pattern}
-                              isSelected={selectedEmbossPattern?.id === pattern.id}
-                              onSelect={handleEmbossPatternSelect}
-                            />
-                          ))
-                        }
-                      </div>
-                      {selectedEmbossPattern && (
-                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg">
-                          <p className="font-medium text-sm">{selectedEmbossPattern.name}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-
                 {/* 3b. Perforation Pattern — wood-perforations only, shown after size selected */}
                 {selectedCategory?.id === "wood-perforations" && selectedWoodPerfSize && (
                   <Accordion type="single" collapsible defaultValue="perforation" className="config-accordion-wrapper">
@@ -2082,6 +3115,7 @@ const Configurator = () => {
                                     onClick={() => setSelectedPerforation(prev => prev?.id === p.id ? null : p)}
                                     className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${selectedPerforation?.id === p.id ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                     data-testid={`perforation-${p.id}`}
+                                    data-uv-selected={selectedPerforation?.id === p.id}
                                   >
                                       {/* White background so transparent PNG holes are clearly visible */}
                                     <div className="absolute inset-0 bg-white" />
@@ -2155,6 +3189,40 @@ const Configurator = () => {
                       <div style={{ fontSize: 11, color: '#8a8480' }}>1200 × 2800 mm · 3-Panel Wall Setup</div>
                     </div>
 
+                    {/* Emboss Pattern — moved above Base Color so users pre-select emboss.
+                        Hidden under Flat surface (Ombre under Flat is a color-gradient-only
+                        product); the colour-gate that used to be here was removed so tiles
+                        render immediately and the user's selection survives across colour
+                        changes. The preview just stays empty until both colour + emboss
+                        are present. */}
+                    {selectedSurfaceType !== 'flat' && (
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Emboss Pattern</Label>
+                      {soIsLoading ? (
+                        <p style={{ fontSize: 11, color: '#8a8480' }}>Loading 3D patterns…</p>
+                      ) : (
+                        <>
+                          <div className="thumbnail-grid" data-testid="so-emboss-grid">
+                            {SO_PATTERNS.map((pattern) => (
+                              <EmbossThumbnail
+                                key={pattern.id}
+                                pattern={pattern}
+                                isSelected={soSelectedPattern === pattern.id}
+                                onSelect={(p) => setSoSelectedPattern(prev => prev === p.id ? null : p.id)}
+                              />
+                            ))}
+                          </div>
+                          {soSelectedPattern && (
+                            <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                              <p className="font-medium text-sm">{SO_PATTERNS.find(p => p.id === soSelectedPattern)?.name}</p>
+                              <button onClick={() => setSoSelectedPattern(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    )}
+
                     {/* Thickness — above Ombre Colors */}
                     {selectedProductType?.thicknesses?.length > 0 && (
                       <div className="config-section space-y-2">
@@ -2165,98 +3233,137 @@ const Configurator = () => {
                           </SelectTrigger>
                           <SelectContent>
                             {selectedProductType.thicknesses.map((t) => (
-                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                              <ThicknessSelectItem key={t} thickness={t} testIdPrefix="so-thickness" productId={selectedProductType?.id} />
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
                     )}
 
-                    {/* Ombre Colors */}
-                    <div className="config-section space-y-3">
-                      <Label className="section-header">Ombre Colors</Label>
-                      <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                          <span style={{ fontSize: 11, color: '#8a8480', fontWeight: 500 }}>Base Color</span>
-                          <div style={{ height: 52, borderRadius: 10, border: '2px solid #e2ddd7', background: soBaseColor, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-                            <input type="color" value={soBaseColor} onChange={(e) => setSoBaseColor(e.target.value)}
-                              style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
-                          </div>
-                          <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#8a8480', textAlign: 'center', textTransform: 'uppercase' }}>{soBaseColor}</div>
-                        </div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                          <span style={{ fontSize: 11, color: '#8a8480', fontWeight: 500 }}>Overlay Color</span>
-                          <div style={{ height: 52, borderRadius: 10, border: '2px solid #e2ddd7', background: soOverlayColor, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-                            <input type="color" value={soOverlayColor} onChange={(e) => setSoOverlayColor(e.target.value)}
-                              style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
-                          </div>
-                          <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#8a8480', textAlign: 'center', textTransform: 'uppercase' }}>{soOverlayColor}</div>
-                        </div>
+                    {/* Base Color — always white */}
+                    <div className="config-section space-y-2">
+                      <Label className="section-header">Base Color</Label>
+                      <div style={{ height: 40, borderRadius: 8, border: '2px solid #e2ddd7', background: '#ffffff', display: 'flex', alignItems: 'center', paddingLeft: 10 }}>
+                        <span style={{ fontSize: 11, color: '#8a8480', fontFamily: 'monospace' }}>WHITE</span>
                       </div>
-                      {/* Ombre preview bar */}
-                      <div style={{ height: 28, borderRadius: 8, border: '1px solid #e2ddd7', marginBottom: 8,
-                        background: `linear-gradient(to bottom, ${soBaseColor} 0%, ${soBaseColor} ${soBlend}%, ${soOverlayColor} 100%)` }} />
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#8a8480', marginBottom: 4 }}>
-                        <span>Ombre Blend</span>
-                        <span style={{ color: '#c4956a', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{soBlend}%</span>
-                      </div>
-                      <input type="range" min={10} max={90} step={1} value={soBlend}
-                        onChange={(e) => setSoBlend(parseInt(e.target.value))}
-                        style={{ width: '100%', accentColor: '#c4956a', cursor: 'pointer' }} />
                     </div>
 
-                    {/* Emboss Pattern */}
+                    {/* Overlay Color — swatch grid */}
                     <div className="config-section space-y-2">
-                      <Label className="section-header">Emboss Pattern</Label>
-                      {soIsLoading ? (
-                        <p style={{ fontSize: 11, color: '#8a8480' }}>Loading 3D patterns…</p>
-                      ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
-                          {SO_PATTERNS.map((p) => {
-                            const isSel = soSelectedPattern === p.id;
-                            return (
-                              <button key={p.id} type="button" onClick={() => setSoSelectedPattern(prev => prev === p.id ? null : p.id)}
+                      <Label className="section-header">Overlay Color</Label>
+                      {/* Group tabs */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                        {SO_COLORS_BY_GROUP.map(({ group }) => (
+                          <button key={group} type="button" onClick={() => setSoColorGroup(group)}
+                            style={{
+                              fontSize: 10, padding: '3px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit',
+                              background: soColorGroup === group ? '#c4956a' : '#f0ece8',
+                              color: soColorGroup === group ? '#fff' : '#6b6056',
+                              border: 'none', fontWeight: soColorGroup === group ? 600 : 400,
+                            }}
+                          >{group}</button>
+                        ))}
+                      </div>
+                      {/* Swatches for selected group — hover to preview the color
+                          at larger size alongside its hex + group name, matching
+                          the Color Core swatch hover pattern. */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 5 }}>
+                        {(SO_COLORS_BY_GROUP.find(g => g.group === soColorGroup)?.colors ?? []).map((hex, i) => (
+                          <HoverCard key={hex + i} openDelay={200} closeDelay={100}>
+                            <HoverCardTrigger asChild>
+                              <button type="button" title={hex} onClick={() => setSoOverlayColor(hex)}
+                                data-testid={`so-overlay-swatch-${hex}`}
+                                data-uv-selected={soOverlayColor === hex}
                                 style={{
-                                  background: isSel ? 'rgba(196,149,106,0.06)' : '#f5f2ee',
-                                  border: `2px solid ${isSel ? '#c4956a' : '#e2ddd7'}`,
-                                  borderRadius: 10, padding: '10px 6px', cursor: 'pointer',
-                                  textAlign: 'center', position: 'relative',
-                                  boxShadow: isSel ? '0 0 0 1px #c4956a' : 'none',
-                                  fontFamily: 'inherit',
+                                  position: 'relative',  // anchor for the badge ::after pseudo-element
+                                  aspectRatio: '1', borderRadius: 6, background: hex, cursor: 'pointer',
+                                  border: soOverlayColor === hex ? '2.5px solid #c4956a' : '2px solid transparent',
+                                  boxShadow: soOverlayColor === hex ? '0 0 0 1px #c4956a' : '0 0 0 1px #d6d0ca',
+                                  outline: 'none',
                                 }}
-                              >
-                                {isSel && (
-                                  <div style={{ position: 'absolute', top: 5, right: 5, width: 14, height: 14,
-                                    background: '#c4956a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" width="8" height="8"><polyline points="20 6 9 17 4 12" /></svg>
-                                  </div>
-                                )}
-                                <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke={isSel ? '#c4956a' : '#8a8480'} strokeWidth="1" width="26" height="26">
-                                    <path d={SO_PAT_ICONS[p.id]} />
-                                  </svg>
-                                </div>
-                                <div style={{ fontSize: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: isSel ? '#c4956a' : '#8a8480' }}>
-                                  {p.name}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                              />
+                            </HoverCardTrigger>
+                            <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
+                              <div className="h-24 w-full" style={{ backgroundColor: hex }} />
+                              <div className="p-3 space-y-1">
+                                <p className="font-manrope font-bold text-sm">{soColorGroup}</p>
+                                <p className="text-xs text-[hsl(215,16%,47%)] font-mono uppercase">{hex}</p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#8a8480', marginTop: 2, textTransform: 'uppercase', minHeight: 12 }}>
+                        {soOverlayColor ?? 'Pick a color'}
+                      </div>
                     </div>
 
-                    {/* HDRI Lighting */}
+                    {/* Gradient preview bar: overlay at bottom → white at top.
+                        Hidden until a color is picked — otherwise the gradient
+                        would render as pure white with nothing to preview. */}
+                    {soOverlayColor && (
+                      <div style={{ height: 32, borderRadius: 8, border: '1px solid #e2ddd7',
+                        background: `linear-gradient(to top, ${soOverlayColor} 0%, ${soOverlayColor} ${soBlend}%, #ffffff 100%)` }} />
+                    )}
+
+                    {/* Blend Presets */}
                     <div className="config-section space-y-2">
-                      <Label className="section-header">HDRI Lighting</Label>
-                      <SignatureOmbreLightRing rotation={soLightRotation} onChange={setSoLightRotation} />
+                      <Label className="section-header">Blend</Label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+                        {SO_BLEND_PRESETS.map(({ label, value }) => {
+                          const isSel = soBlend === value;
+                          return (
+                            <button key={value} type="button" onClick={() => setSoBlend(value)}
+                              style={{
+                                padding: '8px 4px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                                background: isSel ? 'rgba(196,149,106,0.08)' : '#f5f2ee',
+                                border: `2px solid ${isSel ? '#c4956a' : '#e2ddd7'}`,
+                                boxShadow: isSel ? '0 0 0 1px #c4956a' : 'none',
+                                color: isSel ? '#c4956a' : '#6b6056', textAlign: 'center',
+                              }}
+                            >
+                              <div style={{ fontSize: 11, fontWeight: 600 }}>{label}</div>
+                              <div style={{ fontSize: 9, color: isSel ? '#c4956a' : '#8a8480', marginTop: 2 }}>{value}% dark</div>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
+
+                    {/* HDRI Lighting dial removed — rotation is fixed to the default set in soLightRotation state. */}
 
                     {/* Thickness — removed from here, now shown above Ombre Colors */}
                   </>
                 ) : selectedCategory?.id === "ombre-color-core-ombre" ? (
                   <>
                     {/* ── Color Core Ombre controls (existing) ── */}
+                    {/* Emboss Pattern (moved above Base Color so users pre-select emboss).
+                        Colour-gate that used to be here was removed so tiles render
+                        immediately and the user's selection survives across colour
+                        changes. The preview just stays empty until both colour + emboss
+                        are present (no broken URL fetched). */}
+                    {selectedSurfaceType === 'embossed' && (
+                    <div className="config-section space-y-3">
+                      <Label className="section-header">Emboss Pattern</Label>
+                      <div className="thumbnail-grid" data-testid="ombre-emboss-grid">
+                        {OMBRE_COLOR_CORE_EMBOSS_PATTERNS.map((pattern) => (
+                          <EmbossThumbnail
+                            key={pattern.id}
+                            pattern={pattern}
+                            isSelected={selectedOmbreEmbossPattern?.id === pattern.id}
+                            onSelect={(p) => setSelectedOmbreEmbossPattern(prev => prev?.id === p.id ? null : p)}
+                          />
+                        ))}
+                      </div>
+                      {selectedOmbreEmbossPattern && (
+                        <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                          <p className="font-medium text-sm">{selectedOmbreEmbossPattern.name}</p>
+                          <button onClick={() => setSelectedOmbreEmbossPattern(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
+                        </div>
+                      )}
+                    </div>
+                    )}
+
                     {/* 1. Size */}
                     {selectedProductType?.sizes?.length > 0 && (
                       <div className="config-section space-y-2">
@@ -2266,7 +3373,7 @@ const Configurator = () => {
                             <SelectValue placeholder="Select size" />
                           </SelectTrigger>
                           <SelectContent>
-                            {selectedProductType.sizes.map((s) => (
+                            {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((s) => (
                               <SelectItem key={s} value={s}>{s}</SelectItem>
                             ))}
                           </SelectContent>
@@ -2283,9 +3390,14 @@ const Configurator = () => {
                         <SelectValue placeholder="Select thickness" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.thicknesses.map((t) => (
-                          <SelectItem key={t} value={t}>{t}</SelectItem>
-                        ))}
+                        {/* Color Core Ombre does not offer PET Wool — Signature
+                            Ombre does.  The Ombre product's `thicknesses` lists
+                            all three; filter here so only Signature sees all. */}
+                        {selectedProductType.thicknesses
+                          .filter(t => t !== "PET Wool")
+                          .map((t) => (
+                            <ThicknessSelectItem key={t} thickness={t} testIdPrefix="ombre-thickness" productId={selectedProductType?.id} />
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -2304,17 +3416,22 @@ const Configurator = () => {
                               setSelectedOmbreBaseColor(color);
                               // Auto-select first overlay so the preview updates immediately
                               setSelectedOmbreOverlay(OMBRE_COLOR_CORE_OVERLAYS[color.id]?.[0] ?? null);
-                              // Clear any selected finish pattern
-                              setSelectedOmbreEmbossPattern(null);
+                              // Emboss pattern is intentionally NOT cleared on base-color
+                              // change — under the new emboss-first sidebar order users
+                              // pre-select an emboss before colour, and that selection
+                              // should survive switching colours.
+                              // Groove still clears (only the embossed flow is in-scope
+                              // for this rule).
                               setSelectedOmbreGroovePattern(null);
                             }}
-                            className={`relative aspect-square rounded border-2 transition-colors ${
+                            className={`relative aspect-square rounded transition-all ${
                               selectedOmbreBaseColor?.id === color.id
-                                ? "border-[hsl(30,40%,46%)]"
-                                : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                ? "border-2 border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.35)] ring-offset-1 ring-offset-white"
+                                : "border-2 border-transparent hover:border-[hsl(215,16%,47%)]"
                             }`}
                             style={{ backgroundColor: color.hex }}
                             data-testid={`ombre-base-color-${color.id}`}
+                            data-uv-selected={selectedOmbreBaseColor?.id === color.id}
                           />
                         </HoverCardTrigger>
                         <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
@@ -2350,16 +3467,21 @@ const Configurator = () => {
                                 setSelectedOmbreOverlay(prev =>
                                   prev?.filename === overlay.filename ? null : overlay
                                 );
-                                setSelectedOmbreEmbossPattern(null);
+                                // Emboss pattern is intentionally NOT cleared on overlay
+                                // change — the new emboss-first sidebar order means the
+                                // emboss selection should survive across colour/overlay
+                                // changes. Groove still clears (only the embossed flow
+                                // is in scope for this rule).
                                 setSelectedOmbreGroovePattern(null);
                               }}
-                              className={`relative aspect-square rounded border-2 transition-colors ${
+                              className={`relative aspect-square rounded transition-all ${
                                 selectedOmbreOverlay?.filename === overlay.filename
-                                  ? "border-[hsl(30,40%,46%)]"
-                                  : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                  ? "border-2 border-[hsl(var(--accent))] ring-2 ring-[hsl(var(--accent)/0.35)] ring-offset-1 ring-offset-white"
+                                  : "border-2 border-transparent hover:border-[hsl(215,16%,47%)]"
                               }`}
                               style={{ backgroundColor: overlay.hex }}
                               data-testid={`ombre-overlay-${overlay.hex}`}
+                              data-uv-selected={selectedOmbreOverlay?.filename === overlay.filename}
                             />
                           </HoverCardTrigger>
                           <HoverCardContent side="right" align="start" className="w-48 p-0 overflow-hidden">
@@ -2381,8 +3503,12 @@ const Configurator = () => {
                       Overlay {selectedOmbreOverlay.hex}
                     </p>
                   )}
-                  {/* T-Patti toggle */}
-                  {selectedCategory?.id && FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti && (
+                  {/* T-Patti toggle — hidden on the Embossed surface
+                      across all series (see note on the other tpatti
+                      toggle render site for why). */}
+                  {selectedCategory?.id &&
+                    FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
+                    selectedSurfaceType !== 'embossed' && (
                     <div className="flex items-center justify-between mt-3 p-3 bg-[hsl(var(--secondary))] rounded-lg">
                       <Label htmlFor="ombre-tpatti-toggle" className="text-sm font-medium">T-Profile Overlay</Label>
                       <Switch id="ombre-tpatti-toggle" checked={showTpatti} onCheckedChange={setShowTpatti} data-testid="ombre-tpatti-toggle" />
@@ -2390,99 +3516,46 @@ const Configurator = () => {
                   )}
                 </div>
 
-                {/* 4. Emboss / Groove Pattern */}
+                {/* 4. Pattern — surface-tied.
+                    - Flat: entire section hidden (Color Core Ombre under Flat
+                      renders as the base colour + overlay gradient alone).
+                    - Embossed: only emboss thumbnails.  User cannot switch to
+                      Groove — that belongs to the Grooving tab.
+                    - Grooving: only groove thumbnails.
+                    The previous Emboss|Groove toggle is gone — the surface
+                    tab fully dictates which pattern type is relevant. */}
+                {/* Color Core Ombre emboss + groove grids now route through
+                    the shared EmbossThumbnail component so they pick up the
+                    same hover-name overlay and HoverCard enlarged-preview
+                    behaviour that Wood Classics, Color Core Fabrics,
+                    Designer Textile, Signature Ombre and FVP use.  Keeps the
+                    emboss UI consistent across every category in the app.
+                    Also hidden until BOTH a base colour AND an overlay are
+                    picked — picking a pattern without colours first would
+                    produce a broken panel URL. */}
+                {/* (Embossed Emboss Pattern grid moved up — rendered above Base Color now.) */}
+
+                {selectedSurfaceType === 'grooving' && selectedOmbreBaseColor && selectedOmbreOverlay && (
                 <div className="config-section space-y-3">
-                  <Label className="section-header">Pattern</Label>
-
-                  {/* Segmented toggle: Emboss | Groove — hidden when surface type is Grooving */}
-                  {selectedSurfaceType !== 'grooving' && (
-                  <div className="flex rounded-md overflow-hidden border border-[hsl(var(--border))]">
-                    <button
-                      disabled={selectedSize === "1200x2400"}
-                      onClick={() => {
-                        setOmbreFinishType("emboss");
-                        setSelectedOmbreGroovePattern(null);
-                      }}
-                      className={`flex-1 py-1.5 text-sm font-medium transition-colors ${
-                        selectedSize === "1200x2400"
-                          ? "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] opacity-50 cursor-not-allowed"
-                          : ombreFinishType === "emboss"
-                            ? "bg-[hsl(30,40%,46%)] text-white"
-                            : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]"
-                      }`}
-                      data-testid="ombre-finish-emboss"
-                    >
-                      Emboss
-                    </button>
-                    <button
-                      onClick={() => {
-                        setOmbreFinishType("groove");
-                        setSelectedOmbreEmbossPattern(null);
-                      }}
-                      className={`flex-1 py-1.5 text-sm font-medium border-l border-[hsl(var(--border))] transition-colors ${
-                        ombreFinishType === "groove"
-                          ? "bg-[hsl(30,40%,46%)] text-white"
-                          : "bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]"
-                      }`}
-                      data-testid="ombre-finish-groove"
-                    >
-                      Groove
-                    </button>
+                  <Label className="section-header">Groove Pattern</Label>
+                  <div className="thumbnail-grid" data-testid="ombre-groove-grid">
+                    {OMBRE_COLOR_CORE_GROOVE_PATTERNS.map((pattern) => (
+                      <EmbossThumbnail
+                        key={pattern.id}
+                        pattern={pattern}
+                        isSelected={selectedOmbreGroovePattern?.id === pattern.id}
+                        onSelect={(p) => setSelectedOmbreGroovePattern(prev => prev?.id === p.id ? null : p)}
+                      />
+                    ))}
                   </div>
-                  )}
-
-                  {/* Emboss pattern thumbnails */}
-                  {ombreFinishType === "emboss" && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {OMBRE_COLOR_CORE_EMBOSS_PATTERNS.map((pattern) => (
-                        <button
-                          key={pattern.id}
-                          title={pattern.name}
-                          onClick={() => setSelectedOmbreEmbossPattern(prev =>
-                            prev?.id === pattern.id ? null : pattern
-                          )}
-                          className={`relative aspect-square rounded border-2 overflow-hidden transition-colors ${
-                            selectedOmbreEmbossPattern?.id === pattern.id
-                              ? "border-[hsl(30,40%,46%)]"
-                              : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                          }`}
-                          data-testid={`ombre-emboss-${pattern.id}`}
-                        >
-                          <img src={pattern.thumbnailUrl} alt={pattern.name} className="w-full h-full object-cover" draggable={false} loading="lazy" decoding="async" />
-                        </button>
-                      ))}
+                  {selectedOmbreGroovePattern && (
+                    <div className="mt-2 p-3 bg-[hsl(var(--secondary))] rounded-lg flex items-center justify-between">
+                      <p className="font-medium text-sm">{selectedOmbreGroovePattern.name}</p>
+                      <button onClick={() => setSelectedOmbreGroovePattern(null)} className="text-xs text-[hsl(215,16%,47%)] hover:text-red-500 ml-4">Clear</button>
                     </div>
-                  )}
-
-                  {/* Groove pattern thumbnails */}
-                  {ombreFinishType === "groove" && (
-                    <div className="grid grid-cols-3 gap-2">
-                      {OMBRE_COLOR_CORE_GROOVE_PATTERNS.map((pattern) => (
-                        <button
-                          key={pattern.id}
-                          title={pattern.name}
-                          onClick={() => setSelectedOmbreGroovePattern(prev =>
-                            prev?.id === pattern.id ? null : pattern
-                          )}
-                          className={`relative aspect-square rounded border-2 overflow-hidden transition-colors ${
-                            selectedOmbreGroovePattern?.id === pattern.id
-                              ? "border-[hsl(30,40%,46%)]"
-                              : "border-transparent hover:border-[hsl(215,16%,47%)]"
-                          }`}
-                          data-testid={`ombre-groove-${pattern.id}`}
-                        >
-                          <img src={pattern.thumbnailUrl} alt={pattern.name} className="w-full h-full object-cover" draggable={false} loading="lazy" decoding="async" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {(selectedOmbreEmbossPattern || selectedOmbreGroovePattern) && (
-                    <p className="text-xs text-[hsl(215,16%,47%)] pt-1">
-                      {selectedOmbreEmbossPattern?.name ?? selectedOmbreGroovePattern?.name}
-                    </p>
                   )}
                 </div>
+                )}
 
                 {/* 5. Thickness — removed, now shown above Base Color */}
                   </>
@@ -2536,10 +3609,14 @@ const Configurator = () => {
                         </div>
                       )}
 
-                      {/* T-Patti Toggle (only for flat-embossed-vmd categories that have a tpatti defined) */}
+                      {/* T-Patti Toggle (only for flat-embossed-vmd categories
+                          that have a tpatti defined, AND not on the Embossed
+                          surface — see notes on other tpatti toggle render
+                          sites for the rationale). */}
                       {selectedProductType?.id === "flat-embossed-vmd" &&
                         selectedCategory?.id &&
-                        FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti && (
+                        FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
+                        selectedSurfaceType !== 'embossed' && (
                         <div className="flex items-center justify-between mt-4 p-3 bg-[hsl(var(--secondary))] rounded-lg">
                           <Label htmlFor="tpatti-toggle" className="text-sm font-medium">
                             T-Profile Overlay
@@ -2573,7 +3650,7 @@ const Configurator = () => {
                             <SelectValue placeholder="Select size" />
                           </SelectTrigger>
                           <SelectContent>
-                            {selectedProductType.sizes.map((size) => (
+                            {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((size) => (
                               <SelectItem key={size} value={size} data-testid={`size-${size}`}>
                                 {size}
                               </SelectItem>
@@ -2620,9 +3697,7 @@ const Configurator = () => {
                           </SelectTrigger>
                           <SelectContent>
                             {selectedProductType.thicknesses.map((thickness) => (
-                              <SelectItem key={thickness} value={thickness} data-testid={`thickness-${thickness}`}>
-                                {thickness}
-                              </SelectItem>
+                              <ThicknessSelectItem key={thickness} thickness={thickness} productId={selectedProductType?.id} />
                             ))}
                           </SelectContent>
                         </Select>
@@ -2694,7 +3769,10 @@ const Configurator = () => {
             Reset
           </Button>
           
-          <Dialog open={favoritesOpen} onOpenChange={setFavoritesOpen}>
+          <Dialog
+            open={favoritesOpen}
+            onOpenChange={(open) => { if (open) track("saved_list_opened", { count: favorites.length }); setFavoritesOpen(open); }}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="outline"
@@ -2772,17 +3850,83 @@ const Configurator = () => {
             </DialogContent>
           </Dialog>
         </div>
+        {/* Mobile-only: Studio Lighting in the sidebar (the floating widget
+            on the canvas is hidden on mobile). */}
+        <div className="md:hidden px-4 py-3 border-t border-[hsl(var(--border))]" data-testid="hdri-lighting-control-mobile">
+          <p className="section-header pb-2">Studio Lighting</p>
+          <div className="flex gap-1.5">
+            {[
+              { id: 'none', label: 'Off',  dot: '#CBD5E1' },
+              { id: 'warm', label: 'Warm', dot: '#F59E0B' },
+              { id: 'soft', label: 'Soft', dot: '#93C5FD' },
+            ].map(({ id, label, dot }) => (
+              <button
+                key={id}
+                onClick={() => { track("studio_lighting_toggled", { mode: id }); setHdriLighting(id); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                  hdriLighting === id
+                    ? 'bg-[hsl(30,40%,46%)] text-white border-[hsl(30,40%,46%)]'
+                    : 'text-[hsl(215,16%,47%)] border-[hsl(var(--border))] hover:bg-[hsl(var(--secondary))]'
+                }`}
+                data-testid={`lighting-mobile-${id}`}
+                aria-pressed={hdriLighting === id}
+              >
+                <span
+                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: hdriLighting === id ? 'rgba(255,255,255,0.85)' : dot }}
+                />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Caveat */}
         <p className="px-4 py-2 text-[0.62rem] text-[hsl(215,16%,60%)] leading-tight border-t border-[hsl(var(--border))]">
           *This configurator provides an indicative visualization only. Actual product appearance may vary due to lighting conditions, surface textures, material finishes, and installation environment.
         </p>
+
+        {/* Mobile-only: Save / Download / Tech Specs row.  Mirrors the
+            desktop header buttons which are hidden on mobile. */}
+        <div className="md:hidden px-4 py-3 flex gap-2 border-t border-[hsl(var(--border))]" data-testid="mobile-action-row">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveToFavorites}
+            className="flex-1 text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"
+            data-testid="save-favorite-btn-mobile"
+          >
+            <Heart className="h-4 w-4 mr-1.5" />
+            Save
+          </Button>
+          <Button
+            size="sm"
+            onClick={downloadImage}
+            className="flex-1 bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+            data-testid="download-btn-mobile"
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            Download
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleViewTechSpecs}
+            className="flex-1 text-[hsl(215,25%,27%)]"
+            data-testid="tech-spec-btn-mobile"
+            title="View Tech Specs"
+          >
+            <FileText className="h-4 w-4" />
+          </Button>
+        </div>
       </aside>
 
       {/* Canvas Preview Area */}
       <main className="canvas-area" data-testid="canvas-area">
 
-        {/* HDRI Studio Lighting Control */}
-        <div className="absolute bottom-32 right-4 z-10 select-none" data-testid="hdri-lighting-control">
+        {/* HDRI Studio Lighting Control — desktop only.
+            Mobile equivalent lives inside the sidebar (above the disclaimer). */}
+        <div className="absolute bottom-32 right-4 z-10 select-none hidden md:block" data-testid="hdri-lighting-control">
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-[hsl(var(--border))] p-2 flex flex-col items-stretch gap-1">
             <p className="text-[9px] font-bold text-[hsl(215,16%,55%)] uppercase tracking-widest text-center pb-0.5">Studio Lighting</p>
             {[
@@ -2792,7 +3936,7 @@ const Configurator = () => {
             ].map(({ id, label, dot }) => (
               <button
                 key={id}
-                onClick={() => setHdriLighting(id)}
+                onClick={() => { track("studio_lighting_toggled", { mode: id }); setHdriLighting(id); }}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                   hdriLighting === id
                     ? 'bg-[hsl(30,40%,46%)] text-white'
@@ -2822,8 +3966,8 @@ const Configurator = () => {
           </div>
         </div>
 
-        {/* Zoom Controls */}
-        <div className="absolute top-4 right-4 flex flex-col gap-1 z-10" data-testid="zoom-controls">
+        {/* Zoom Controls — desktop only (touch users pinch-zoom natively or use browser zoom). */}
+        <div className="absolute top-4 right-4 hidden md:flex flex-col gap-1 z-10" data-testid="zoom-controls">
           <Button
             variant="outline"
             size="icon"
@@ -2835,9 +3979,37 @@ const Configurator = () => {
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
-          <div className="text-xs text-center text-[hsl(215,16%,47%)] bg-white/90 backdrop-blur-sm rounded px-1 py-0.5 shadow font-medium">
-            {Math.round(zoomLevel * 100)}%
-          </div>
+          {isEditingZoom ? (
+            <div className="bg-white/90 backdrop-blur-sm rounded shadow flex items-center justify-center px-1 py-0.5 h-6 w-12">
+              <input
+                ref={zoomInputRef}
+                type="number"
+                inputMode="numeric"
+                min={Math.round(ZOOM_MIN * 100)}
+                max={Math.round(ZOOM_MAX * 100)}
+                value={zoomInputValue}
+                onChange={(e) => setZoomInputValue(e.target.value)}
+                onBlur={commitZoomInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') { e.preventDefault(); commitZoomInput(); }
+                  else if (e.key === 'Escape') { e.preventDefault(); cancelZoomInput(); }
+                }}
+                className="w-full text-xs text-center text-[hsl(215,16%,47%)] bg-transparent outline-none font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                data-testid="zoom-percent-input"
+                aria-label="Zoom percentage"
+              />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={beginEditZoom}
+              title="Click to enter a custom zoom %"
+              className="text-xs text-center text-[hsl(215,16%,47%)] bg-white/90 backdrop-blur-sm rounded px-1 py-0.5 shadow font-medium h-6 w-12 hover:bg-white cursor-text"
+              data-testid="zoom-percent-display"
+            >
+              {Math.round(zoomLevel * 100)}%
+            </button>
+          )}
           <Button
             variant="outline"
             size="icon"
@@ -2886,7 +4058,153 @@ const Configurator = () => {
             lensCloneRef.current = null;
           }}
         >
+        {/* ── Compare: Slot tiles (shown while picking) ───────────────── */}
+        {compareMode && !compareApplied && (
+          <div
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 border border-[hsl(var(--border))]"
+            data-testid="compare-slots"
+          >
+            {[0, 1].map((i) => {
+              const slot = compareSlots[i];
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    onClick={() => captureSlot(i)}
+                    className={`relative w-20 h-20 rounded-lg border-2 cursor-pointer transition-all ${
+                      slot
+                        ? 'border-[hsl(25,40%,46%)] hover:border-[hsl(25,40%,40%)]'
+                        : 'border-dashed border-[hsl(215,16%,60%)] hover:border-[hsl(25,40%,46%)] bg-[hsl(var(--secondary))]'
+                    }`}
+                    data-testid={`compare-slot-${i}`}
+                    title={slot ? 'Click to recapture with current view' : 'Click to capture current view'}
+                  >
+                    {slot ? (
+                      <>
+                        <img src={slot.imageUrl} alt={slot.label} className="w-full h-full object-cover rounded-md" />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); clearSlot(i); }}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white border border-[hsl(var(--border))] shadow flex items-center justify-center hover:bg-red-50"
+                          data-testid={`compare-slot-${i}-clear`}
+                          aria-label="Clear slot"
+                        >
+                          <X className="h-3 w-3 text-[hsl(215,16%,47%)]" />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] font-semibold text-[hsl(215,16%,47%)]">
+                        {i === 0 ? 'A' : 'B'}<br />
+                        <span className="text-[8px] font-normal block">Click</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-[9px] text-[hsl(215,16%,47%)] max-w-[80px] truncate text-center" title={slot?.label}>
+                    {slot?.label ?? (i === 0 ? 'Slot A' : 'Slot B')}
+                  </div>
+                </div>
+              );
+            })}
+            <Button
+              size="sm"
+              disabled={!compareSlots[0] || !compareSlots[1]}
+              onClick={applyCompare}
+              className="bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white disabled:opacity-40"
+              data-testid="compare-apply-btn"
+            >
+              Apply
+            </Button>
+          </div>
+        )}
+
+        {/* ── Compare: Slider overlay (shown after Apply) ───────────────
+            Initial divider position is 50% (set via the element's inline
+            `left` / `clipPath` style on mount).  During a drag, pointermove
+            mutates those DOM nodes directly via refs — no React re-render,
+            no jank.  The close button opts out of drag via
+            data-compare-nodrag so clicking × reliably fires onClick. */}
+        {compareMode && compareApplied && compareSlots[0] && compareSlots[1] && (
+          <div
+            ref={sliderContainerRef}
+            className="absolute inset-0 z-30 overflow-hidden select-none"
+            onPointerDown={handleSliderContainerPointerDown}
+            data-testid="compare-slider"
+          >
+            {/* Slot A fills the whole preview area */}
+            <img
+              src={compareSlots[0].imageUrl}
+              alt={compareSlots[0].label}
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              draggable={false}
+            />
+            {/* Slot B clipped so only the portion right of the slider is visible */}
+            <img
+              ref={sliderImgBRef}
+              src={compareSlots[1].imageUrl}
+              alt={compareSlots[1].label}
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              draggable={false}
+              style={{ clipPath: 'inset(0 0 0 50%)' }}
+            />
+            {/* Vertical divider line + draggable handle */}
+            <div
+              ref={sliderDividerRef}
+              className="absolute top-0 bottom-0 w-[2px] bg-white shadow-[0_0_6px_rgba(0,0,0,0.45)] pointer-events-none"
+              style={{ left: 'calc(50% - 1px)' }}
+            />
+            <div
+              ref={sliderHandleRef}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white border-2 border-[hsl(25,40%,46%)] shadow-lg flex items-center justify-center cursor-ew-resize"
+              style={{ left: '50%' }}
+              data-testid="compare-slider-handle"
+            >
+              <SplitSquareHorizontal className="h-4 w-4 text-[hsl(25,40%,46%)] pointer-events-none" />
+            </div>
+            {/* Labels pinned to each side — now clickable tabs.  Click a
+                pill to re-capture the current live preview into that slot,
+                letting the user iterate on one side while keeping the other
+                fixed.  The refresh icon makes the clickability discoverable;
+                data-compare-nodrag keeps the pill out of slider-drag hit-
+                testing so clicks fire reliably.  Disabled (inert) style when
+                no series is selected — capturing a blank placeholder into a
+                slot would just produce an empty image. */}
+            {[0, 1].map((i) => {
+              const slot = compareSlots[i];
+              const isDisabled = !selectedProductType;
+              const sideClass = i === 0 ? 'left-3' : 'right-3';
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { if (!isDisabled) captureSlot(i); }}
+                  disabled={isDisabled}
+                  data-compare-nodrag
+                  className={`absolute top-3 ${sideClass} flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-[11px] font-medium text-[hsl(215,25%,27%)] shadow max-w-[45%] border transition-colors z-10 ${
+                    isDisabled
+                      ? 'opacity-50 cursor-not-allowed border-transparent'
+                      : 'border-transparent hover:border-[hsl(25,40%,46%)] hover:bg-white cursor-pointer'
+                  }`}
+                  title={isDisabled ? 'Pick a series first' : 'Replace this side with the current configuration'}
+                  data-testid={`compare-tab-${i === 0 ? 'a' : 'b'}`}
+                >
+                  <RefreshCw className="h-3 w-3 text-[hsl(25,40%,46%)] flex-shrink-0" />
+                  <span className="truncate">{i === 0 ? 'A' : 'B'} — {slot.label}</span>
+                </button>
+              );
+            })}
+            {/* Close button — opts out of drag so clicks fire reliably. */}
+            <button
+              onClick={exitCompare}
+              data-compare-nodrag
+              className="absolute top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white border border-[hsl(var(--border))] shadow flex items-center justify-center hover:bg-red-50 z-10"
+              data-testid="compare-exit-btn"
+              aria-label="Exit compare"
+            >
+              <X className="h-4 w-4 text-[hsl(215,16%,47%)] pointer-events-none" />
+            </button>
+          </div>
+        )}
+
         <div
+          ref={previewContentRef}
           style={{
             transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
             transformOrigin: "center",
@@ -2901,9 +4219,44 @@ const Configurator = () => {
           }}
           data-testid="preview-zoom-wrapper"
         >
-        {selectedProductType?.id === "ombre" && selectedCategory?.id === "signature-ombre" ? (
+        {!selectedProductType ? (
+          /* No series picked → surface-only URL (e.g. /flat).  Show the
+             muted "Select a series to see a preview" placeholder that
+             matches the app's quietly-guide-the-user tone. */
+          <div
+            className="w-full h-full flex items-center justify-center"
+            data-testid="preview-empty-state"
+          >
+            <p className="text-sm text-[hsl(215,16%,47%)] p-4">
+              Select a series to see a preview
+            </p>
+          </div>
+        ) : !isConfigComplete ? (
+          /* Series picked but not every field is filled — under the
+             "all fields mandatory" rule we render the preview empty
+             with a centred message so the user immediately understands
+             why nothing is rendering. Matches the muted style of the
+             "Select a series to see a preview" placeholder above. */
+          <div
+            className="w-full h-full flex flex-col items-center justify-center gap-2 px-6 text-center py-4 border-2 border-gray-300 border-dashed rounded-lg"
+            data-testid="preview-incomplete-state"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[hsl(215,16%,60%)]" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p className="text-sm font-medium text-[hsl(215,16%,40%)]">
+              Select all fields to see the preview
+            </p>
+            <p className="text-xs text-[hsl(215,16%,55%)] max-w-xs">
+              Pick every option in the sidebar — size, thickness, colour, emboss, and more — to render your panel.
+            </p>
+          </div>
+        ) : selectedProductType?.id === "ombre" && selectedCategory?.id === "signature-ombre" ? (
           <SignatureOmbreRoomPreview
-            panelImage={soPanelImage}
+            // No preview until every required field is filled.
+            panelImage={isConfigComplete ? soPanelImage : null}
             panelCount={3}
             style={{ width: '100%', height: '100%' }}
           />
@@ -2912,19 +4265,28 @@ const Configurator = () => {
             ref={canvasRef}
             onLoadingChange={handleLoadingChange}
             categoryId={selectedCategory?.id}
-            showTpatti={showTpatti}
+            // T-Profile is unavailable on the Embossed surface (decision:
+            // an embossed pattern is itself the visual interest, no extra
+            // overlay), so force it off here regardless of the toggle's
+            // last value on Flat / Grooving tabs.
+            showTpatti={selectedSurfaceType === 'embossed' ? false : showTpatti}
             panelRows={selectedCategory?.id === "fabrics-designer-textile" ? (selectedDTEmboss?.panelRows ?? null) : selectedProductType?.id === "ombre" ? (FLAT_EMBOSSED_VMT_CONFIG[selectedCategory?.id]?.panelRows ?? null) : (selectedColorCoreEmboss?.panelRows ?? null)}
             panelFallbackColor={selectedProductType?.id === "ombre" ? (selectedOmbreBaseColor?.hex ?? null) : null}
             embossUrl={
-              selectedProductType?.id === "ombre"
-                ? ombreEmbossBlobUrl
-                : selectedCategory?.id === "wood-perforations"
-                  ? woodPerfEmbossBlobUrl
-                  : selectedCategory?.id === "fabrics-color-core"
-                    ? (selectedColorCoreEmboss ? ccPanelBlobUrl : null)
-                    : selectedCategory?.id === "fabrics-designer-textile"
-                      ? (selectedDTEmboss ? dtPanelBlobUrl : null)
-                      : fvpEmbossBlobUrl
+              // Gate the entire preview on isConfigComplete — under the new
+              // "every field is mandatory" rule the preview must stay blank
+              // until every visible field is filled.
+              !isConfigComplete
+                ? null
+                : selectedProductType?.id === "ombre"
+                  ? ombreEmbossBlobUrl
+                  : selectedCategory?.id === "wood-perforations"
+                    ? woodPerfEmbossBlobUrl
+                    : selectedCategory?.id === "fabrics-color-core"
+                      ? (selectedColorCoreEmboss ? ccPanelBlobUrl : null)
+                      : selectedCategory?.id === "fabrics-designer-textile"
+                        ? (selectedDTEmboss ? dtPanelBlobUrl : null)
+                        : fvpEmbossBlobUrl
             }
             // flipCenter: allow per-design override (`selectedDesign.mirror_center`) or
             // fall back to category-level `mirrorCenter` from FLAT_EMBOSSED_VMT_CONFIG.
@@ -2936,44 +4298,49 @@ const Configurator = () => {
                   (selectedCategory?.id ? FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.mirrorCenter : false)
             }
             textureUrls={
-              // Ombre: never uses multi-column slices
-              selectedProductType?.id === "ombre"
+              !isConfigComplete
                 ? null
-                // Continuous-pattern: blob URLs managed by useMultiBlobPanels
-                : selectedDesign?.panel_variant === "continuous" && fvpContinuousBlobUrls?.length
-                  ? fvpContinuousBlobUrls
-                  : null
+                // Ombre: never uses multi-column slices
+                : selectedProductType?.id === "ombre"
+                  ? null
+                  // Continuous-pattern: blob URLs managed by useMultiBlobPanels
+                  : selectedDesign?.panel_variant === "continuous" && fvpContinuousBlobUrls?.length
+                    ? fvpContinuousBlobUrls
+                    : null
             }
             textureUrl={
-              // Ombre Color Core: Blob URL — only 1 decoded panel in memory at a time
-              selectedProductType?.id === "ombre"
-                ? (ombrePanelBlobUrl ?? null)
-                // Color Core: Blob URL — only 1 decoded panel in memory at a time
-                : selectedCategory?.id === "fabrics-color-core"
-                ? (ccPanelBlobUrl ?? null)
-                // Designer Textile: Blob URL — only 1 decoded panel in memory at a time
-                : selectedCategory?.id === "fabrics-designer-textile"
-                ? (dtPanelBlobUrl ?? null)
-                // Single-texture: blob URL managed by useBlobPanel
-                : selectedDesign?.panel_variant !== "continuous"
-                  ? fvpSingleBlobUrl
-                  : null
+              !isConfigComplete
+                ? null
+                // Ombre Color Core: Blob URL — only 1 decoded panel in memory at a time
+                : selectedProductType?.id === "ombre"
+                  ? (ombrePanelBlobUrl ?? null)
+                  // Color Core: Blob URL — only 1 decoded panel in memory at a time
+                  : selectedCategory?.id === "fabrics-color-core"
+                    ? (ccPanelBlobUrl ?? null)
+                    // Designer Textile: Blob URL — only 1 decoded panel in memory at a time
+                    : selectedCategory?.id === "fabrics-designer-textile"
+                      ? (dtPanelBlobUrl ?? null)
+                      // Single-texture: blob URL managed by useBlobPanel
+                      : selectedDesign?.panel_variant !== "continuous"
+                        ? fvpSingleBlobUrl
+                        : null
             }
           />
         ) : selectedProductType?.id === "vicstrip" ? (
           <VicStripPreview
             ref={canvasRef}
             onLoadingChange={handleLoadingChange}
-            textureUrl={vicstripBlobUrl}
-            fallbackColor={selectedDesign?.color?.hex || "#CCCCCC"}
+            // Gate on isConfigComplete — every field must be filled.
+            textureUrl={isConfigComplete ? vicstripBlobUrl : null}
+            fallbackColor={isConfigComplete ? (selectedDesign?.color?.hex || "#CCCCCC") : null}
             designLabel={`${selectedPattern?.id || "vicstrip"}-${selectedDesign?.color?.id || "design"}`}
           />
         ) : (
           <CanvasPreview
             ref={canvasRef}
             onLoadingChange={handleLoadingChange}
-            textureColor={selectedDesign?.texture_color}
-            textureUrl={canvasBlobUrl}
+            textureColor={isConfigComplete ? selectedDesign?.texture_color : null}
+            textureUrl={isConfigComplete ? canvasBlobUrl : null}
             selectedColor={selectedColor}
             size={selectedSize}
             isEmbossed={isEmbossed}
@@ -3042,22 +4409,9 @@ const Configurator = () => {
         />
         </div>
 
-        {/* ── Incomplete-selections note ─────────────────────────────── */}
-        {selectedProductType && !isConfigComplete && (
-          <div
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
-            data-testid="incomplete-selections-note"
-          >
-            <div className="flex items-center gap-2.5 bg-black/60 backdrop-blur-md rounded-xl px-5 py-2.5 shadow-xl">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span className="text-white text-[13px] font-medium tracking-wide whitespace-nowrap">
-                Please fill in all selections to see the full preview.
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Incomplete-selections note removed — the preview area now shows
+            a centred "Select all fields to see the preview" placeholder when
+            isConfigComplete is false, so this floating banner is redundant. */}
 
         {/* ── Selection mini cards — stacked at bottom-left of canvas area ── */}
         {selectedProductType && (() => {
@@ -3077,8 +4431,8 @@ const Configurator = () => {
           } else if (id === 'ombre') {
             if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
             if (selectedCategory?.id === 'signature-ombre') {
-              entries.push({ label: 'Base', value: soBaseColor, color: soBaseColor });
-              entries.push({ label: 'Overlay', value: soOverlayColor, color: soOverlayColor });
+              entries.push({ label: 'Base', value: soBaseColor.toLowerCase() === '#ffffff' ? 'white' : soBaseColor, color: soBaseColor });
+              if (soOverlayColor) entries.push({ label: 'Overlay', value: soOverlayColor, color: soOverlayColor });
               if (soSelectedPattern) entries.push({ label: 'Pattern', value: SO_PATTERNS.find(p => p.id === soSelectedPattern)?.name ?? soSelectedPattern });
             } else {
               if (selectedOmbreBaseColor) entries.push({ label: 'Base Color', value: selectedOmbreBaseColor.name, color: selectedOmbreBaseColor.hex });
@@ -3124,8 +4478,12 @@ const Configurator = () => {
             }
           }
 
-          // T-Patti (relevant for categories that support it)
-          if (selectedCategory?.id && FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti) {
+          // T-Patti (relevant for categories that support it, and only
+          // outside the Embossed surface — Embossed series have no
+          // T-Profile option per UI rule).
+          if (selectedCategory?.id &&
+              FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
+              selectedSurfaceType !== 'embossed') {
             entries.push({ label: 'T-Profile', value: showTpatti ? 'On' : 'Off' });
           }
 

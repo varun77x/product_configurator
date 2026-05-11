@@ -16,28 +16,12 @@ const SignatureOmbreRoomPreview = ({ panelImage, panelCount = 3, className }) =>
   const wallRef = useRef(null);
   const overlayRef = useRef(null);
 
-  // Load room setup image and convert black → transparent (wall zone becomes see-through)
+  // Load room setup image directly — PNG already has proper alpha transparency,
+  // no pixel manipulation needed (avoids distorting dark furniture pixels).
   useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const cv = document.createElement('canvas');
-      cv.width = img.width;
-      cv.height = img.height;
-      const ctx = cv.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0);
-      const imgData = ctx.getImageData(0, 0, cv.width, cv.height);
-      const px = imgData.data;
-      for (let i = 0; i < px.length; i += 4) {
-        if (px[i] < 15 && px[i + 1] < 15 && px[i + 2] < 15) px[i + 3] = 0;
-      }
-      ctx.putImageData(imgData, 0, 0);
-      if (overlayRef.current) {
-        overlayRef.current.src = cv.toDataURL('image/png');
-      }
-    };
-    img.onerror = () => console.error('SignatureOmbreRoomPreview: failed to load room image', ROOM_SETUP_URL);
-    img.src = ROOM_SETUP_URL;
+    if (overlayRef.current) {
+      overlayRef.current.src = ROOM_SETUP_URL;
+    }
   }, []);
 
   // Tile panel image across wall canvas whenever it changes.
@@ -50,9 +34,9 @@ const SignatureOmbreRoomPreview = ({ panelImage, panelCount = 3, className }) =>
     const W = canvas.width, H = canvas.height;
 
     if (!panelImage) {
-      // No render yet — show a neutral placeholder
+      // No color picked yet — show a bare white wall behind the furniture.
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = '#c8b8a8';
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, W, H);
       return;
     }

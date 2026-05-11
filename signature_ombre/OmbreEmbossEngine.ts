@@ -78,22 +78,22 @@ export class OmbreEmbossEngine {
     this.texCanvas.width = 512;
     this.texCanvas.height = 1024;
 
-    // HDRI-style hemisphere (sky blue top, warm ground bottom)
-    this.hemiLight = new THREE.HemisphereLight(0xddeeff, 0x443322, 0.4);
+    // Neutral ambient — no sky/ground color tint so overlay hue comes through accurately
+    this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.15);
     this.scene.add(this.hemiLight);
 
-    // 3-point directional lights
-    this.keyLight = new THREE.DirectionalLight(0xfff5e8, 1.3);
+    // 3-point directional lights — pure white to avoid color contamination
+    this.keyLight = new THREE.DirectionalLight(0xffffff, 0.80);
     this.keyLight.castShadow = true;
     this.keyLight.shadow.mapSize.set(2048, 2048);
     this.scene.add(this.keyLight);
     this.scene.add(this.keyLight.target);
 
-    this.fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.35);
+    this.fillLight = new THREE.DirectionalLight(0xffffff, 0.25);
     this.scene.add(this.fillLight);
     this.scene.add(this.fillLight.target);
 
-    this.rimLight = new THREE.DirectionalLight(0xffe8d0, 0.2);
+    this.rimLight = new THREE.DirectionalLight(0xffe8d0, 0.15);
     this.scene.add(this.rimLight);
     this.scene.add(this.rimLight.target);
   }
@@ -193,7 +193,7 @@ export class OmbreEmbossEngine {
         mat.needsUpdate = true;
       } else {
         mesh.material = new THREE.MeshStandardMaterial({
-          map: this.texture!, roughness: 0.65, metalness: 0, side: THREE.DoubleSide,
+          map: this.texture!, roughness: 0.85, metalness: 0, side: THREE.DoubleSide,
         });
       }
     });
@@ -219,11 +219,10 @@ export class OmbreEmbossEngine {
     if (!this.renderer) {
       this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
       this.renderer.outputEncoding = THREE.sRGBEncoding;
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMapping = THREE.NoToneMapping;
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
-    this.renderer.toneMappingExposure = 1.1;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setPixelRatio(1);
     const rw = renderWidth;
@@ -257,12 +256,25 @@ export class OmbreEmbossEngine {
 
   // ── Private ──
 
+  // Mix overlay color with white: factor=0 → white, factor=1 → full overlay
+  private tintColor(hex: string, factor: number): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgb(${Math.round(r * factor + 255 * (1 - factor))},${Math.round(g * factor + 255 * (1 - factor))},${Math.round(b * factor + 255 * (1 - factor))})`;
+  }
+
   private paintOmbre(base: string, overlay: string, percent: number) {
     const w = this.texCanvas.width, h = this.texCanvas.height;
     const ctx = this.texCanvas.getContext('2d')!;
-    const pct = Math.max(0.1, percent / 100);
+    // Top = very pale tint of overlay (not pure white) → smooth, no Mach band at transition
+    // midPoint = where full overlay colour is reached; controlled by blend preset
+    const topColor = this.tintColor(overlay, 0.10);
+    const midPoint = 1 - Math.max(0.05, Math.min(0.95, percent / 100)); // 30%→0.7 | 50%→0.5
     const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, base); g.addColorStop(pct, base); g.addColorStop(1, overlay);
+    g.addColorStop(0, topColor);
+    g.addColorStop(midPoint, overlay);
+    g.addColorStop(1, overlay);
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
     // Subtle noise
     const img = ctx.getImageData(0, 0, w, h); const d = img.data;

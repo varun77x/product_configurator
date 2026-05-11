@@ -183,5 +183,13 @@
                 },
             });
         </script>
+        <!--
+            First-time-user walkthrough (Shepherd.js based, 24 steps).
+            Self-bootstraps: loads Shepherd from CDN, auto-launches on first
+            visit (persisted via localStorage key `uv_tour_seen_v1`), and
+            exposes window.startUnivicousticTour() for a relaunch trigger.
+            Deferred so it doesn't block React mount.
+        -->
+        <script src="%PUBLIC_URL%/univicoustic-tour.js" defer></script>
     </body>
 </html>

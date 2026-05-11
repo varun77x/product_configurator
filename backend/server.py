@@ -11,6 +11,9 @@ from collections import defaultdict
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
+import json
+import hashlib
+from datetime import datetime, timezone
 from chat_knowledge import SYSTEM_PROMPT
 
 # Python 3.14 introduced a strict assertion in _SelectorSocketTransport._write_send()
@@ -43,11 +46,16 @@ except ImportError:
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+CHAT_LOGS_DIR = ROOT_DIR / "chatbot_logs"
+CHAT_LOGS_DIR.mkdir(exist_ok=True)
+
 # Create the main app without a prefix
 app = FastAPI()
 
-# Serve static assets (images) from backend/static/
-app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
+# Serve static assets (images) from backend/static/ (only if the directory exists)
+_static_dir = ROOT_DIR / "static"
+if _static_dir.exists():
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
 # Serve pre-generated catalog JSON from backend/data/
 # This mirrors the S3 layout so the frontend works unchanged locally.
@@ -55,6 +63,10 @@ app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
 _data_dir = ROOT_DIR / "data"
 if _data_dir.exists():
     app.mount("/data", StaticFiles(directory=_data_dir), name="data")
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 THUMB_CACHE_DIR = ROOT_DIR / "static" / "_thumbcache"
 THUMB_SIZE = (200, 200)
@@ -252,12 +264,9 @@ def generate_mock_products():
     
     # 1. Flat / Embossed VMD Panels
     vmd_categories_non_emboss = [
-        "Line & Texture", "Rhythm & Repeat", "Woven Brushwork", "Patterned Weaves",
-        "Indian Modern", "Quiet Bloom",
-        "Nature Reimagined", "Color Block", "Fun & Fantasy", "Soft Texture",
-        "Luxury Textures"
+        "Nature Reimagined", "Marble"
     ]
-    vmd_categories_emboss = ["Marble", "Leather"]  # Wood Classics moved to Wood product
+    vmd_categories_emboss = ["Leather"]
     
     vmd_panel = {
         "id": "flat-embossed-vmd",
@@ -1827,17 +1836,17 @@ def generate_mock_products():
             },
         ],
         "Leather": [
-            {"id":"vmd-design-lh-001", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-01", "design_name": "LH-BR-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg", "color_name": "LH-BR-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","square_30"]},
-            {"id":"vmd-design-lh-002", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-02", "design_name": "LH-BR-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg", "color_name": "LH-BR-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-003", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-03", "design_name": "LH-BR-03", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg", "color_name": "LH-BR-03", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-004", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-04", "design_name": "LH-BR-04", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg", "color_name": "LH-BR-04", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-005", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-05", "design_name": "LH-BR-05", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg", "color_name": "LH-BR-05", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-006", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-06", "design_name": "LH-BR-06", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg", "color_name": "LH-BR-06", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-007", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GR-01", "design_name": "LH-GR-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg", "color_name": "LH-GR-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-008", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GY-01", "design_name": "LH-GY-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg", "color_name": "LH-GY-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-009", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GY-02", "design_name": "LH-GY-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg", "color_name": "LH-GY-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-010", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-NE-01", "design_name": "LH-NE-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg", "color_name": "LH-NE-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
-            {"id":"vmd-design-lh-011", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-NE-02", "design_name": "LH-NE-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg", "color_name": "LH-NE-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle"]},
+            {"id":"vmd-design-lh-001", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-01", "design_name": "LH-BR-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-01.jpg", "color_name": "LH-BR-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","square_30","aqualine"]},
+            {"id":"vmd-design-lh-002", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-02", "design_name": "LH-BR-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-02.jpg", "color_name": "LH-BR-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-003", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-03", "design_name": "LH-BR-03", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-03.jpg", "color_name": "LH-BR-03", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-004", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-04", "design_name": "LH-BR-04", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-04.jpg", "color_name": "LH-BR-04", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-005", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-05", "design_name": "LH-BR-05", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-05.jpg", "color_name": "LH-BR-05", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-006", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-BR-06", "design_name": "LH-BR-06", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-BR-06.jpg", "color_name": "LH-BR-06", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-007", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GR-01", "design_name": "LH-GR-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GR-01.jpg", "color_name": "LH-GR-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-008", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GY-01", "design_name": "LH-GY-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GY-01.jpg", "color_name": "LH-GY-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-009", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-GY-02", "design_name": "LH-GY-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-GY-02.jpg", "color_name": "LH-GY-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-010", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-NE-01", "design_name": "LH-NE-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-NE-01.jpg", "color_name": "LH-NE-01", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
+            {"id":"vmd-design-lh-011", "product_type": "flat-embossed-vmd", "category": "Leather", "design_code": "LH-NE-02", "design_name": "LH-NE-02", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-leather/LH-NE-02.jpg", "color_name": "LH-NE-02", "available_emboss": ["flux_ribbed","ribbed_45mm","ribbed_60mm","tappered","triangle","aqualine"]},
         ],
         "Woven Brushwork": [
             {"id": "vmd-design-wb-001", "product_type": "flat-embossed-vmd", "category": "Woven Brushwork", "design_code": "AB-BL-01", "design_name": "AB-BL-01", "texture_color": "#FFFFFF", "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-BL-01.jpg", "thumbnail_url": "/thumb/flat-embossed-vmt/panels/vmd-woven-brushwork/AB-BL-01.jpg", "color_name": "AB-BL-01"},
@@ -2215,6 +2224,7 @@ def generate_mock_products():
             "name": cat,
             "product_type": "flat-embossed-vmd",
             "emboss_available": True,
+            "flat_available": True,
             "designs": []
         }
         # If there are explicit designs provided for this category, use them
@@ -2291,14 +2301,6 @@ def generate_mock_products():
         "thicknesses": ["12mm (PET Panel)", "20mm (PET Panel)", "25mm (PET Wool)"],
         "categories": []
     }
-    luxury_textures_category = {
-        "id": "fabrics-luxury-textures",
-        "name": "Luxury Textures",
-        "product_type": "fabrics",
-        "emboss_available": False,
-        "designs": EXPLICIT_CATEGORY_DESIGNS.get("Luxury Textures", []),
-    }
-    fabrics_product["categories"].append(luxury_textures_category)
     modern_corporate_category = {
         "id": "fabrics-modern-corporate",
         "name": "Modern Corporate",
@@ -2334,7 +2336,7 @@ def generate_mock_products():
         "densities": [],
         "patterns": [],
         "colors": [],
-        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)"],
+        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
         "categories": []
     }
 
@@ -2374,7 +2376,7 @@ def generate_mock_products():
         "densities": [],
         "patterns": ["Single Groove", "Double Groove", "Square", "Double Square"],
         "colors": vicstrip_colors,
-        "thicknesses": ["12 mm", "25 mm"],
+        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)"],
         "categories": []
     }
     
@@ -2394,12 +2396,16 @@ def generate_mock_products():
             "emboss_available": False,
             "designs": []
         }
-        for i, color in enumerate(vicstrip_colors[:4]):
+        for i, color in enumerate(vicstrip_colors):
+            # design_code is 1-based PER pattern so it lines up with the disk
+            # filenames at static/images/vicstrip/thumbnails/{pattern}_vcs{####}.png
+            # which are numbered 1..16 inside each pattern folder.
+            # `id` keeps the global counter so it stays unique across patterns.
             category["designs"].append({
                 "id": f"vicstrip-design-{design_counter}",
                 "product_type": "vicstrip",
                 "category": pattern,
-                "design_code": f"VCS-{design_counter:04d}",
+                "design_code": f"VCS-{i + 1:04d}",
                 "design_name": f"{pattern} - {vicstrip_color_names[i]}",
                 "texture_color": color,
                 "texture_url": None,
@@ -2462,6 +2468,10 @@ async def get_product_specs(product_id: str):
 
 # ── Chat endpoint ────────────────────────────────────────────────────────────
 
+# Pricing for claude-haiku-4-5-20251001 — verify at https://www.anthropic.com/pricing
+_PRICE_INPUT_PER_MTOK  = 0.80   # USD per 1M input tokens
+_PRICE_OUTPUT_PER_MTOK = 4.00   # USD per 1M output tokens
+
 class ChatMessage(BaseModel):
     role: str
     content: str = Field(max_length=2000)
@@ -2482,50 +2492,252 @@ def _check_rate_limit(client_ip: str) -> bool:
     _rate_store[client_ip].append(now)
     return True
 
+# ── Wall Visualizer endpoint ────────────────────────────────────────────────
+# Powers the standalone /visualizer page (frontend src/visualizer/).
+# Takes a room photo, asks Claude vision to find the wall quadrilaterals,
+# returns structured JSON the frontend uses to drive a homography-based
+# panel composite.
+#
+# Why a new endpoint instead of reusing /chat: the chat endpoint expects
+# text-only messages and a small token budget; vision needs base64 image
+# input plus a tighter prompt that returns strict JSON.
+
+# Pricing constants for the vision-capable model — verify at
+# https://www.anthropic.com/pricing.  Sonnet costs more than Haiku per
+# token but is a step-up in spatial reasoning, which matters when the
+# task is "where exactly are the wall corners."
+_VIS_PRICE_INPUT_PER_MTOK  = 3.00
+_VIS_PRICE_OUTPUT_PER_MTOK = 15.00
+
+# Strict prompt — ask Claude to return ONLY JSON.  Each wall is described
+# by four corner points (in pixel coordinates of the original photo) plus
+# metadata the frontend uses for compositing decisions.
+_WALL_VISION_PROMPT = """You are an expert in interior photography and 2D room geometry.  Your only job is to find the precise pixel boundary of each VERTICAL WALL surface in the photo so we can paste a wall-panel texture onto it.
+
+Look at the photo.  For each VERTICAL WALL identify the four corner pixel coordinates of just the bare wall surface (the vertical plane where panels would be installed).  Use the original image's pixel coordinate system (origin at top-left, x → right, y → down).
+
+CRITICAL — what counts as the wall:
+  • ONLY the vertical wall plane itself.  The wall ENDS at the floor line, the ceiling line, and at any adjacent wall's corner.
+  • DO NOT include the floor, ceiling, baseboards, crown moulding, or skirting.
+  • DO NOT include windows, doors, mirrors, artwork, decorations, or any opening cut into the wall.
+  • DO NOT include furniture in front of the wall.  If a couch or shelf hides part of the wall, return the wall's full quadrilateral as if the obstruction wasn't there — the user masks furniture later.
+  • The four corners must trace the actual visible vertical-plane edges, NOT the photo's outer corners.  If the wall doesn't reach the edge of the photo, neither should your corners.
+
+Return ONE quadrilateral per distinct wall plane.  Two walls that meet at a corner give TWO entries (the back wall and the left/right wall), each with their own quadrilateral that ends at the shared vertical seam between them.
+
+Corners must be in this order: top-left, top-right, bottom-right, bottom-left of THAT wall as it appears in the photo (so for a side wall in perspective, top-left is the corner that's higher and farther from the viewer, etc.).
+
+Return STRICT JSON in this exact shape, no prose, no markdown fence:
+
+{
+  "image_size": { "w": <int>, "h": <int> },
+  "walls": [
+    {
+      "id": "wall-1",
+      "type": "back" | "left" | "right" | "other",
+      "corners": [
+        { "x": <int>, "y": <int> },
+        { "x": <int>, "y": <int> },
+        { "x": <int>, "y": <int> },
+        { "x": <int>, "y": <int> }
+      ],
+      "lighting_direction": "from-left" | "from-right" | "from-top" | "from-front" | "ambient",
+      "confidence": 0.0..1.0,
+      "notes": "<short human-readable note about this specific wall>"
+    }
+  ]
+}
+
+DO NOT include ceiling as a wall type — we don't apply panels to ceilings.  If no clear walls are visible, return an empty walls array.  Do not invent walls that aren't there.  Maximum 3 walls (back + 2 sides).
+"""
+
+
+class VisualizeWallsRequest(BaseModel):
+    """Body for /api/visualize-walls.  Image is base64 PNG/JPEG bytes —
+    `data:image/...;base64,` prefix accepted but stripped server-side."""
+    image_base64: str
+    image_mime: str = "image/jpeg"  # caller hint; stripped if image_base64 has data: prefix
+
+
+@api_router.post("/visualize-walls")
+async def visualize_walls(payload: VisualizeWallsRequest, req: Request):
+    client_ip = req.client.host if req.client else "unknown"
+    if not _check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Too many requests — please wait a moment.")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="Wall visualizer is not configured (missing ANTHROPIC_API_KEY).")
+
+    # Strip data: URL prefix if the caller sent one, then validate the base64
+    # is non-empty and not absurdly large (10 MB cap, matches the frontend
+    # PhotoUpload component's check).
+    raw_b64 = payload.image_base64
+    detected_mime = payload.image_mime or "image/jpeg"
+    if raw_b64.startswith("data:"):
+        # data:image/png;base64,iVBOR...
+        try:
+            header, raw_b64 = raw_b64.split(",", 1)
+            detected_mime = header.split(";", 1)[0].replace("data:", "") or detected_mime
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Malformed data URL.")
+    if not raw_b64:
+        raise HTTPException(status_code=400, detail="image_base64 is empty.")
+    # 4/3 base64 ratio → 10 MB image ≈ 13.3 MB base64 string
+    if len(raw_b64) > 14 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image too large — keep it under 10 MB.")
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+
+        _t0 = time.time()
+        response = client.messages.create(
+            model="claude-sonnet-4-5-20250929",  # vision-capable model with strong spatial reasoning
+            max_tokens=1500,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": detected_mime,
+                                "data": raw_b64,
+                            },
+                        },
+                        {"type": "text", "text": _WALL_VISION_PROMPT},
+                    ],
+                }
+            ],
+        )
+        duration_ms = int((time.time() - _t0) * 1000)
+
+        usage = response.usage
+        cost_usd = (
+            usage.input_tokens * _VIS_PRICE_INPUT_PER_MTOK
+            + usage.output_tokens * _VIS_PRICE_OUTPUT_PER_MTOK
+        ) / 1_000_000
+
+        # Claude was instructed to return strict JSON.  Pull out the JSON
+        # from the first text content block, then defend against any
+        # accidental markdown fence or leading prose.
+        raw_text = response.content[0].text.strip()
+        if raw_text.startswith("```"):
+            # Strip markdown fence:  ```json ... ```  →  ...
+            raw_text = raw_text.strip("`")
+            if raw_text.startswith("json"):
+                raw_text = raw_text[4:]
+            raw_text = raw_text.strip()
+        try:
+            parsed = json.loads(raw_text)
+        except json.JSONDecodeError as je:
+            logger.error(f"visualize-walls: Claude returned non-JSON. First 500 chars: {raw_text[:500]!r}")
+            raise HTTPException(status_code=502, detail="Vision model returned malformed JSON; try again.") from je
+
+        # Log usage to the same daily file used by /chat for consistency.
+        log_entry = {
+            "ts":            datetime.now(timezone.utc).isoformat(),
+            "endpoint":      "visualize-walls",
+            "model":         "claude-sonnet-4-5-20250929",
+            "input_tokens":  usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "cost_usd":      round(cost_usd, 6),
+            "duration_ms":   duration_ms,
+            "walls_found":   len(parsed.get("walls", [])),
+            "ip_hash":       hashlib.sha256(client_ip.encode()).hexdigest()[:12],
+        }
+        log_file = CHAT_LOGS_DIR / datetime.now(timezone.utc).strftime("%Y-%m-%d.jsonl")
+        with open(log_file, "a", encoding="utf-8") as _lf:
+            _lf.write(json.dumps(log_entry) + "\n")
+
+        logger.info(
+            f"VisWalls | in={usage.input_tokens} out={usage.output_tokens} "
+            f"cost=${cost_usd:.6f} walls={len(parsed.get('walls', []))} duration={duration_ms}ms"
+        )
+        return parsed
+    except HTTPException:
+        raise
+    except Exception as e:
+        err_str = str(e)
+        logger.error(f"visualize-walls error: {e}")
+        if "429" in err_str or "rate_limit" in err_str.lower() or "overloaded" in err_str.lower():
+            raise HTTPException(status_code=429, detail="Vision service is busy — please try again in a moment.")
+        raise HTTPException(status_code=500, detail="Vision service error — please try again.")
+
+
 @api_router.post("/chat")
 async def chat(request: ChatRequest, req: Request):
     client_ip = req.client.host if req.client else "unknown"
     if not _check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Too many requests — please wait a moment.")
 
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise HTTPException(status_code=503, detail="Chat assistant is not configured.")
 
     if not request.messages:
         raise HTTPException(status_code=400, detail="No messages provided.")
 
-    # Only allow role values of 'user' or 'model' to prevent prompt injection via role field
+    # Only allow role values of 'user' or 'assistant' to prevent prompt injection via role field
     for msg in request.messages:
-        if msg.role not in ("user", "model"):
+        if msg.role not in ("user", "assistant"):
             raise HTTPException(status_code=400, detail="Invalid message role.")
 
     try:
-        from google import genai
-        from google.genai import types
-        client = genai.Client(api_key=api_key)
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
 
-        # Build full conversation as contents (multi-turn)
-        contents = [
-            types.Content(role=msg.role, parts=[types.Part(text=msg.content)])
-            for msg in request.messages
-        ]
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=contents,
-            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
+        messages = [{"role": msg.role, "content": msg.content} for msg in request.messages]
+        _t0 = time.time()
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            messages=messages,
         )
-        return {"reply": response.text}
+        duration_ms = int((time.time() - _t0) * 1000)
+
+        usage = response.usage
+        input_tok  = usage.input_tokens
+        output_tok = usage.output_tokens
+        cost_usd   = (input_tok * _PRICE_INPUT_PER_MTOK + output_tok * _PRICE_OUTPUT_PER_MTOK) / 1_000_000
+
+        log_entry = {
+            "ts":            datetime.now(timezone.utc).isoformat(),
+            "model":         "claude-haiku-4-5-20251001",
+            "input_tokens":  input_tok,
+            "output_tokens": output_tok,
+            "cost_usd":      round(cost_usd, 6),
+            "duration_ms":   duration_ms,
+            "ip_hash":       hashlib.sha256(client_ip.encode()).hexdigest()[:12],
+        }
+        log_file = CHAT_LOGS_DIR / datetime.now(timezone.utc).strftime("%Y-%m-%d.jsonl")
+        with open(log_file, "a", encoding="utf-8") as _lf:
+            _lf.write(json.dumps(log_entry) + "\n")
+
+        logger.info(
+            f"Chat | in={input_tok} out={output_tok} "
+            f"cost=${cost_usd:.6f} duration={duration_ms}ms"
+        )
+        return {"reply": response.content[0].text}
     except Exception as e:
         err_str = str(e)
-        logger.error(f"Gemini chat error: {e}")
-        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+        logger.error(f"Anthropic chat error: {e}")
+        if "429" in err_str or "rate_limit" in err_str.lower() or "overloaded" in err_str.lower():
             raise HTTPException(status_code=429, detail="The assistant is busy — please try again in a moment.")
         raise HTTPException(status_code=500, detail="Chat service error — please try again.")
 
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# ── Auth router (frontend-only OTP register + email-only login). See auth.py
+# for the full description of the flow and security caveats. The router
+# carries its own /api/auth prefix so it doesn't double up on api_router's. ──
+from auth import router as auth_router  # noqa: E402  (defined after app for clarity)
+app.include_router(auth_router)
 
 cors_origins = [
     origin.strip()
