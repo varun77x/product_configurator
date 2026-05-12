@@ -140,7 +140,7 @@ export default function ChatWidget({ open, onClose }) {
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: "#da5142" }}
+        style={{ background: "#f8f7f7" }}
       >
         <div className="flex items-center gap-2">
           <img
@@ -150,14 +150,11 @@ export default function ChatWidget({ open, onClose }) {
             aria-hidden="true"
           />
           <div>
-            <p className="text-white font-semibold text-md leading-tight" style={{ 
-              fontFamily: "'Quintessential', serif",
-               fontStyle: 'normal',
-                fontWeight: 400 }}>
+            <p className="text-black/80 font-mono font-semibold text-md leading-tight">
 
               UNIVICOUSTIC Assistant
             </p>
-            <p className="text-white/70 text-[11px]">Ask about our panels</p>
+            <p className="text-black/70 text-[11px]">Ask about our panels</p>
           </div>
         </div>
         <button
@@ -204,7 +201,7 @@ export default function ChatWidget({ open, onClose }) {
                         li: ({ children }) => <li>{children}</li>,
                         strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                         a: ({ href, children }) => (
-                          <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-[hsl(25,40%,46%)]">{children}</a>
+                          <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-accent">{children}</a>
                         ),
                         code: ({ children }) => <code className="bg-black/10 px-1 rounded text-xs">{children}</code>,
                       }}
@@ -222,8 +219,8 @@ export default function ChatWidget({ open, onClose }) {
                           onClose();
                           navigate(`/${slug}`, surfaceType ? { state: { surfaceType } } : undefined);
                         }}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors hover:bg-[hsl(25,40%,46%)] hover:text-white hover:border-transparent"
-                        style={{ borderColor: "hsl(25,40%,46%)", color: "hsl(25,40%,46%)" }}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border transition-colors hover:bg-accent hover:text-white hover:border-transparent"
+                        style={{ borderColor: "hsl(var(--accent))", color: "hsl(var(--accent))" }}
                       >
                         Explore {label} <ArrowRight className="h-3 w-3" />
                       </button>
@@ -283,7 +280,7 @@ export default function ChatWidget({ open, onClose }) {
               borderColor: "hsl(215,16%,87%)",
               maxHeight: 96,
               lineHeight: "1.4",
-              focusRingColor: "hsl(25,40%,46%)",
+              focusRingColor: "hsl(var(--accent))",
             }}
             onInput={(e) => {
               e.target.style.height = "auto";
@@ -295,7 +292,7 @@ export default function ChatWidget({ open, onClose }) {
             disabled={!input.trim() || loading || rateCooldown > 0}
             aria-label="Send message"
             className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40"
-            style={{ background: "hsl(25,40%,46%)" }}
+            style={{ background: "hsl(var(--accent))" }}
           >
             <Send className="h-4 w-4 text-white" />
           </button>

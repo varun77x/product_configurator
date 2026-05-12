@@ -242,7 +242,7 @@ export default function AuthScreen() {
       </div>
 
       {/* ── Hero pane (right) — hidden on mobile ──────────────────────── */}
-      <div className="hidden md:flex md:w-[55%] relative overflow-hidden bg-[hsl(30,40%,46%)]">
+      <div className="hidden md:flex md:w-[55%] relative overflow-hidden bg-accent">
         <img
           src={HERO_IMAGE}
           alt="UniVicoustic acoustic wall paneling in a styled interior"
@@ -279,7 +279,7 @@ function LoginPanel({ email, setEmail, busy, onSubmit, onSwitchToRegister }) {
         <Button
           type="submit"
           disabled={busy || !email.trim()}
-          className="w-full h-11 bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white font-medium mt-2 shadow-sm disabled:opacity-50"
+          className="w-full h-11 bg-accent hover:bg-accent-hover text-white font-medium mt-2 shadow-sm disabled:opacity-50"
           data-testid="auth-login-submit"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Sign in <ArrowRight className="h-4 w-4 ml-1.5" /></>}
@@ -290,7 +290,7 @@ function LoginPanel({ email, setEmail, busy, onSubmit, onSwitchToRegister }) {
         <button
           type="button"
           onClick={onSwitchToRegister}
-          className="text-[hsl(25,40%,46%)] hover:underline font-medium"
+          className="text-accent hover:underline font-medium"
           data-testid="auth-mode-toggle"
         >
           Sign up
@@ -314,7 +314,7 @@ function RegisterPanel({ email, setEmail, busy, onSubmit, onSwitchToLogin }) {
         <Button
           type="submit"
           disabled={busy || !email.trim()}
-          className="w-full h-11 bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white font-medium mt-2 shadow-sm disabled:opacity-50"
+          className="w-full h-11 bg-accent hover:bg-accent-hover text-white font-medium mt-2 shadow-sm disabled:opacity-50"
           data-testid="auth-register-submit"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Send verification code <ArrowRight className="h-4 w-4 ml-1.5" /></>}
@@ -325,7 +325,7 @@ function RegisterPanel({ email, setEmail, busy, onSubmit, onSwitchToLogin }) {
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-[hsl(25,40%,46%)] hover:underline font-medium"
+          className="text-accent hover:underline font-medium"
           data-testid="auth-mode-toggle"
         >
           Sign in
@@ -398,8 +398,8 @@ function OtpPanel({ email, otp, setOtp, busy, resendIn, onSubmit, onResend, onCh
   return (
     <>
       <div className="mb-6">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[hsl(30,40%,46%)]/10 mb-4">
-          <Mail className="h-5 w-5 text-[hsl(25,40%,46%)]" />
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 mb-4">
+          <Mail className="h-5 w-5 text-accent" />
         </div>
         <h1 className="font-manrope text-2xl md:text-3xl font-semibold text-[hsl(215,25%,27%)] tracking-tight">
           Check your email
@@ -411,7 +411,7 @@ function OtpPanel({ email, otp, setOtp, busy, resendIn, onSubmit, onResend, onCh
           <button
             type="button"
             onClick={onChangeEmail}
-            className="text-[hsl(25,40%,46%)] hover:underline font-medium"
+            className="text-accent hover:underline font-medium"
           >
             Change email
           </button>
@@ -436,8 +436,8 @@ function OtpPanel({ email, otp, setOtp, busy, resendIn, onSubmit, onResend, onCh
                 "w-11 h-12 text-center text-lg font-semibold font-manrope " +
                 "border-2 rounded-lg focus:outline-none transition-colors " +
                 (digit
-                  ? "border-[hsl(25,40%,46%)] text-[hsl(215,25%,27%)] bg-[hsl(30,40%,46%)]/[0.04]"
-                  : "border-[hsl(var(--border))] text-[hsl(215,25%,27%)] focus:border-[hsl(25,40%,46%)]")
+                  ? "border-accent text-[hsl(215,25%,27%)] bg-accent/[0.04]"
+                  : "border-[hsl(var(--border))] text-[hsl(215,25%,27%)] focus:border-accent")
               }
               data-testid={`auth-otp-input-${i}`}
               aria-label={`Digit ${i + 1}`}
@@ -456,7 +456,7 @@ function OtpPanel({ email, otp, setOtp, busy, resendIn, onSubmit, onResend, onCh
         <Button
           type="submit"
           disabled={busy || !isComplete}
-          className="w-full h-11 bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white font-medium shadow-sm disabled:opacity-50"
+          className="w-full h-11 bg-accent hover:bg-accent-hover text-white font-medium shadow-sm disabled:opacity-50"
           data-testid="auth-otp-submit"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify and continue"}
@@ -472,7 +472,7 @@ function OtpPanel({ email, otp, setOtp, busy, resendIn, onSubmit, onResend, onCh
             type="button"
             onClick={onResend}
             disabled={busy}
-            className="text-[hsl(25,40%,46%)] hover:underline font-medium disabled:opacity-50"
+            className="text-accent hover:underline font-medium disabled:opacity-50"
             data-testid="auth-otp-resend"
           >
             Resend code

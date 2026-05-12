@@ -2371,7 +2371,7 @@ const Configurator = () => {
           <Button
             size="sm"
             onClick={downloadImage}
-            className="hidden md:inline-flex bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+            className="hidden md:inline-flex bg-accent hover:bg-accent-hover text-white"
             data-testid="download-btn"
           >
             <Download className="h-4 w-4 mr-1.5" />
@@ -2383,7 +2383,7 @@ const Configurator = () => {
             onClick={toggleCompareMode}
             disabled={!selectedProductType}
             className={`hidden md:inline-flex ${compareMode
-              ? "bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+              ? "bg-accent hover:bg-accent-hover text-white"
               : "text-[hsl(215,25%,27%)] border-[hsl(var(--border))]"}`}
             data-testid="compare-btn"
             title={selectedProductType ? "Compare two configurations side-by-side" : "Pick a series first"}
@@ -2473,7 +2473,7 @@ const Configurator = () => {
                     onClick={() => handleSurfaceTypeChange(st.id)}
                     className={`flex-1 py-2 text-sm font-medium transition-colors ${idx < arr.length - 1 ? 'border-r border-[hsl(var(--border))]' : ''} ${
                       selectedSurfaceType === st.id
-                        ? 'bg-[hsl(30,40%,46%)] text-white'
+                        ? 'bg-accent text-white'
                         : 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
                     }`}
                     data-testid={`surface-type-${st.id}`}
@@ -2807,7 +2807,7 @@ const Configurator = () => {
                                 onClick={() => setSelectedColorCoreColor(color)}
                                 className={`relative aspect-square rounded border-2 transition-colors ${
                                   selectedColorCoreColor?.id === color.id
-                                    ? "border-[hsl(30,40%,46%)]"
+                                    ? "border-accent"
                                     : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                 }`}
                                 style={{ backgroundColor: color.hex }}
@@ -2847,7 +2847,7 @@ const Configurator = () => {
                                   <HoverCardTrigger asChild>
                                     <button
                                       onClick={() => setSelectedFabricStructure(structure)}
-                                      className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
+                                      className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${isSelected ? "border-accent" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                       data-testid={`fabric-structure-${structure.id}`}
                                       data-uv-selected={isSelected}
                                     >
@@ -2979,7 +2979,7 @@ const Configurator = () => {
                                     }}
                                     className={`w-6 h-6 rounded border-2 transition-colors ${
                                       selectedDTShade?.id === shade.id
-                                        ? "border-[hsl(30,40%,46%)] scale-110"
+                                        ? "border-accent scale-110"
                                         : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                     }`}
                                     style={{ backgroundColor: shade.hex }}
@@ -3027,7 +3027,7 @@ const Configurator = () => {
                                         title={fabric.name}
                                         onClick={() => setSelectedDTFabric(fabric)}
                                         className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${
-                                          isSelected ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"
+                                          isSelected ? "border-accent" : "border-transparent hover:border-[hsl(215,16%,47%)]"
                                         }`}
                                         data-testid={`dt-fabric-${fabric.id}`}
                                         data-uv-selected={isSelected}
@@ -3113,7 +3113,7 @@ const Configurator = () => {
                                 <HoverCardTrigger asChild>
                                   <button
                                     onClick={() => setSelectedPerforation(prev => prev?.id === p.id ? null : p)}
-                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${selectedPerforation?.id === p.id ? "border-[hsl(30,40%,46%)]" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
+                                    className={`relative aspect-square rounded overflow-hidden border-2 transition-colors ${selectedPerforation?.id === p.id ? "border-accent" : "border-transparent hover:border-[hsl(215,16%,47%)]"}`}
                                     data-testid={`perforation-${p.id}`}
                                     data-uv-selected={selectedPerforation?.id === p.id}
                                   >
@@ -3783,7 +3783,7 @@ const Configurator = () => {
                 <Heart className="h-4 w-4 mr-2" />
                 Saved
                 {favorites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-[hsl(30,40%,46%)] text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-accent text-white text-xs rounded-full flex items-center justify-center">
                     {favorites.length}
                   </span>
                 )}
@@ -3865,7 +3865,7 @@ const Configurator = () => {
                 onClick={() => { track("studio_lighting_toggled", { mode: id }); setHdriLighting(id); }}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   hdriLighting === id
-                    ? 'bg-[hsl(30,40%,46%)] text-white border-[hsl(30,40%,46%)]'
+                    ? 'bg-accent text-white border-accent'
                     : 'text-[hsl(215,16%,47%)] border-[hsl(var(--border))] hover:bg-[hsl(var(--secondary))]'
                 }`}
                 data-testid={`lighting-mobile-${id}`}
@@ -3902,7 +3902,7 @@ const Configurator = () => {
           <Button
             size="sm"
             onClick={downloadImage}
-            className="flex-1 bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+            className="flex-1 bg-accent hover:bg-accent-hover text-white"
             data-testid="download-btn-mobile"
           >
             <Download className="h-4 w-4 mr-1.5" />
@@ -3939,7 +3939,7 @@ const Configurator = () => {
                 onClick={() => { track("studio_lighting_toggled", { mode: id }); setHdriLighting(id); }}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                   hdriLighting === id
-                    ? 'bg-[hsl(30,40%,46%)] text-white'
+                    ? 'bg-accent text-white'
                     : 'text-[hsl(215,16%,47%)] hover:bg-[hsl(var(--secondary))]'
                 }`}
                 data-testid={`lighting-${id}`}
@@ -4072,8 +4072,8 @@ const Configurator = () => {
                     onClick={() => captureSlot(i)}
                     className={`relative w-20 h-20 rounded-lg border-2 cursor-pointer transition-all ${
                       slot
-                        ? 'border-[hsl(25,40%,46%)] hover:border-[hsl(25,40%,40%)]'
-                        : 'border-dashed border-[hsl(215,16%,60%)] hover:border-[hsl(25,40%,46%)] bg-[hsl(var(--secondary))]'
+                        ? 'border-accent hover:border-accent-hover'
+                        : 'border-dashed border-[hsl(215,16%,60%)] hover:border-accent bg-[hsl(var(--secondary))]'
                     }`}
                     data-testid={`compare-slot-${i}`}
                     title={slot ? 'Click to recapture with current view' : 'Click to capture current view'}
@@ -4107,7 +4107,7 @@ const Configurator = () => {
               size="sm"
               disabled={!compareSlots[0] || !compareSlots[1]}
               onClick={applyCompare}
-              className="bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white disabled:opacity-40"
+              className="bg-accent hover:bg-accent-hover text-white disabled:opacity-40"
               data-testid="compare-apply-btn"
             >
               Apply
@@ -4152,11 +4152,11 @@ const Configurator = () => {
             />
             <div
               ref={sliderHandleRef}
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white border-2 border-[hsl(25,40%,46%)] shadow-lg flex items-center justify-center cursor-ew-resize"
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white border-2 border-accent shadow-lg flex items-center justify-center cursor-ew-resize"
               style={{ left: '50%' }}
               data-testid="compare-slider-handle"
             >
-              <SplitSquareHorizontal className="h-4 w-4 text-[hsl(25,40%,46%)] pointer-events-none" />
+              <SplitSquareHorizontal className="h-4 w-4 text-accent pointer-events-none" />
             </div>
             {/* Labels pinned to each side — now clickable tabs.  Click a
                 pill to re-capture the current live preview into that slot,
@@ -4180,12 +4180,12 @@ const Configurator = () => {
                   className={`absolute top-3 ${sideClass} flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-[11px] font-medium text-[hsl(215,25%,27%)] shadow max-w-[45%] border transition-colors z-10 ${
                     isDisabled
                       ? 'opacity-50 cursor-not-allowed border-transparent'
-                      : 'border-transparent hover:border-[hsl(25,40%,46%)] hover:bg-white cursor-pointer'
+                      : 'border-transparent hover:border-accent hover:bg-white cursor-pointer'
                   }`}
                   title={isDisabled ? 'Pick a series first' : 'Replace this side with the current configuration'}
                   data-testid={`compare-tab-${i === 0 ? 'a' : 'b'}`}
                 >
-                  <RefreshCw className="h-3 w-3 text-[hsl(25,40%,46%)] flex-shrink-0" />
+                  <RefreshCw className="h-3 w-3 text-accent flex-shrink-0" />
                   <span className="truncate">{i === 0 ? 'A' : 'B'} — {slot.label}</span>
                 </button>
               );
@@ -4524,8 +4524,8 @@ const Configurator = () => {
       {/* Floating chat button */}
       <button
         onClick={() => setChatOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-[300] w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-        style={{ background: 'hsl(7, 62%, 62%)' }}
+        className="fixed border-[0.4px] border-black bottom-6 right-6 z-[300] w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+        style={{ background: 'hsl(0, 0%, 91%)' }}
         aria-label="Chat with us"
         data-testid="chat-fab"
       >

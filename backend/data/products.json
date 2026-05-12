@@ -102,28 +102,6 @@
             "color_name": "NA-GR-02"
           },
           {
-            "id": "vmd-design-nr-006",
-            "product_type": "flat-embossed-vmd",
-            "category": "Nature Reimagined",
-            "design_code": "NA-GR-03",
-            "design_name": "NA-GR-03",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-03.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-03.jpg",
-            "color_name": "NA-GR-03"
-          },
-          {
-            "id": "vmd-design-nr-007",
-            "product_type": "flat-embossed-vmd",
-            "category": "Nature Reimagined",
-            "design_code": "NA-GR-04",
-            "design_name": "NA-GR-04",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-04.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-04.jpg",
-            "color_name": "NA-GR-04"
-          },
-          {
             "id": "vmd-design-nr-008",
             "product_type": "flat-embossed-vmd",
             "category": "Nature Reimagined",
@@ -133,17 +111,6 @@
             "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-05.jpg",
             "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-GR-05.jpg",
             "color_name": "NA-GR-05"
-          },
-          {
-            "id": "vmd-design-nr-009",
-            "product_type": "flat-embossed-vmd",
-            "category": "Nature Reimagined",
-            "design_code": "NA-NC-16",
-            "design_name": "NA-NC-16",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-16.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/NA-NC-16.jpg",
-            "color_name": "NA-NC-16"
           },
           {
             "id": "vmd-design-nr-010",
@@ -263,17 +230,6 @@
             "color_name": "NA-YL-02"
           },
           {
-            "id": "vmd-design-nr-017",
-            "product_type": "flat-embossed-vmd",
-            "category": "Nature Reimagined",
-            "design_code": "WP-BL-04",
-            "design_name": "WP-BL-04",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BL-04.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-BL-04.jpg",
-            "color_name": "WP-BL-04"
-          },
-          {
             "id": "vmd-design-nr-018",
             "product_type": "flat-embossed-vmd",
             "category": "Nature Reimagined",
@@ -317,17 +273,6 @@
               "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-NC-04-PanelC.jpg"
             ],
             "color_name": "WP-NC-04"
-          },
-          {
-            "id": "vmd-design-nr-021",
-            "product_type": "flat-embossed-vmd",
-            "category": "Nature Reimagined",
-            "design_code": "WP-OR-02",
-            "design_name": "WP-OR-02",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-OR-02.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-nature-reimagined/WP-OR-02.jpg",
-            "color_name": "WP-OR-02"
           }
         ]
       },
@@ -337,30 +282,6 @@
         "product_type": "flat-embossed-vmd",
         "emboss_available": false,
         "designs": [
-          {
-            "id": "vmd-design-mb-001",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-01",
-            "design_name": "ST-NC-01",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-01.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-01.jpg",
-            "color_name": "ST-NC-01",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-002",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-02",
-            "design_name": "ST-NC-02",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-02.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-02.jpg",
-            "color_name": "ST-NC-02",
-            "available_emboss": []
-          },
           {
             "id": "vmd-design-mb-003",
             "product_type": "flat-embossed-vmd",
@@ -425,42 +346,6 @@
             "available_emboss": []
           },
           {
-            "id": "vmd-design-mb-007",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-07",
-            "design_name": "ST-NC-07",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-07.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-07.jpg",
-            "color_name": "ST-NC-07",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-008",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-08",
-            "design_name": "ST-NC-08",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-08.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-08.jpg",
-            "color_name": "ST-NC-08",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-009",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-09",
-            "design_name": "ST-NC-09",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-09.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-09.jpg",
-            "color_name": "ST-NC-09",
-            "available_emboss": []
-          },
-          {
             "id": "vmd-design-mb-010",
             "product_type": "flat-embossed-vmd",
             "category": "Marble",
@@ -494,18 +379,6 @@
             "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-12.jpg",
             "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-12.jpg",
             "color_name": "ST-NC-12",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-013",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-13",
-            "design_name": "ST-NC-13",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-13.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-13.jpg",
-            "color_name": "ST-NC-13",
             "available_emboss": []
           },
           {
@@ -547,18 +420,6 @@
             "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-16.jpg",
             "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-16.jpg",
             "color_name": "ST-NC-16",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-017",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-17",
-            "design_name": "ST-NC-17",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-17.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-17.jpg",
-            "color_name": "ST-NC-17",
             "available_emboss": []
           },
           {
@@ -620,42 +481,6 @@
             "available_emboss": []
           },
           {
-            "id": "vmd-design-mb-022",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-22",
-            "design_name": "ST-NC-22",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-22.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-22.jpg",
-            "color_name": "ST-NC-22",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-023",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-23",
-            "design_name": "ST-NC-23",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-23.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-23.jpg",
-            "color_name": "ST-NC-23",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-024",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-24",
-            "design_name": "ST-NC-24",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-24.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-24.jpg",
-            "color_name": "ST-NC-24",
-            "available_emboss": []
-          },
-          {
             "id": "vmd-design-mb-025",
             "product_type": "flat-embossed-vmd",
             "category": "Marble",
@@ -695,30 +520,6 @@
               "ribbed_60mm",
               "tappered"
             ]
-          },
-          {
-            "id": "vmd-design-mb-028",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-28",
-            "design_name": "ST-NC-28",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-28.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-28.jpg",
-            "color_name": "ST-NC-28",
-            "available_emboss": []
-          },
-          {
-            "id": "vmd-design-mb-029",
-            "product_type": "flat-embossed-vmd",
-            "category": "Marble",
-            "design_code": "ST-NC-29",
-            "design_name": "ST-NC-29",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-marble/ST-NC-29.jpg",
-            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-marble/ST-NC-29.jpg",
-            "color_name": "ST-NC-29",
-            "available_emboss": []
           },
           {
             "id": "vmd-design-mb-030",

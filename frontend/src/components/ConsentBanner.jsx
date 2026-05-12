@@ -36,8 +36,8 @@ export default function ConsentBanner() {
     >
       <div className="bg-white border border-[hsl(var(--border))] rounded-xl shadow-2xl p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4">
         <div className="flex items-start gap-3 flex-1">
-          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[hsl(30,40%,46%)]/10 flex items-center justify-center">
-            <Cookie className="h-4 w-4 text-[hsl(25,40%,46%)]" />
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
+            <Cookie className="h-4 w-4 text-accent" />
           </div>
           <div className="flex-1 text-sm text-[hsl(215,25%,27%)] leading-relaxed">
             <p className="font-medium">We use cookies for analytics.</p>
@@ -60,7 +60,7 @@ export default function ConsentBanner() {
           <Button
             size="sm"
             onClick={() => setConsent(true)}
-            className="flex-1 md:flex-none bg-[hsl(25,40%,46%)] hover:bg-[hsl(25,40%,40%)] text-white"
+            className="flex-1 md:flex-none bg-accent hover:bg-accent-hover text-white"
             data-testid="consent-accept-btn"
           >
             Accept all
