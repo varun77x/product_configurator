@@ -341,13 +341,18 @@ const CanvasPreview = forwardRef(({
 
   // Expose download function
   useImperativeHandle(ref, () => ({
-    downloadImage: () => {
+    downloadImage: async (overrideFilename, addHeader) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
+      let dataUrl = canvas.toDataURL("image/png", 1.0);
+      if (addHeader) {
+        try { dataUrl = await addHeader(dataUrl); }
+        catch (err) { console.error("[CanvasPreview] header failed:", err); }
+      }
       const link = document.createElement("a");
-      link.download = `univicoustic-design-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png", 1.0);
+      link.download = overrideFilename || `univicoustic-design-${Date.now()}.png`;
+      link.href = dataUrl;
       link.click();
     }
   }));

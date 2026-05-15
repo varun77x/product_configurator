@@ -803,8 +803,8 @@
     "colors": [],
     "thicknesses": [
       "12mm (PET Panel)",
-      "20mm (PET Panel)",
-      "25mm (PET Wool)"
+      "25mm (PET Panel)",
+      "PET Wool"
     ],
     "categories": [
       {
@@ -1306,28 +1306,6 @@
         "emboss_available": false,
         "designs": [
           {
-            "id": "wood-cp-002",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-01",
-            "design_name": "PR-NC-01",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-01.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-01.jpg",
-            "color_name": "PR-NC-01"
-          },
-          {
-            "id": "wood-cp-003",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-02",
-            "design_name": "PR-NC-02",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-02.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-02.jpg",
-            "color_name": "PR-NC-02"
-          },
-          {
             "id": "wood-cp-004",
             "product_type": "wood",
             "category": "Classic Parquet",
@@ -1337,61 +1315,6 @@
             "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-05.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-05.jpg",
             "color_name": "PR-NC-05"
-          },
-          {
-            "id": "wood-cp-005",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-06",
-            "design_name": "PR-NC-06",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-06.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-06.jpg",
-            "color_name": "PR-NC-06"
-          },
-          {
-            "id": "wood-cp-006",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-07",
-            "design_name": "PR-NC-07",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-07.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-07.jpg",
-            "color_name": "PR-NC-07"
-          },
-          {
-            "id": "wood-cp-007",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-08",
-            "design_name": "PR-NC-08",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-08.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-08.jpg",
-            "color_name": "PR-NC-08"
-          },
-          {
-            "id": "wood-cp-008",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-09",
-            "design_name": "PR-NC-09",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-09.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-09.jpg",
-            "color_name": "PR-NC-09"
-          },
-          {
-            "id": "wood-cp-009",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-10",
-            "design_name": "PR-NC-10",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-10.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-10.jpg",
-            "color_name": "PR-NC-10"
           },
           {
             "id": "wood-cp-010",
@@ -1438,28 +1361,6 @@
             "color_name": "PR-NC-14"
           },
           {
-            "id": "wood-cp-014",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-15",
-            "design_name": "PR-NC-15",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-15.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-15.jpg",
-            "color_name": "PR-NC-15"
-          },
-          {
-            "id": "wood-cp-015",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-16",
-            "design_name": "PR-NC-16",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-16.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-16.jpg",
-            "color_name": "PR-NC-16"
-          },
-          {
             "id": "wood-cp-016",
             "product_type": "wood",
             "category": "Classic Parquet",
@@ -1469,39 +1370,6 @@
             "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-17.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-17.jpg",
             "color_name": "PR-NC-17"
-          },
-          {
-            "id": "wood-cp-017",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-18",
-            "design_name": "PR-NC-18",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-18.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-18.jpg",
-            "color_name": "PR-NC-18"
-          },
-          {
-            "id": "wood-cp-018",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-19",
-            "design_name": "PR-NC-19",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-19.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-19.jpg",
-            "color_name": "PR-NC-19"
-          },
-          {
-            "id": "wood-cp-019",
-            "product_type": "wood",
-            "category": "Classic Parquet",
-            "design_code": "PR-NC-20",
-            "design_name": "PR-NC-20",
-            "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-20.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-20.jpg",
-            "color_name": "PR-NC-20"
           },
           {
             "id": "wood-cp-020",
@@ -1526,6 +1394,105 @@
             "color_name": "PR-NC-22"
           },
           {
+            "id": "wood-cp-005",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-06",
+            "design_name": "PR-NC-06",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-06.jpg",
+            "color_name": "PR-NC-06"
+          },
+          {
+            "id": "wood-cp-014",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-15",
+            "design_name": "PR-NC-15",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-15.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-15.jpg",
+            "color_name": "PR-NC-15"
+          },
+          {
+            "id": "wood-cp-015",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-16",
+            "design_name": "PR-NC-16",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-16.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-16.jpg",
+            "color_name": "PR-NC-16"
+          },
+          {
+            "id": "wood-cp-017",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-18",
+            "design_name": "PR-NC-18",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-18.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-18.jpg",
+            "color_name": "PR-NC-18"
+          },
+          {
+            "id": "wood-cp-006",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-07",
+            "design_name": "PR-NC-07",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-07.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-07.jpg",
+            "color_name": "PR-NC-07"
+          },
+          {
+            "id": "wood-cp-018",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-19",
+            "design_name": "PR-NC-19",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-19.jpg",
+            "color_name": "PR-NC-19"
+          },
+          {
+            "id": "wood-cp-019",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-20",
+            "design_name": "PR-NC-20",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-20.jpg",
+            "color_name": "PR-NC-20"
+          },
+          {
+            "id": "wood-cp-007",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-08",
+            "design_name": "PR-NC-08",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-08.jpg",
+            "color_name": "PR-NC-08"
+          },
+          {
+            "id": "wood-cp-008",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-09",
+            "design_name": "PR-NC-09",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-09.jpg",
+            "color_name": "PR-NC-09"
+          },
+          {
             "id": "wood-cp-022",
             "product_type": "wood",
             "category": "Classic Parquet",
@@ -1546,6 +1513,17 @@
             "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-24.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-24.jpg",
             "color_name": "PR-NC-24"
+          },
+          {
+            "id": "wood-cp-029",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-30",
+            "design_name": "PR-NC-30",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-30.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-30.jpg",
+            "color_name": "PR-NC-30"
           },
           {
             "id": "wood-cp-024",
@@ -1603,15 +1581,37 @@
             "color_name": "PR-NC-29"
           },
           {
-            "id": "wood-cp-029",
+            "id": "wood-cp-002",
             "product_type": "wood",
             "category": "Classic Parquet",
-            "design_code": "PR-NC-30",
-            "design_name": "PR-NC-30",
+            "design_code": "PR-NC-01",
+            "design_name": "PR-NC-01",
             "texture_color": "#FFFFFF",
-            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-30.jpg",
-            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-30.jpg",
-            "color_name": "PR-NC-30"
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-01.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-01.jpg",
+            "color_name": "PR-NC-01"
+          },
+          {
+            "id": "wood-cp-003",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-02",
+            "design_name": "PR-NC-02",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-02.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-02.jpg",
+            "color_name": "PR-NC-02"
+          },
+          {
+            "id": "wood-cp-009",
+            "product_type": "wood",
+            "category": "Classic Parquet",
+            "design_code": "PR-NC-10",
+            "design_name": "PR-NC-10",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "thumbnail_url": "/static/_thumbcache/wood/panels/classic_parquet/PR-NC-10.jpg",
+            "color_name": "PR-NC-10"
           }
         ]
       },
@@ -1675,6 +1675,42 @@
             "texture_url": "/static/images/wood/panels/wood-perfocations/WD-NC-34.jpg",
             "thumbnail_url": "/static/_thumbcache/wood/panels/wood-perfocations/WD-NC-34.jpg",
             "color_name": "WD-NC-34"
+          },
+          {
+            "id": "wood-pf-006",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-35",
+            "design_name": "WD-NC-35",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-35.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-35.jpg",
+            "color_name": "WD-NC-35",
+            "available_emboss": []
+          },
+          {
+            "id": "wood-pf-007",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-36",
+            "design_name": "WD-NC-36",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-36.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-36.jpg",
+            "color_name": "WD-NC-36",
+            "available_emboss": []
+          },
+          {
+            "id": "wood-pf-008",
+            "product_type": "wood",
+            "category": "Wood Perforations",
+            "design_code": "WD-NC-37",
+            "design_name": "WD-NC-37",
+            "texture_color": "#FFFFFF",
+            "texture_url": "/static/images/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-37.jpg",
+            "thumbnail_url": "/static/_thumbcache/flat-embossed-vmt/panels/vmd-wood-classics/WD-NC-37.jpg",
+            "color_name": "WD-NC-37",
+            "available_emboss": []
           }
         ]
       }
@@ -1693,8 +1729,8 @@
     "colors": [],
     "thicknesses": [
       "12mm (PET Panel)",
-      "20mm (PET Panel)",
-      "25mm (PET Wool)"
+      "25mm (PET Panel)",
+      "PET Wool"
     ],
     "categories": [
       {

@@ -3,7 +3,8 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useRenderLog } from "@/hooks/use-render-log";
 // import axios from "axios"; // removed: product catalog + specs now fetched from CDN JSON
 import { toast } from "sonner";
-import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText, MessageCircle, SplitSquareHorizontal, ArrowDown, User, LogOut, ChevronDown } from "lucide-react";
+import { Download, Heart, Trash2, RefreshCw, Shield, Flame, Leaf, Award, ZoomIn, ZoomOut, X, FileText, MessageCircle, SplitSquareHorizontal, ArrowDown, ArrowRight, User, LogOut, ChevronDown, HelpCircle, Package, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getUser, logout, onAuthChange } from "@/lib/auth";
 import { track } from "@/lib/analytics";
@@ -21,7 +22,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import CanvasPreview from "@/components/CanvasPreview";
 import FlatEmbossedPreview, { preloadImages } from "@/components/FlatEmbossedPreview";
 import VicStripPreview from "@/components/VicStripPreview";
-import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS, WOOD_PERFORATION_SIZES, WOOD_PERFORATION_PATTERNS, WOOD_PERFORATION_EXCLUSIONS, COLOR_CORE_COLORS, COLOR_CORE_FABRIC_STRUCTURES, getColorCorePanelUrl, getColorCoreThumbnailUrl, COLOR_CORE_EMBOSS_PATTERNS, COLOR_CORE_SIZES, getColorCoreEmbossUrl, OMBRE_COLOR_CORE_BASE_COLORS, OMBRE_COLOR_CORE_OVERLAYS, getOmbreColorCorePanelUrl, OMBRE_COLOR_CORE_EMBOSS_PATTERNS, getOmbreEmbossPanelUrl, OMBRE_COLOR_CORE_GROOVE_PATTERNS, getOmbreGroovePanelUrl, DESIGNER_TEXTILE_COLOR_GROUPS, DESIGNER_TEXTILE_FABRICS, DESIGNER_TEXTILE_SIZES, DESIGNER_TEXTILE_THICKNESSES, getDesignerTextileThumbnailUrl, DESIGNER_TEXTILE_EMBOSS_PATTERNS, getDesignerTextileEmbossUrl, getVicstripThumbnailUrl } from "@/data/skus";
+import { VICSTRIP_PRODUCT, getImagePath, getFlatEmbossedPanelPath, FLAT_EMBOSSED_VMT_CONFIG, resolveAssetUrl, FLAT_EMBOSSED_EMBOSS_PATTERNS, LEATHER_EMBOSS_BY_SIZE, WOOD_PERFORATION_SIZES, WOOD_PERFORATION_PATTERNS, WOOD_PERFORATION_EXCLUSIONS, COLOR_CORE_COLORS, COLOR_CORE_FABRIC_STRUCTURES, getColorCorePanelUrl, getColorCoreThumbnailUrl, COLOR_CORE_EMBOSS_PATTERNS, COLOR_CORE_SIZES, getColorCoreEmbossUrl, OMBRE_COLOR_CORE_BASE_COLORS, OMBRE_COLOR_CORE_OVERLAYS, getOmbreColorCorePanelUrl, OMBRE_COLOR_CORE_EMBOSS_PATTERNS, getOmbreEmbossPanelUrl, OMBRE_COLOR_CORE_GROOVE_PATTERNS, getOmbreGroovePanelUrl, DESIGNER_TEXTILE_COLOR_GROUPS, DESIGNER_TEXTILE_FABRICS, DESIGNER_TEXTILE_SIZES, DESIGNER_TEXTILE_THICKNESSES, getDesignerTextileThumbnailUrl, getDesignerTextilePanelUrl, DESIGNER_TEXTILE_EMBOSS_PATTERNS, getDesignerTextileEmbossUrl, getVicstripThumbnailUrl } from "@/data/skus";
 import { useBlobPanel, useMultiBlobPanels } from "@/hooks/use-blob-panel";
 import { downloadPanelImages } from "@/lib/downloadPanelImages";
 import SignatureOmbreRoomPreview from "@/components/SignatureOmbreRoomPreview";
@@ -62,7 +63,7 @@ const SO_COLORS_BY_GROUP = [
   { group: 'Neutral', colors: ['#ebdfd9','#e7d0bd','#845e4f','#e8c9ab','#e9c5a4','#bc9c7a','#ccbfa6','#e3b692','#806449','#f4d1a8','#f0e1d4'] },
   { group: 'Pink',    colors: ['#b57777','#ac827d','#d3a7ae','#d69fa0','#ddbac8'] },
   { group: 'Rust',    colors: ['#813923','#5d241b','#9d6632','#9b3b22','#8e4725'] },
-  { group: 'Yellow',  colors: ['#e4b01f','#fdb81d','#fad427','#fada54','#f7da88'] },
+  { group: 'Yellow',  colors: ['#f3dd41','#cfbd46','#d89a2f','#f8c941','#fcb606'] },
 ];
 
 // ── Signature Ombre: blend presets (dark zone % from bottom → top = white) ─
@@ -78,7 +79,7 @@ const SO_BLEND_PRESETS = [
 // defaults; per-product overrides go in THICKNESS_NRC_HINTS_BY_PRODUCT.
 const THICKNESS_NRC_HINTS = {
   "12mm (PET Panel)": "0.45 NRC can be increased to 0.9 (See Tech Specs for further details)",
-  "25mm (PET Panel)": "0.6 NRC can be increased to 0.9 (See Tech Specs for further details)",
+  "25mm (PET Panel)": "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
   "PET Wool":         "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
 };
 
@@ -88,7 +89,7 @@ const THICKNESS_NRC_HINTS = {
 const THICKNESS_NRC_HINTS_BY_PRODUCT = {
   vicstrip: {
     "12mm (PET Panel)": "0.5 NRC can be increased to 0.9 (See Tech Specs for further details)",
-    "25mm (PET Panel)": "0.7 NRC can be increased to 0.9 (See Tech Specs for further details)",
+    "25mm (PET Panel)": "0.75 NRC can be increased to 0.9 (See Tech Specs for further details)",
   },
 };
 
@@ -285,10 +286,14 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
         />
         <div className="p-4 space-y-2">
           <div className="space-y-1 text-xs">
-            <div className="flex justify-between">
-              <span className="text-[hsl(215,16%,47%)]">Product Code</span>
-              <span className="font-mono font-medium">{design.design_code}</span>
-            </div>
+            {/* Product Code row hidden for Univic Strip per product spec —
+                the colour name + pattern + size give enough info there. */}
+            {!isVicstrip && (
+              <div className="flex justify-between">
+                <span className="text-[hsl(215,16%,47%)]">Product Code</span>
+                <span className="font-mono font-medium">{design.design_code}</span>
+              </div>
+            )}
             {isVicstrip && design.color_name && (
               <div className="flex justify-between">
                 <span className="text-[hsl(215,16%,47%)]">Color</span>
@@ -327,6 +332,20 @@ const DesignThumbnail = memo(({ design, isSelected, onSelect }) => {
   );
 });
 DesignThumbnail.displayName = "DesignThumbnail";
+
+// Derive the full-quality original PNG path from a thumbnail URL.
+// Single canonical folder now (`/static/images/emboss-thumbnails/`), so the
+// transform is just: swap `/_thumbcache/` → `/images/`, force the `.png`
+// extension, then point at the `_area50` cropped copy used for hover.
+// The <img onError> fallback restores the thumbnail if the original 404s.
+function getEmbossOriginalUrl(thumbUrl) {
+  if (!thumbUrl) return thumbUrl;
+  if (!thumbUrl.includes('/_thumbcache/')) return thumbUrl;
+  return thumbUrl
+    .replace('/_thumbcache/', '/images/')
+    .replace(/\.jpe?g$/i, '.png')
+    .replace(/\.png$/i, '_area50.png');
+}
 
 const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
   <HoverCard openDelay={250} closeDelay={100}>
@@ -373,17 +392,25 @@ const EmbossThumbnail = memo(({ pattern, isSelected, onSelect, disabled }) => (
     </HoverCardTrigger>
     <HoverCardContent side="right" align="start" className="w-64 p-0 overflow-hidden">
       {pattern.thumbnailUrl ? (
-        // aspect-square + w-64 (256px) matches the native 1:1 ratio of every
-        // emboss source PNG and roughly halves the downsample factor versus the
-        // old 208×128 sizing.  That's what keeps sub-pixel patterns like
-        // Ribbed Duo's paired thin lines from turning into Moiré/broken lines.
+        // Use the full-quality original PNG on hover (not the small _thumbcache
+        // JPG that drives the grid tile). The grid keeps the cheap thumb for
+        // fast initial render; the hover preview lazy-loads the original so
+        // sub-pixel patterns and fine ribbing don't look blurry when upscaled.
+        // The grid thumb is reused as a placeholder via the same <img> tag's
+        // initial paint while the full-res loads.
         <img
-          src={pattern.thumbnailUrl}
+          src={getEmbossOriginalUrl(pattern.thumbnailUrl)}
           alt={pattern.name}
           loading="lazy"
           decoding="async"
           className="w-full aspect-square object-cover"
           style={{ imageRendering: 'auto' }}
+          onError={(e) => {
+            // Fallback to the thumbnail if the original 404s for any reason.
+            if (e.currentTarget.src !== pattern.thumbnailUrl) {
+              e.currentTarget.src = pattern.thumbnailUrl;
+            }
+          }}
         />
       ) : (
         <div className="aspect-square w-full bg-gray-100" />
@@ -534,7 +561,15 @@ function getCategoriesForSurface(categories, surfaceType, productId) {
 // so every size is fine).
 function getAvailableSizesForSurface(categoryId, surfaceType, patternSets) {
   if (!categoryId || !surfaceType) return null;
-  if (surfaceType === 'flat') return null; // no emboss/groove restriction on Flat
+  if (surfaceType === 'flat') {
+    // Flat-only product rule: Color Core and Designer Textile do not offer
+    // the 600-series sizes in their flat variants. Embossed / grooving still
+    // get them via the pattern.availableSizes metadata below.
+    if (categoryId === 'fabrics-color-core' || categoryId === 'fabrics-designer-textile') {
+      return new Set(['1200x2800', '1200x2400']);
+    }
+    return null; // no emboss/groove restriction on Flat
+  }
 
   const pick = (which) => {
     if (which === 'emboss') {
@@ -753,9 +788,10 @@ const Configurator = () => {
     if (id === "ombre") {
       if (!selectedCategory) return false;
       if (selectedCategory.id === "signature-ombre") {
-        // Base is fixed white, Blend has a default. Required: thickness +
-        // overlay colour, plus the 3D pattern when on the Embossed tab.
+        // Base is fixed white, Blend has a default. Required: size + thickness
+        // + overlay colour, plus the 3D pattern when on the Embossed tab.
         return !!(
+          (!needsSize || selectedSize) &&
           (!needsThick || selectedThickness) &&
           soOverlayColor &&
           (!requiresEmboss || soSelectedPattern)
@@ -959,6 +995,150 @@ const Configurator = () => {
     const unsubscribe = onAuthChange((next) => setAuthUser(next?.user ?? null));
     return unsubscribe;
   }, []);
+
+  // ── Auto-detect new deploy and offer one-click reload ─────────────────────
+  // Customers often keep the configurator tab open for long sessions and
+  // never re-fetch index.html on their own — so after a deploy they're stuck
+  // on the old bundle until they hard-refresh.  This effect polls the live
+  // index.html (cheap, ~3 KB) on window focus AND every 5 min, extracts the
+  // hashed bundle filename, and compares against the bundle that was loaded
+  // into the current page.  When they differ, it shows a persistent toast
+  // with a Reload button.
+  useEffect(() => {
+    const initialBundle = (
+      document.querySelector('script[src*="static/js/main"]')?.getAttribute('src') || ''
+    ).match(/main\.[a-f0-9]+\.js/)?.[0];
+    if (!initialBundle) return;
+
+    let notified = false;
+    const check = async () => {
+      if (notified) return;
+      try {
+        // Cache-buster query param sidesteps any intermediate CDN that
+        // ignores the no-cache header on index.html.
+        const res = await fetch(`/index.html?_v=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = await res.text();
+        const latest = text.match(/main\.[a-f0-9]+\.js/)?.[0];
+        if (!latest || latest === initialBundle) return;
+        notified = true;
+        toast("A new version is available", {
+          description: "Reload to get the latest updates.",
+          action: { label: "Reload", onClick: () => window.location.reload() },
+          duration: Infinity,
+        });
+      } catch (_) {
+        // Network blip — try again next cycle.
+      }
+    };
+
+    const onFocus = () => check();
+    window.addEventListener('focus', onFocus);
+    const id = setInterval(check, 5 * 60 * 1000);
+    // First check ~10 s after mount, so a tab opened just before a deploy
+    // catches the new bundle quickly without spamming on initial render.
+    const initId = setTimeout(check, 10_000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      clearInterval(id);
+      clearTimeout(initId);
+    };
+  }, []);
+
+  // ── Request-a-Sample modal state ──────────────────────────────────────────
+  // Opens a form dialog prefilled with the current configurator state plus
+  // user-info fields. On submit, POSTs to a Google Apps Script Web App URL
+  // (configured via REACT_APP_SAMPLE_REQUEST_URL env var) which appends a
+  // row to the linked Google Sheet.
+  const [requestSampleOpen, setRequestSampleOpen] = useState(false);
+  const [reqSampleSubmitting, setReqSampleSubmitting] = useState(false);
+  const [reqSampleForm, setReqSampleForm] = useState({
+    name: "",
+    email: "",
+    region: "",
+    quantity: 1,
+    sampleSize: "A4",
+  });
+  // Prefill the email from the logged-in user the first time the modal opens
+  // for this session. User can still edit it.
+  useEffect(() => {
+    if (requestSampleOpen && authUser?.email && !reqSampleForm.email) {
+      setReqSampleForm((f) => ({ ...f, email: authUser.email }));
+    }
+  }, [requestSampleOpen, authUser, reqSampleForm.email]);
+
+  const handleRequestSampleSubmit = async (e) => {
+    e.preventDefault();
+    if (reqSampleSubmitting) return;
+
+    // Build a key->value map of every entry shown in the live config summary.
+    // The Sheet stores this as a single JSON column so we never have to
+    // migrate columns when a new product type adds new fields.
+    const details = {};
+    configSummary.forEach(({ label, value, color }) => {
+      details[label] = color ? `${value} (${color})` : value;
+    });
+    // Human-readable one-liner for the sheet (skip Series/Category which get
+    // their own columns).
+    const summary = configSummary
+      .filter((entry) => entry.label !== "Series" && entry.label !== "Category")
+      .map((entry) => `${entry.label}: ${entry.value}`)
+      .join(" · ");
+
+    const payload = {
+      name: reqSampleForm.name.trim(),
+      email: reqSampleForm.email.trim(),
+      region: reqSampleForm.region,
+      quantity: reqSampleForm.quantity,
+      sampleSize: reqSampleForm.sampleSize,
+      series: details["Series"] || "",
+      category: details["Category"] || "",
+      summary,
+      details,
+      submittedAt: new Date().toISOString(),
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+    };
+
+    const url = process.env.REACT_APP_SAMPLE_REQUEST_URL;
+    if (!url) {
+      // Env var unset — log loudly so misconfigured deploys are obvious, but
+      // still close the modal so the user isn't blocked.
+      console.warn("[RequestSample] REACT_APP_SAMPLE_REQUEST_URL is not set — request not sent. Payload was:", payload);
+      toast.error("Sample request endpoint is not configured. Contact the site admin.");
+      return;
+    }
+
+    setReqSampleSubmitting(true);
+    try {
+      // mode:'no-cors' because Apps Script Web Apps redirect through
+      // script.googleusercontent.com which trips CORS. The request still
+      // reaches the server and the row is appended; we just can't read
+      // the response body.
+      await fetch(url, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+      toast.success("Sample request submitted — we'll be in touch soon.");
+      setRequestSampleOpen(false);
+      // Reset the user-info fields; configSummary stays in sync with the
+      // live configurator on its own.
+      setReqSampleForm({
+        name: "",
+        email: authUser?.email || "",
+        region: "",
+        quantity: 1,
+        sampleSize: "A4",
+      });
+    } catch (err) {
+      console.error("[RequestSample] submission failed:", err);
+      toast.error("Couldn't submit your request. Please try again.");
+    } finally {
+      setReqSampleSubmitting(false);
+    }
+  };
   const handleLogout = () => {
     logout();
     toast.success("Signed out.");
@@ -1008,7 +1188,7 @@ const Configurator = () => {
   }, []);
   const ZOOM_STEP = 0.50;
   const ZOOM_MIN = 1.0;
-  const ZOOM_MAX = selectedProductType?.id === "ombre" ? 1.5 : 8.0;
+  const ZOOM_MAX = selectedProductType?.id === "ombre" ? 1.5 : 10.0;
   const zoomIn = () => setZoomLevel(prev => {
     const next = Math.min(parseFloat((prev + ZOOM_STEP).toFixed(2)), ZOOM_MAX);
     if (next !== prev) track("zoom_in", { from: prev, to: next });
@@ -1081,9 +1261,22 @@ const Configurator = () => {
   const magnifierRef = useRef(null);   // outer preview container
   const magnifierDivRef = useRef(null); // the lens circle (always in DOM)
   const lensCloneRef = useRef(null);    // cloned preview inside lens
+  // rAF throttle for lens-follows-cursor updates. Mousemove fires 60-120 Hz
+  // and each tick does a getBoundingClientRect() + DOM style mutations which
+  // are synchronous layout work.  We coalesce to one update per frame.
+  const lensRafRef = useRef(null);
+  const lensMouseRef = useRef(null);
+  const lensRectRef = useRef(null); // cached bounding rect, refreshed on enter
   const [magnifierActive, setMagnifierActive] = useState(false);
   const MAGNIFIER_SIZE = 200;
-  const MAGNIFIER_ZOOM = 2.5;
+  // Leather, Wood Perforations, and Fabrics (Color Core / Designer Textile /
+  // Modern Corporate) all have fine micro-detail that benefits from a stronger
+  // loupe than the default 2.5x — bump to 7x (700%) for those.
+  const MAGNIFIER_ZOOM = (
+    selectedCategory?.id === "vmd-leather" ||
+    selectedCategory?.id === "wood-perforations" ||
+    selectedProductType?.id === "fabrics"
+  ) ? 7.0 : 2.5;
 
   // ── Compare slider state ────────────────────────────────────────────────
   // Session-local A/B comparison.  Flow:
@@ -1275,9 +1468,15 @@ const Configurator = () => {
       'pointer-events:none',
       'transform-origin:top left',
       `transform:scale(${MAGNIFIER_ZOOM})`,
+      // Hint the browser to GPU-composite the clone so subsequent translates
+      // (lens follows cursor) don't trigger re-rasterisation.
+      'will-change:transform',
     ].join(';');
     lens.appendChild(clone);
     lensCloneRef.current = clone;
+    // Cache the preview container's rect so the mousemove path doesn't have
+    // to call getBoundingClientRect() on every tick.
+    lensRectRef.current = node.getBoundingClientRect();
     setMagnifierActive(true);
   }, [isConfigComplete, compareMode]);
 
@@ -1292,6 +1491,18 @@ const Configurator = () => {
     if (lens) while (lens.firstChild) lens.removeChild(lens.firstChild);
     lensCloneRef.current = null;
   }, [compareMode]);
+
+  // Re-snapshot the magnifier clone when zoom or pan state changes while the
+  // lens is active.  Without this, the clone is a stale capture from the
+  // moment of mouseenter — so panning a zoomed-in image makes the lens show
+  // the wrong region under the cursor.  Skipped during an active drag so we
+  // don't burn through DOM clones on every pointermove tick; the final
+  // snapshot is taken when isDragging flips back to false.
+  useEffect(() => {
+    if (!magnifierActive || isDragging) return;
+    handleMagnifierEnter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoomLevel, isDragging]);
 
   // Clamp zoom when switching to ombre (which has a lower max)
   useEffect(() => {
@@ -1885,12 +2096,19 @@ const Configurator = () => {
         // changes when the new design supports it; otherwise clear it. Toast
         // only when the new design has its own emboss options (i.e. the user
         // would have noticed a tile getting deselected).
-        const newAvailable = designOrColor?.available_emboss ?? [];
-        if (selectedEmbossPattern && !newAvailable.includes(selectedEmbossPattern.id)) {
-          if (newAvailable.length > 0) {
-            toast.info(`${selectedEmbossPattern.name} isn't available for ${designOrColor.design_code} — emboss cleared`);
+        //
+        // Leather is the exception: its emboss compatibility is driven by
+        // SIZE (LEATHER_EMBOSS_BY_SIZE), not by per-design available_emboss,
+        // so skip this per-design validation entirely for Leather.  Changing
+        // the print code should never clear the emboss for leather.
+        if (selectedCategory?.id !== 'vmd-leather') {
+          const newAvailable = designOrColor?.available_emboss ?? [];
+          if (selectedEmbossPattern && !newAvailable.includes(selectedEmbossPattern.id)) {
+            if (newAvailable.length > 0) {
+              toast.info(`${selectedEmbossPattern.name} isn't available for ${designOrColor.design_code} — emboss cleared`);
+            }
+            setSelectedEmbossPattern(null);
           }
-          setSelectedEmbossPattern(null);
         }
       }
       setSelectedDesign(designOrColor);
@@ -1925,8 +2143,17 @@ const Configurator = () => {
 
   // (groove thumbnails now served via /thumb/ — no eager preload needed)
 
-  // Reset emboss selection if the current pattern is not available for the new size
-  // (placed here so it's defined before the JSX; effect runs after state change)
+  // For Leather: when the size changes and the currently-selected emboss
+  // pattern is no longer in LEATHER_EMBOSS_BY_SIZE[size], clear it so the
+  // sidebar doesn't show a stale selection that has no visible tile.
+  useEffect(() => {
+    if (selectedCategory?.id !== 'vmd-leather') return;
+    if (!selectedEmbossPattern || !selectedSize) return;
+    const allowed = LEATHER_EMBOSS_BY_SIZE[selectedSize] || [];
+    if (!allowed.includes(selectedEmbossPattern.id)) {
+      setSelectedEmbossPattern(null);
+    }
+  }, [selectedSize, selectedCategory, selectedEmbossPattern]);
 
   // Save current configuration to favorites
   const saveToFavorites = () => {
@@ -2019,26 +2246,139 @@ const Configurator = () => {
   };
 
   // Download rendered image
-  const downloadImage = () => {
+  const [downloading, setDownloading] = useState(false);
+
+  // Build a human-friendly download filename from the live configSummary.
+  // Format: "UniVicoustic - <Series> - <Category/Pattern> - <Size> - …  .png"
+  // Sanitises filesystem-unfriendly chars and caps total length to keep the
+  // saved name readable across OSes.
+  const buildDownloadFilename = () => {
+    const sanitize = (s) =>
+      String(s ?? '')
+        .replace(/[<>:"/\\|?*]+/g, '')
+        .replace(/[#+]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const parts = ['UniVicoustic'];
+    for (const entry of configSummary) {
+      const v = sanitize(entry?.value);
+      if (v) parts.push(v);
+    }
+    const joined = parts.join(' - ').slice(0, 180);
+    return `${joined}.png`;
+  };
+
+  // Compose the source image with a branded header strip showing the live
+  // configuration. Accepts any image source loadable by <img> (data URL,
+  // object URL, or absolute URL) and returns a new data URL with the header
+  // stitched on top. Header height is computed to fit content so rows never
+  // overflow regardless of how many configSummary entries are present.
+  const composeWithHeader = async (imgSrc) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imgSrc;
+    });
+
+    // Scale font sizes proportionally to image width so they look right on
+    // small (1200 px) and large (4000 px) source assets alike.
+    const baseFont = Math.max(16, Math.floor(img.width * 0.014));
+    const brandFontPx = Math.floor(baseFont * 2);
+    const taglineFontPx = Math.floor(baseFont * 0.72);
+    const rowFontPx = Math.floor(baseFont * 0.95);
+    const rowGap = Math.floor(rowFontPx * 1.45);
+    const SIDE_PAD = Math.max(32, Math.floor(img.width * 0.025));
+    const PAD_V = Math.floor(baseFont * 1.4);
+
+    const visibleLines = (configSummary || [])
+      .map((e) => `${e.label}:  ${e.value}`)
+      .slice(0, 10);
+
+    // Heights of the two content blocks → header is the taller of the two
+    // (plus vertical padding top + bottom).
+    const brandBlockHeight = brandFontPx + Math.floor(brandFontPx * 0.3) + taglineFontPx;
+    const rowsBlockHeight = visibleLines.length * rowGap;
+    const HEADER_HEIGHT = Math.max(brandBlockHeight, rowsBlockHeight) + PAD_V * 2;
+
+    const out = document.createElement('canvas');
+    out.width = img.width;
+    out.height = img.height + HEADER_HEIGHT;
+    const ctx = out.getContext('2d');
+
+    // Header background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, HEADER_HEIGHT);
+
+    // ── Brand block (left, vertically centred) ────────────────────────────
+    const brandCenterY = HEADER_HEIGHT / 2;
+    ctx.fillStyle = '#1f2937';
+    ctx.font = `700 ${brandFontPx}px Manrope, system-ui, -apple-system, "Segoe UI", sans-serif`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    // Position the baseline so the brand+tagline block sits centred
+    const brandBaseline = brandCenterY - Math.floor(brandFontPx * 0.1);
+    ctx.fillText('UNIVICOUSTIC', SIDE_PAD, brandBaseline);
+    ctx.font = `500 ${taglineFontPx}px system-ui, sans-serif`;
+    ctx.fillStyle = '#dc6e6e';
+    ctx.fillText('makes sound sense', SIDE_PAD + 2, brandBaseline + taglineFontPx + 4);
+
+    // ── Config rows (right, vertically centred) ───────────────────────────
+    ctx.fillStyle = '#374151';
+    ctx.font = `500 ${rowFontPx}px system-ui, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    const rowsStartY = HEADER_HEIGHT / 2 - rowsBlockHeight / 2 + rowGap / 2;
+    visibleLines.forEach((line, i) => {
+      ctx.fillText(line, out.width - SIDE_PAD, rowsStartY + i * rowGap);
+    });
+
+    // Thin accent line separating header from image
+    ctx.fillStyle = '#dc6e6e';
+    ctx.fillRect(0, HEADER_HEIGHT - 3, out.width, 3);
+
+    // Original image below header
+    ctx.drawImage(img, 0, HEADER_HEIGHT);
+
+    return out.toDataURL('image/png');
+  };
+
+  const downloadImage = async () => {
+    if (downloading) return;
     // PRD 4.6: full config snapshot accompanies every download event.
     track("download_clicked", analyticsSnap());
-    // Signature Ombre: composite wall canvas + room overlay
-    if (selectedProductType?.id === 'ombre' && selectedCategory?.id === 'signature-ombre') {
-      const wallCanvas = document.querySelector('.so-room canvas');
-      const overlayImg = document.querySelector('.so-room img');
-      if (!wallCanvas) return;
-      const out = document.createElement('canvas'); out.width = 2000; out.height = 2000;
-      const ctx = out.getContext('2d');
-      ctx.drawImage(wallCanvas, 0, 0, 2000, 2000);
-      if (overlayImg?.complete && overlayImg.naturalWidth) ctx.drawImage(overlayImg, 0, 0, 2000, 2000);
-      const url = out.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = url;
-      a.download = `SignatureOmbre_${soSelectedPattern ?? 'flat'}_${soBaseColor.replace('#', '')}_${(soOverlayColor ?? 'nocolor').replace('#', '')}.png`;
-      a.click();
-      return;
-    }
-    if (canvasRef.current) {
-      canvasRef.current.downloadImage();
+    setDownloading(true);
+    try {
+      const filename = buildDownloadFilename();
+      // Signature Ombre: composite wall canvas + room overlay, then header
+      if (selectedProductType?.id === 'ombre' && selectedCategory?.id === 'signature-ombre') {
+        const wallCanvas = document.querySelector('.so-room canvas');
+        const overlayImg = document.querySelector('.so-room img');
+        if (!wallCanvas) return;
+        const out = document.createElement('canvas'); out.width = 2000; out.height = 2000;
+        const ctx = out.getContext('2d');
+        ctx.drawImage(wallCanvas, 0, 0, 2000, 2000);
+        if (overlayImg?.complete && overlayImg.naturalWidth) ctx.drawImage(overlayImg, 0, 0, 2000, 2000);
+        let rawUrl = out.toDataURL('image/png');
+        let finalUrl = rawUrl;
+        try { finalUrl = await composeWithHeader(rawUrl); }
+        catch (err) { console.error('[download] header compose failed:', err); }
+        const a = document.createElement('a'); a.href = finalUrl;
+        a.download = filename;
+        a.click();
+        return;
+      }
+      if (canvasRef.current) {
+        // canvasRef.current.downloadImage(filename, addHeader) may be async —
+        // await so the button stays in its busy state until the file saves.
+        await canvasRef.current.downloadImage(filename, composeWithHeader);
+      }
+    } catch (err) {
+      console.error('[download] failed:', err);
+      toast.error('Could not generate the download. Please try again.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -2306,6 +2646,94 @@ const Configurator = () => {
     );
   }
 
+  // Flat config summary { label, value, color? } used by BOTH the floating
+  // mini cards on the canvas AND the "Request a Sample" modal — keeping the
+  // two in sync as the configurator schema evolves.
+  const configSummary = (() => {
+    if (!selectedProductType) return [];
+    const id = selectedProductType.id;
+    const entries = [];
+    entries.push({ label: 'Series', value: selectedProductType.name });
+
+    if (id === 'vicstrip') {
+      if (selectedPattern) {
+        // The 600×600 "square" / "double-square" patterns are renamed in the
+        // sidebar dropdown to "Single Groove" / "Double Groove".  In the info
+        // cards we want the fully-qualified label so users can tell them apart
+        // from the long-form Single/Double Groove patterns (which live on the
+        // 600×2400 size).
+        let patternLabel = selectedPattern.name;
+        if (selectedPattern.id === 'square') patternLabel = 'Square Single Groove';
+        else if (selectedPattern.id === 'double-square') patternLabel = 'Square Double Groove';
+        entries.push({ label: 'Pattern', value: patternLabel });
+      }
+      if (selectedDesign?.color) entries.push({ label: 'Color', value: selectedDesign.color.name, color: selectedDesign.color.hex });
+      if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+      if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+    } else if (id === 'ombre') {
+      if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+      if (selectedCategory?.id === 'signature-ombre') {
+        if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+        if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+        entries.push({ label: 'Base', value: soBaseColor.toLowerCase() === '#ffffff' ? 'white' : soBaseColor, color: soBaseColor });
+        if (soOverlayColor) entries.push({ label: 'Overlay', value: soOverlayColor, color: soOverlayColor });
+        if (soSelectedPattern) entries.push({ label: 'Pattern', value: SO_PATTERNS.find(p => p.id === soSelectedPattern)?.name ?? soSelectedPattern });
+        // Blend always has a value (default 30 = "30/70") — show the preset
+        // label if known, else fall back to the raw "<n>% dark" string.
+        {
+          const blendLabel = SO_BLEND_PRESETS.find(p => p.value === soBlend)?.label ?? `${soBlend}% dark`;
+          entries.push({ label: 'Blend', value: blendLabel });
+        }
+      } else {
+        if (selectedOmbreBaseColor) entries.push({ label: 'Base Color', value: selectedOmbreBaseColor.name, color: selectedOmbreBaseColor.hex });
+        if (selectedOmbreOverlay) entries.push({ label: 'Overlay', value: selectedOmbreOverlay.hex, color: selectedOmbreOverlay.hex });
+        if (selectedOmbreEmbossPattern) entries.push({ label: 'Emboss', value: selectedOmbreEmbossPattern.name });
+        if (selectedOmbreGroovePattern) entries.push({ label: 'Groove', value: selectedOmbreGroovePattern.name });
+        if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+        if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+      }
+    } else if (id === 'fabrics') {
+      if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+      if (selectedCategory?.id === 'fabrics-color-core') {
+        if (selectedColorCoreColor) entries.push({ label: 'Color', value: selectedColorCoreColor.name, color: selectedColorCoreColor.hex });
+        if (selectedFabricStructure) entries.push({ label: 'Texture', value: selectedFabricStructure.name });
+        if (selectedColorCoreEmboss) entries.push({ label: 'Emboss', value: selectedColorCoreEmboss.name });
+        if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+      } else if (selectedCategory?.id === 'fabrics-designer-textile') {
+        if (selectedDTShade) entries.push({ label: 'Shade', value: selectedDTShade.id.replace('_', ' '), color: selectedDTShade.hex });
+        if (selectedDTFabric) entries.push({ label: 'Fabric', value: selectedDTFabric.name });
+        if (selectedDTEmboss) entries.push({ label: 'Emboss', value: selectedDTEmboss.name });
+        if (selectedDTSize) entries.push({ label: 'Size', value: selectedDTSize });
+        if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+      } else {
+        if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
+        if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+        if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+        if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
+      }
+    } else {
+      if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
+      if (selectedCategory?.id === 'wood-perforations') {
+        if (selectedWoodPerfSize) entries.push({ label: 'Size', value: selectedWoodPerfSize });
+        if (selectedDesign) entries.push({ label: 'Print', value: selectedDesign.design_name || selectedDesign.design_code });
+        if (selectedPerforation) entries.push({ label: 'Perforation', value: selectedPerforation.name });
+      } else {
+        if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
+        if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
+        if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
+        if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
+      }
+    }
+
+    if (selectedCategory?.id &&
+        FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
+        selectedSurfaceType !== 'embossed') {
+      entries.push({ label: 'T-Profile', value: showTpatti ? 'On' : 'Off' });
+    }
+
+    return entries;
+  })();
+
   return (
     <div className="configurator-root" data-testid="configurator-page">
       {/* Mobile block screen — temporarily disabled. Re-enable by uncommenting the block below. */}
@@ -2371,11 +2799,36 @@ const Configurator = () => {
           <Button
             size="sm"
             onClick={downloadImage}
-            className="hidden md:inline-flex bg-accent hover:bg-accent-hover text-white"
+            disabled={downloading}
+            className="hidden md:inline-flex bg-accent hover:bg-accent-hover text-white disabled:opacity-70 disabled:cursor-wait"
             data-testid="download-btn"
+            title={downloading ? "Preparing your download…" : undefined}
           >
-            <Download className="h-4 w-4 mr-1.5" />
-            Download
+            {downloading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                Preparing…
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-1.5" />
+                Download
+              </>
+            )}
+          </Button>
+          {/* Request a Sample — hidden again. Modal + handler stay wired so
+              re-enabling is a one-line change: swap `hidden` for `hidden md:inline-flex`. */}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setRequestSampleOpen(true)}
+            disabled={!isConfigComplete}
+            className="hidden bg-accent hover:bg-accent-hover text-white shadow-sm disabled:opacity-50"
+            data-testid="request-sample-btn"
+            title={isConfigComplete ? "Request a physical sample of this configuration" : "Complete all selections to request a sample"}
+          >
+            <Package className="h-4 w-4 mr-1.5" />
+            Request a Sample
           </Button>
           <Button
             variant={compareMode ? 'default' : 'outline'}
@@ -2401,6 +2854,21 @@ const Configurator = () => {
           >
             <FileText className="h-4 w-4 mr-1.5" />
             View Tech Specs
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (typeof window.startUnivicousticTour === "function") {
+                window.startUnivicousticTour();
+              }
+            }}
+            className="hidden md:inline-flex text-[hsl(215,25%,27%)]"
+            data-testid="replay-tour-btn"
+            title="Replay the walkthrough tour"
+          >
+            <HelpCircle className="h-4 w-4 mr-1.5" />
+            Replay tour
           </Button>
           {/* Auth control. Logged out → "Sign in" button (routes to /login).
               Logged in → dropdown showing the user's email + a Logout item. */}
@@ -2655,9 +3123,19 @@ const Configurator = () => {
                         <SelectValue placeholder="Select size" />
                       </SelectTrigger>
                       <SelectContent>
-                        {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((size) => (
-                          <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
-                        ))}
+                        {(() => {
+                          // Embossed Leather gets the 600-series sizes appended to whatever
+                          // the product declares — other categories under flat-embossed-vmd
+                          // (Marble, Nature Reimagined, etc.) keep the default set.
+                          const baseSizes = selectedProductType.sizes;
+                          const extraSizes = (selectedCategory?.id === 'vmd-leather' && selectedSurfaceType === 'embossed')
+                            ? ['600x600', '600x1200']
+                            : [];
+                          const sizes = [...baseSizes, ...extraSizes];
+                          return sizes.filter(isSizeAllowedForSurface).map((size) => (
+                            <SelectItem key={size} value={size} data-testid={`size-${size}`}>{size}</SelectItem>
+                          ));
+                        })()}
                       </SelectContent>
                     </Select>
                   </div>
@@ -2715,7 +3193,18 @@ const Configurator = () => {
                   const categoryEmbossIds = selectedDesign
                     ? availableEmbossIds
                     : Array.from(new Set((selectedCategory?.designs ?? []).flatMap(d => d.available_emboss ?? [])));
-                  const patternsToShow = FLAT_EMBOSSED_EMBOSS_PATTERNS.filter(p => categoryEmbossIds.includes(p.id));
+                  // Leather has its own size-driven emboss matrix (LEATHER_EMBOSS_BY_SIZE)
+                  // that overrides per-design available_emboss.  Other Bespoke Graphics
+                  // categories (Marble, Nature Reimagined) still use available_emboss.
+                  let patternsToShow;
+                  if (selectedCategory?.id === 'vmd-leather') {
+                    const allowedIds = (selectedSize && LEATHER_EMBOSS_BY_SIZE[selectedSize]) || [];
+                    patternsToShow = allowedIds
+                      .map(id => FLAT_EMBOSSED_EMBOSS_PATTERNS.find(p => p.id === id))
+                      .filter(Boolean);
+                  } else {
+                    patternsToShow = FLAT_EMBOSSED_EMBOSS_PATTERNS.filter(p => categoryEmbossIds.includes(p.id));
+                  }
                   // Category has zero embossable designs → hide section entirely.
                   if (patternsToShow.length === 0) return null;
                   return (
@@ -2825,11 +3314,6 @@ const Configurator = () => {
                           </HoverCard>
                         ))}
                       </div>
-                      {selectedColorCoreColor && (
-                        <p className="text-xs text-[hsl(215,16%,47%)] pt-1">
-                          {selectedColorCoreColor.name} &mdash; {selectedColorCoreColor.id}
-                        </p>
-                      )}
                     </div>
 
                     {/* Color Core: Fabric Structure grid */}
@@ -2842,6 +3326,26 @@ const Configurator = () => {
                               const thumbUrl = getColorCoreThumbnailUrl(structure.id, selectedColorCoreColor?.id ?? COLOR_CORE_COLORS[0].id);
                               const panelUrl = getColorCorePanelUrl(structure.id, selectedColorCoreColor?.id ?? COLOR_CORE_COLORS[0].id);
                               const isSelected = selectedFabricStructure?.id === structure.id;
+                              const colorName = selectedColorCoreColor?.name ?? COLOR_CORE_COLORS[0].name;
+                              const handleDownloadPanel = async (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                if (!panelUrl) return;
+                                try {
+                                  const res = await fetch(panelUrl, { cache: 'no-store' });
+                                  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                  const blob = await res.blob();
+                                  const blobUrl = URL.createObjectURL(blob);
+                                  const link = document.createElement('a');
+                                  link.download = `UniVicoustic - Color Core - ${structure.name} - ${colorName}.jpg`;
+                                  link.href = blobUrl;
+                                  link.click();
+                                  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                                } catch (err) {
+                                  console.error('[ColorCore panel download] failed:', err);
+                                  toast.error('Could not download this panel. Please try again.');
+                                }
+                              };
                               return (
                                 <HoverCard key={structure.id} openDelay={200} closeDelay={100}>
                                   <HoverCardTrigger asChild>
@@ -2866,9 +3370,23 @@ const Configurator = () => {
                                         className="absolute inset-0 w-full h-full object-cover"
                                       />
                                     </div>
-                                    <div className="px-3 py-2">
-                                      <p className="font-manrope font-bold text-sm">{structure.name}</p>
-                                      <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                    <div className="px-4 py-3 space-y-2">
+                                      <div>
+                                        <p className="font-manrope font-bold text-sm">{structure.name}</p>
+                                        <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                      </div>
+                                      <div className="flex items-center gap-2 pt-2 border-t">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="mt-2"
+                                          onClick={handleDownloadPanel}
+                                          data-testid={`fabric-structure-download-${structure.id}`}
+                                        >
+                                          <Download className="h-4 w-4 mr-1" />
+                                          Download Panel
+                                        </Button>
+                                      </div>
                                     </div>
                                   </HoverCardContent>
                                 </HoverCard>
@@ -2964,7 +3482,7 @@ const Configurator = () => {
                       {DESIGNER_TEXTILE_COLOR_GROUPS.map((group) => (
                         <div key={group.id}>
                           <p className="text-[10px] font-semibold text-[hsl(215,16%,47%)] uppercase tracking-wider mb-1.5">{group.name}</p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="grid grid-cols-5 gap-2">
                             {group.shades.map((shade) => (
                               <HoverCard key={shade.id} openDelay={200} closeDelay={100}>
                                 <HoverCardTrigger asChild>
@@ -2977,7 +3495,7 @@ const Configurator = () => {
                                       const firstAvailable = DESIGNER_TEXTILE_FABRICS.find(f => f.supportedColorGroups.includes(group.id));
                                       setSelectedDTFabric(firstAvailable ?? DESIGNER_TEXTILE_FABRICS[0]);
                                     }}
-                                    className={`w-6 h-6 rounded border-2 transition-colors ${
+                                    className={`aspect-square rounded border-2 transition-colors ${
                                       selectedDTShade?.id === shade.id
                                         ? "border-accent scale-110"
                                         : "border-transparent hover:border-[hsl(215,16%,47%)]"
@@ -3000,11 +3518,6 @@ const Configurator = () => {
                           </div>
                         </div>
                       ))}
-                      {selectedDTShade && (
-                        <p className="text-xs text-[hsl(215,16%,47%)] pt-0.5">
-                          {selectedDTColorGroup?.name} — {selectedDTShade.id.replace('_', ' ')}
-                        </p>
-                      )}
                     </div>
 
                     {/* Designer Textile: 4. Fabric Texture — live thumbnails, cannot unselect */}
@@ -3020,6 +3533,29 @@ const Configurator = () => {
                               .map((fabric) => {
                                 const isSelected = selectedDTFabric?.id === fabric.id;
                                 const thumbUrl = getDesignerTextileThumbnailUrl(fabric.id, selectedDTShade?.id);
+                                // Use the high-res panel image for the grid tile and crop with
+                                // object-fit: none so we display source pixels at 1:1 (a true
+                                // crop, not an upscale of the low-res thumbnail).
+                                const panelUrl = getDesignerTextilePanelUrl(fabric.id, selectedDTShade?.id);
+                                const handleDownloadPanel = async (e) => {
+                                  e.stopPropagation();  // don't trigger fabric selection
+                                  e.preventDefault();
+                                  if (!panelUrl) return;
+                                  try {
+                                    const res = await fetch(panelUrl, { cache: 'no-store' });
+                                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                    const blob = await res.blob();
+                                    const blobUrl = URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.download = `UniVicoustic - Designer Textile - ${fabric.name} - ${selectedDTShade?.id.replace('_', ' ') || ''}.jpg`;
+                                    link.href = blobUrl;
+                                    link.click();
+                                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                                  } catch (err) {
+                                    console.error('[DT panel download] failed:', err);
+                                    toast.error('Could not download this panel. Please try again.');
+                                  }
+                                };
                                 return (
                                   <HoverCard key={fabric.id} openDelay={200} closeDelay={100}>
                                     <HoverCardTrigger asChild>
@@ -3033,9 +3569,10 @@ const Configurator = () => {
                                         data-uv-selected={isSelected}
                                       >
                                         <img
-                                          src={thumbUrl}
+                                          src={panelUrl}
                                           alt={fabric.name}
                                           className="absolute inset-0 w-full h-full object-cover"
+                                          style={{ transform: 'scale(12)', transformOrigin: 'center' }}
                                         />
                                         <span className="absolute bottom-0 left-0 right-0 text-[10px] text-center font-semibold text-white bg-black/40 py-0.5">
                                           {fabric.name}
@@ -3045,14 +3582,29 @@ const Configurator = () => {
                                     <HoverCardContent side="right" align="start" className="w-56 p-0 overflow-hidden">
                                       <div className="relative w-full h-40 overflow-hidden">
                                         <img
-                                          src={thumbUrl}
+                                          src={panelUrl}
                                           alt={fabric.name}
                                           className="absolute inset-0 w-full h-full object-cover"
+                                          style={{ transform: 'scale(12)', transformOrigin: 'center' }}
                                         />
                                       </div>
-                                      <div className="px-3 py-2">
-                                        <p className="font-manrope font-bold text-sm">{fabric.name}</p>
-                                        <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                      <div className="px-4 py-3 space-y-2">
+                                        <div>
+                                          <p className="font-manrope font-bold text-sm">{fabric.name}</p>
+                                          <p className="text-xs text-[hsl(215,16%,47%)] mt-0.5">Fabric Texture</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 pt-2 border-t">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-2"
+                                            onClick={handleDownloadPanel}
+                                            data-testid={`dt-fabric-download-${fabric.id}`}
+                                          >
+                                            <Download className="h-4 w-4 mr-1" />
+                                            Download Panel
+                                          </Button>
+                                        </div>
                                       </div>
                                     </HoverCardContent>
                                   </HoverCard>
@@ -3183,18 +3735,46 @@ const Configurator = () => {
                 {/* ── Signature Ombre: real-time 3D configurator ── */}
                 {selectedCategory?.id === "signature-ombre" ? (
                   <>
-                    {/* Product info */}
-                    <div className="config-section">
-                      <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Signature Ombre</div>
-                      <div style={{ fontSize: 11, color: '#8a8480' }}>1200 × 2800 mm · 3-Panel Wall Setup</div>
-                    </div>
+                    {/* Size — same list as Color Core Ombre (filtered by surface). */}
+                    {selectedProductType?.sizes?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Size</Label>
+                        <Select value={selectedSize || ""} onValueChange={setSelectedSize} data-testid="so-size-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
-                    {/* Emboss Pattern — moved above Base Color so users pre-select emboss.
-                        Hidden under Flat surface (Ombre under Flat is a color-gradient-only
-                        product); the colour-gate that used to be here was removed so tiles
-                        render immediately and the user's selection survives across colour
-                        changes. The preview just stays empty until both colour + emboss
-                        are present. */}
+                    {/* Thickness — placed below Size so the basic dimensions are set
+                        before pattern & colour. */}
+                    {selectedProductType?.thicknesses?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Thickness</Label>
+                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="so-thickness-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select thickness" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.thicknesses.map((t) => (
+                              <ThicknessSelectItem key={t} thickness={t} testIdPrefix="so-thickness" productId={selectedProductType?.id} />
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Emboss Pattern — hidden under Flat surface (Ombre under Flat
+                        is a color-gradient-only product); the colour-gate that used
+                        to be here was removed so tiles render immediately and the
+                        user's selection survives across colour changes. The preview
+                        just stays empty until both colour + emboss are present. */}
                     {selectedSurfaceType !== 'flat' && (
                     <div className="config-section space-y-2">
                       <Label className="section-header">Emboss Pattern</Label>
@@ -3221,23 +3801,6 @@ const Configurator = () => {
                         </>
                       )}
                     </div>
-                    )}
-
-                    {/* Thickness — above Ombre Colors */}
-                    {selectedProductType?.thicknesses?.length > 0 && (
-                      <div className="config-section space-y-2">
-                        <Label className="section-header">Thickness</Label>
-                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="so-thickness-select">
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select thickness" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedProductType.thicknesses.map((t) => (
-                              <ThicknessSelectItem key={t} thickness={t} testIdPrefix="so-thickness" productId={selectedProductType?.id} />
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
                     )}
 
                     {/* Base Color — always white */}
@@ -3336,12 +3899,53 @@ const Configurator = () => {
                   </>
                 ) : selectedCategory?.id === "ombre-color-core-ombre" ? (
                   <>
-                    {/* ── Color Core Ombre controls (existing) ── */}
-                    {/* Emboss Pattern (moved above Base Color so users pre-select emboss).
-                        Colour-gate that used to be here was removed so tiles render
-                        immediately and the user's selection survives across colour
-                        changes. The preview just stays empty until both colour + emboss
-                        are present (no broken URL fetched). */}
+                    {/* ── Color Core Ombre controls ────────────────────────────────
+                        Order: Size → Thickness → Emboss Pattern → Base Color → Overlay.
+                        Size/Thickness sit right under Category so users set the basic
+                        dimensions before drilling into pattern/colour choices. */}
+
+                    {/* 1. Size */}
+                    {selectedProductType?.sizes?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Size</Label>
+                        <Select value={selectedSize || ""} onValueChange={handleOmbreSizeChange} data-testid="ombre-size-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* 2. Thickness */}
+                    {selectedProductType?.thicknesses?.length > 0 && (
+                      <div className="config-section space-y-2">
+                        <Label className="section-header">Thickness</Label>
+                        <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="ombre-thickness-select">
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select thickness" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {/* Color Core Ombre does not offer PET Wool — Signature
+                                Ombre does.  The Ombre product's `thicknesses` lists
+                                all three; filter here so only Signature sees all. */}
+                            {selectedProductType.thicknesses
+                              .filter(t => t !== "PET Wool")
+                              .map((t) => (
+                                <ThicknessSelectItem key={t} thickness={t} testIdPrefix="ombre-thickness" productId={selectedProductType?.id} />
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* 3. Emboss Pattern — only in embossed surface.  The colour-gate
+                        that used to be here was removed so tiles render immediately
+                        and the user's selection survives across colour changes. */}
                     {selectedSurfaceType === 'embossed' && (
                     <div className="config-section space-y-3">
                       <Label className="section-header">Emboss Pattern</Label>
@@ -3363,45 +3967,6 @@ const Configurator = () => {
                       )}
                     </div>
                     )}
-
-                    {/* 1. Size */}
-                    {selectedProductType?.sizes?.length > 0 && (
-                      <div className="config-section space-y-2">
-                        <Label className="section-header">Size</Label>
-                        <Select value={selectedSize || ""} onValueChange={handleOmbreSizeChange} data-testid="ombre-size-select">
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedProductType.sizes.filter(isSizeAllowedForSurface).map((s) => (
-                              <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                {/* 1b. Thickness — above Base Color */}
-                {selectedProductType?.thicknesses?.length > 0 && (
-                  <div className="config-section space-y-2">
-                    <Label className="section-header">Thickness</Label>
-                    <Select value={selectedThickness || ""} onValueChange={setSelectedThickness} data-testid="ombre-thickness-select">
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select thickness" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {/* Color Core Ombre does not offer PET Wool — Signature
-                            Ombre does.  The Ombre product's `thicknesses` lists
-                            all three; filter here so only Signature sees all. */}
-                        {selectedProductType.thicknesses
-                          .filter(t => t !== "PET Wool")
-                          .map((t) => (
-                            <ThicknessSelectItem key={t} thickness={t} testIdPrefix="ombre-thickness" productId={selectedProductType?.id} />
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
 
                 {/* 2. Base Colors */}
                 <div className="config-section space-y-2">
@@ -3967,7 +4532,32 @@ const Configurator = () => {
         </div>
 
         {/* Zoom Controls — desktop only (touch users pinch-zoom natively or use browser zoom). */}
-        <div className="absolute top-4 right-4 hidden md:flex flex-col gap-1 z-10" data-testid="zoom-controls">
+        <div className="absolute top-4 right-4 hidden md:flex items-start gap-2 z-10" data-testid="zoom-controls">
+          {/* Vertical zoom slider — finer-grained than the +/- step buttons */}
+          <input
+            type="range"
+            orient="vertical"
+            min={ZOOM_MIN}
+            max={ZOOM_MAX}
+            step={0.1}
+            value={zoomLevel}
+            onChange={(e) => {
+              const next = parseFloat(parseFloat(e.target.value).toFixed(2));
+              setZoomLevel(next);
+            }}
+            style={{
+              WebkitAppearance: 'slider-vertical',
+              appearance: 'slider-vertical',
+              writingMode: 'vertical-lr',
+              direction: 'rtl',
+              height: '120px',
+              width: '24px',
+            }}
+            className="cursor-pointer accent-accent bg-white/90 backdrop-blur-sm rounded shadow-lg"
+            aria-label="Zoom level"
+            data-testid="zoom-slider"
+          />
+          <div className="flex flex-col gap-1">
           <Button
             variant="outline"
             size="icon"
@@ -4021,6 +4611,7 @@ const Configurator = () => {
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
+          </div>
         </div>
 
         {/* Preview Component — routes by product type */}
@@ -4033,25 +4624,45 @@ const Configurator = () => {
           onMouseDown={handlePanStart}
           onMouseMove={(e) => {
             handlePanMove(e);
-            if (!isDraggingRef.current && magnifierDivRef.current && magnifierRef.current) {
-              const rect = magnifierRef.current.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              // Move the lens circle to follow the cursor
+            if (isDraggingRef.current || !magnifierDivRef.current || !magnifierRef.current) return;
+            // Capture coords on the synthetic event NOW; we'll read them in
+            // the rAF callback, by which time the React event is pooled.
+            lensMouseRef.current = { clientX: e.clientX, clientY: e.clientY };
+            if (lensRafRef.current != null) return; // one update per frame
+            lensRafRef.current = requestAnimationFrame(() => {
+              lensRafRef.current = null;
+              const m = lensMouseRef.current;
+              const rect = lensRectRef.current;
+              if (!m || !rect || !magnifierDivRef.current) return;
+              const x = m.clientX - rect.left;
+              const y = m.clientY - rect.top;
+              // Use top/left for the lens (its CSS already includes a
+              // transform: translate(-50%, -50%) for centering, which we
+              // mustn't clobber). Use transform for the CLONE inside — that's
+              // the heavy element being scaled N×, and translate3d keeps it
+              // on the GPU layer hinted by will-change.
               magnifierDivRef.current.style.top = `${y}px`;
               magnifierDivRef.current.style.left = `${x}px`;
-              // Shift the clone inside the lens so the cursor point is centred
               if (lensCloneRef.current) {
-                lensCloneRef.current.style.top = `${MAGNIFIER_SIZE / 2 - y * MAGNIFIER_ZOOM}px`;
-                lensCloneRef.current.style.left = `${MAGNIFIER_SIZE / 2 - x * MAGNIFIER_ZOOM}px`;
+                const tx = MAGNIFIER_SIZE / 2 - x * MAGNIFIER_ZOOM;
+                const ty = MAGNIFIER_SIZE / 2 - y * MAGNIFIER_ZOOM;
+                lensCloneRef.current.style.transform =
+                  `translate3d(${tx}px, ${ty}px, 0) scale(${MAGNIFIER_ZOOM})`;
               }
-            }
+            });
           }}
           onMouseUp={handlePanEnd}
           onMouseEnter={handleMagnifierEnter}
           onMouseLeave={() => {
             handlePanEnd();
             setMagnifierActive(false);
+            // Cancel any pending rAF so it can't fire after the lens is gone
+            if (lensRafRef.current != null) {
+              cancelAnimationFrame(lensRafRef.current);
+              lensRafRef.current = null;
+            }
+            lensMouseRef.current = null;
+            lensRectRef.current = null;
             // Clear clone to free memory
             const lens = magnifierDivRef.current;
             if (lens) while (lens.firstChild) lens.removeChild(lens.firstChild);
@@ -4414,87 +5025,12 @@ const Configurator = () => {
             isConfigComplete is false, so this floating banner is redundant. */}
 
         {/* ── Selection mini cards — stacked at bottom-left of canvas area ── */}
-        {selectedProductType && (() => {
-          const id = selectedProductType.id;
-
-          // Build a flat list of { label, value, color? } entries for the active config
-          const entries = [];
-
-          entries.push({ label: 'Series', value: selectedProductType.name });
-
-          if (id === 'vicstrip') {
-            if (selectedPattern) entries.push({ label: 'Pattern', value: selectedPattern.name });
-            if (selectedDesign?.color) entries.push({ label: 'Color', value: selectedDesign.color.name, color: selectedDesign.color.hex });
-            if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
-            if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
-
-          } else if (id === 'ombre') {
-            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
-            if (selectedCategory?.id === 'signature-ombre') {
-              entries.push({ label: 'Base', value: soBaseColor.toLowerCase() === '#ffffff' ? 'white' : soBaseColor, color: soBaseColor });
-              if (soOverlayColor) entries.push({ label: 'Overlay', value: soOverlayColor, color: soOverlayColor });
-              if (soSelectedPattern) entries.push({ label: 'Pattern', value: SO_PATTERNS.find(p => p.id === soSelectedPattern)?.name ?? soSelectedPattern });
-            } else {
-              if (selectedOmbreBaseColor) entries.push({ label: 'Base Color', value: selectedOmbreBaseColor.name, color: selectedOmbreBaseColor.hex });
-              if (selectedOmbreOverlay) entries.push({ label: 'Overlay', value: selectedOmbreOverlay.hex, color: selectedOmbreOverlay.hex });
-              if (selectedOmbreEmbossPattern) entries.push({ label: 'Emboss', value: selectedOmbreEmbossPattern.name });
-              if (selectedOmbreGroovePattern) entries.push({ label: 'Groove', value: selectedOmbreGroovePattern.name });
-              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
-              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
-            }
-
-          } else if (id === 'fabrics') {
-            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
-            if (selectedCategory?.id === 'fabrics-color-core') {
-              if (selectedColorCoreColor) entries.push({ label: 'Color', value: selectedColorCoreColor.name, color: selectedColorCoreColor.hex });
-              if (selectedFabricStructure) entries.push({ label: 'Texture', value: selectedFabricStructure.name });
-              if (selectedColorCoreEmboss) entries.push({ label: 'Emboss', value: selectedColorCoreEmboss.name });
-              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
-            } else if (selectedCategory?.id === 'fabrics-designer-textile') {
-              if (selectedDTShade) entries.push({ label: 'Shade', value: `${selectedDTColorGroup?.name} · ${selectedDTShade.id.replace('_', ' ')}`, color: selectedDTShade.hex });
-              if (selectedDTFabric) entries.push({ label: 'Fabric', value: selectedDTFabric.name });
-              if (selectedDTEmboss) entries.push({ label: 'Emboss', value: selectedDTEmboss.name });
-              if (selectedDTSize) entries.push({ label: 'Size', value: selectedDTSize });
-              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
-            } else {
-              if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
-              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
-              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
-              if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
-            }
-
-          } else {
-            // flat-embossed-vmd, wood, and generic
-            if (selectedCategory) entries.push({ label: 'Category', value: selectedCategory.name });
-            if (selectedCategory?.id === 'wood-perforations') {
-              if (selectedWoodPerfSize) entries.push({ label: 'Size', value: selectedWoodPerfSize });
-              if (selectedDesign) entries.push({ label: 'Print', value: selectedDesign.design_name || selectedDesign.design_code });
-              if (selectedPerforation) entries.push({ label: 'Perforation', value: selectedPerforation.name });
-            } else {
-              if (selectedDesign) entries.push({ label: 'Design', value: selectedDesign.design_name || selectedDesign.design_code });
-              if (selectedSize) entries.push({ label: 'Size', value: selectedSize });
-              if (selectedThickness) entries.push({ label: 'Thickness', value: selectedThickness });
-              if (selectedEmbossPattern) entries.push({ label: 'Emboss', value: selectedEmbossPattern.name });
-            }
-          }
-
-          // T-Patti (relevant for categories that support it, and only
-          // outside the Embossed surface — Embossed series have no
-          // T-Profile option per UI rule).
-          if (selectedCategory?.id &&
-              FLAT_EMBOSSED_VMT_CONFIG[selectedCategory.id]?.tpatti &&
-              selectedSurfaceType !== 'embossed') {
-            entries.push({ label: 'T-Profile', value: showTpatti ? 'On' : 'Off' });
-          }
-
-          if (entries.length === 0) return null;
-
-          return (
+        {configSummary.length > 0 && (
             <div
               className="absolute bottom-4 left-4 z-20 flex flex-col-reverse gap-1.5 items-start pointer-events-none"
               data-testid="selection-mini-cards"
             >
-              {entries.map(({ label, value, color }) => (
+              {configSummary.map(({ label, value, color }) => (
                 <div
                   key={label}
                   className="flex items-center gap-2 bg-white/88 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md border border-white/40"
@@ -4515,11 +5051,173 @@ const Configurator = () => {
                 </div>
               ))}
             </div>
-          );
-        })()}
+          )}
       </main>
 
       </div>{/* end configurator-content */}
+
+      {/* ── Request a Sample modal ─────────────────────────────────────── */}
+      <Dialog open={requestSampleOpen} onOpenChange={setRequestSampleOpen}>
+        <DialogContent
+          className="max-w-lg p-0 overflow-hidden flex flex-col max-h-[90vh]"
+          data-testid="request-sample-modal"
+        >
+          {/* Header strip with accent edge */}
+          <div className="px-6 pt-6 pb-4 border-b border-[hsl(var(--border))] flex-shrink-0">
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="font-manrope text-xl flex items-center gap-2 text-[hsl(215,25%,27%)]">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent/10 text-accent">
+                  <Package className="h-4 w-4" />
+                </span>
+                Request a Sample
+              </DialogTitle>
+              <p className="text-sm text-[hsl(215,16%,47%)] pl-9">
+                We'll send a physical sample of this configuration to your address.
+              </p>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1 min-h-0">
+            {/* Read-only configuration summary — mirrors the live preview. */}
+            <div
+              className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--secondary))]/40 overflow-hidden"
+              data-testid="request-sample-summary"
+            >
+              <div className="px-4 py-2.5 bg-white/60 border-b border-[hsl(var(--border))]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[hsl(215,25%,27%)]">
+                  Your configuration
+                </p>
+              </div>
+              <div className="px-4 py-3 space-y-2">
+                {configSummary.length === 0 ? (
+                  <p className="text-xs text-[hsl(215,16%,47%)]">No selection yet.</p>
+                ) : (
+                  configSummary.map(({ label, value, color }) => (
+                    <div key={label} className="flex justify-between items-center gap-3 text-sm">
+                      <span className="text-[hsl(215,16%,47%)] text-[11px] uppercase tracking-wider font-semibold">{label}</span>
+                      <span className="font-semibold text-[hsl(215,25%,27%)] flex items-center gap-1.5 text-right truncate">
+                        {color && (
+                          <span
+                            className="inline-block w-3.5 h-3.5 rounded-full flex-shrink-0 border border-black/10 shadow-inner"
+                            style={{ backgroundColor: color }}
+                          />
+                        )}
+                        <span className="truncate">{value}</span>
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* User-info form. Submission is a stub — wire to backend later. */}
+            <form id="request-sample-form" onSubmit={handleRequestSampleSubmit} className="space-y-4" data-testid="request-sample-form">
+              <div className="space-y-1.5">
+                <Label htmlFor="req-name" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215,25%,27%)]">Name</Label>
+                <Input
+                  id="req-name"
+                  type="text"
+                  value={reqSampleForm.name}
+                  onChange={(e) => setReqSampleForm((f) => ({ ...f, name: e.target.value }))}
+                  required
+                  placeholder="Full name"
+                  className="h-10"
+                  data-testid="req-name"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="req-email" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215,25%,27%)]">Email</Label>
+                <Input
+                  id="req-email"
+                  type="email"
+                  value={reqSampleForm.email}
+                  onChange={(e) => setReqSampleForm((f) => ({ ...f, email: e.target.value }))}
+                  required
+                  placeholder="you@example.com"
+                  className="h-10"
+                  data-testid="req-email"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="req-region" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215,25%,27%)]">Region</Label>
+                <Select
+                  value={reqSampleForm.region}
+                  onValueChange={(v) => setReqSampleForm((f) => ({ ...f, region: v }))}
+                >
+                  <SelectTrigger id="req-region" className="h-10" data-testid="req-region"><SelectValue placeholder="Select region" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="East">East</SelectItem>
+                    <SelectItem value="North">North</SelectItem>
+                    <SelectItem value="South">South</SelectItem>
+                    <SelectItem value="West">West</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="req-qty" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215,25%,27%)]">Quantity</Label>
+                  <Input
+                    id="req-qty"
+                    type="number"
+                    min="1"
+                    value={reqSampleForm.quantity}
+                    onChange={(e) => setReqSampleForm((f) => ({ ...f, quantity: Math.max(1, parseInt(e.target.value) || 1) }))}
+                    required
+                    className="h-10"
+                    data-testid="req-qty"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="req-size" className="text-[11px] font-semibold uppercase tracking-wider text-[hsl(215,25%,27%)]">Sample size</Label>
+                  <Select
+                    value={reqSampleForm.sampleSize}
+                    onValueChange={(v) => setReqSampleForm((f) => ({ ...f, sampleSize: v }))}
+                  >
+                    <SelectTrigger id="req-size" className="h-10" data-testid="req-size"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A3">A3</SelectItem>
+                      <SelectItem value="A4">A4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Footer with submit action */}
+          <div className="px-6 py-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--secondary))]/30 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] text-[hsl(215,16%,55%)]">
+                We typically respond within 2 business days.
+              </p>
+              <Button
+                type="submit"
+                form="request-sample-form"
+                disabled={
+                  reqSampleSubmitting ||
+                  !reqSampleForm.name.trim() ||
+                  !reqSampleForm.email.trim() ||
+                  !reqSampleForm.region
+                }
+                className="h-10 px-6 bg-accent hover:bg-accent-hover text-white font-medium shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                data-testid="req-submit"
+              >
+                {reqSampleSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                    Submitting…
+                  </>
+                ) : (
+                  <>
+                    Submit Request
+                    <ArrowRight className="h-4 w-4 ml-1.5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Floating chat button */}
       <button

@@ -2259,7 +2259,7 @@ def generate_mock_products():
         "densities": [],
         "patterns": [],
         "colors": [],
-        "thicknesses": ["12mm (PET Panel)", "20mm (PET Panel)", "25mm (PET Wool)"],
+        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
         "categories": []
     }
     # Wood Classics category — designs drawn from the shared EXPLICIT_CATEGORY_DESIGNS dict
@@ -2298,7 +2298,7 @@ def generate_mock_products():
         "densities": [],
         "patterns": [],
         "colors": [],
-        "thicknesses": ["12mm (PET Panel)", "20mm (PET Panel)", "25mm (PET Wool)"],
+        "thicknesses": ["12mm (PET Panel)", "25mm (PET Panel)", "PET Wool"],
         "categories": []
     }
     modern_corporate_category = {

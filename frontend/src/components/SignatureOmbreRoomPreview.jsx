@@ -7,7 +7,7 @@
  * Furniture renders on top of the panel wall.
  */
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 
 const ROOM_SETUP_URL = '/images/room-setups/Colour_Core_Setup.png';
 const PREVIEW_SIZE = 680; // fixed px
@@ -15,13 +15,23 @@ const PREVIEW_SIZE = 680; // fixed px
 const SignatureOmbreRoomPreview = ({ panelImage, panelCount = 3, className }) => {
   const wallRef = useRef(null);
   const overlayRef = useRef(null);
+  const [overlayReady, setOverlayReady] = useState(false);
 
-  // Load room setup image directly — PNG already has proper alpha transparency,
-  // no pixel manipulation needed (avoids distorting dark furniture pixels).
+  // Load room setup image — decode off-screen first so the consumer paints
+  // atomically. Until decode finishes, a loader covers the preview so the
+  // user never sees the furniture pop in over the wall.
   useEffect(() => {
-    if (overlayRef.current) {
-      overlayRef.current.src = ROOM_SETUP_URL;
-    }
+    let cancelled = false;
+    const probe = new Image();
+    probe.src = ROOM_SETUP_URL;
+    probe.decode().catch(() => {}).finally(() => {
+      if (cancelled) return;
+      if (overlayRef.current) {
+        overlayRef.current.src = ROOM_SETUP_URL;
+      }
+      setOverlayReady(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   // Tile panel image across wall canvas whenever it changes.
@@ -80,6 +90,23 @@ const SignatureOmbreRoomPreview = ({ panelImage, panelCount = 3, className }) =>
         alt=""
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 3, pointerEvents: 'none' }}
       />
+      {/* Layer 3: loader covers everything until furniture overlay is decoded */}
+      {!overlayReady && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#ffffff',
+            zIndex: 10,
+          }}
+          data-testid="ombre-preview-loading"
+        >
+          <img src="/UV-loader.png" alt="Loading..." className="uv-loader" />
+        </div>
+      )}
     </div>
   );
 };

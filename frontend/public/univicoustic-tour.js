@@ -4,7 +4,7 @@
  * Drop-in script. Paste once, attach before </body>. It will:
  *   1. Auto-load Shepherd.js (tour engine) + its CSS from CDN.
  *   2. Detect first-time visitors via localStorage.
- *   3. Wait until the DOM is ready, then launch the 24-step tour.
+ *   3. Wait until the DOM is ready, then launch the 23-step tour.
  *   4. Expose window.startUnivicousticTour() so you can re-run it
  *      from a "How it works" help link.
  *
@@ -106,10 +106,10 @@
     .shepherd-theme-uv .shepherd-text { color: #444; font-size: 14px; line-height: 1.5; padding: 6px 18px 16px; }
     .shepherd-theme-uv .shepherd-footer { padding: 0 18px 16px; }
     .shepherd-theme-uv .shepherd-button {
-      background: #B27B4B; color: #fff; border-radius: 8px;
+      background: hsl(var(--accent)); color: hsl(var(--accent-foreground, 0 0% 100%)); border-radius: 8px;
       padding: 8px 14px; font-size: 13px; font-weight: 500;
     }
-    .shepherd-theme-uv .shepherd-button:hover { background: #9a683d; }
+    .shepherd-theme-uv .shepherd-button:hover { background: hsl(var(--accent-hover)); }
     .shepherd-theme-uv .shepherd-button.shepherd-button-secondary {
       background: #f3f3f3; color: #444;
     }
@@ -129,7 +129,7 @@
 
   /* ---------- step definitions ---------- */
   function buildSteps(tour) {
-    var totalSteps = 24;
+    var totalSteps = 23;
     var mkProgress = function (n) {
       return '<span class="uv-tour-progress">Step ' + n + ' of ' + totalSteps + '</span>';
     };
@@ -167,36 +167,29 @@
         buttons: [backBtn, nextBtn]
       },
       {
-        id: 't-profile',
-        title: '4. T-Profile Overlay',
-        text: 'Toggles the T-profile trim between panels on or off in the preview. Shows how seams will actually look once installed on a wall.',
-        attachTo: { element: function () { return rowByText('T-Profile Overlay'); }, on: 'right' },
-        buttons: [backBtn, nextBtn]
-      },
-      {
         id: 'size',
-        title: '5. Size',
+        title: '4. Size',
         text: 'Sheet dimensions in millimetres. Sizes that are available for the selected series appear here. Changing size updates the preview tiling.',
         attachTo: { element: function () { return sectionBlockByLabel('SIZE'); }, on: 'right' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'thickness',
-        title: '6. Thickness & Acoustic Rating',
+        title: '5. Thickness & Acoustic Rating',
         text: 'Each option lists its substrate (PET Panel / PET Wool). Hover an option to see the <b>NRC</b> acoustic rating — e.g. <i>"0.45 NRC can be increased to 0.9"</i>. Thicker panel = more absorption.',
         attachTo: { element: function () { return sectionBlockByLabel('THICKNESS'); }, on: 'right' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'print-gallery',
-        title: '7. Print / Designs gallery',
+        title: '6. Print / Designs gallery',
         text: 'Thumbnail grid of every finish in the current category. Click a swatch to apply it — the 3D room preview re-renders instantly. Scroll to see the full range.',
         attachTo: { element: function () { return sectionBlockByLabel('PRINT') || sectionBlockByLabel('DESIGNS'); }, on: 'right' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'preview',
-        title: '8. Live room preview',
+        title: '7. Live room preview',
         text: 'Your panel rendered in a real-world scene (office, lounge, or studio). This updates every time you change a selection on the left.',
         attachTo: { element: function () {
           return document.querySelector('main') ||
@@ -207,7 +200,7 @@
       },
       {
         id: 'config-tags',
-        title: '9. Configuration summary',
+        title: '8. Configuration summary',
         text: 'These chips at the bottom-left of the preview mirror your live selection: T-Profile, Thickness, Size, Design, Category, Series. A quick read-out of your spec.',
         attachTo: { element: function () {
           return document.querySelector('[data-testid="selection-mini-cards"]') ||
@@ -217,7 +210,7 @@
       },
       {
         id: 'hint-banner',
-        title: '10. "Fill in all selections" prompt',
+        title: '9. "Fill in all selections" prompt',
         text: 'A dark banner appears across the preview until you\'ve chosen every required field. Once it disappears, your configuration is complete and ready to save or download.',
         attachTo: { element: function () {
           // If the banner is on-screen (config incomplete), anchor it.
@@ -232,7 +225,7 @@
       },
       {
         id: 'zoom',
-        title: '11. Zoom controls',
+        title: '10. Zoom controls',
         text: 'Zoom in (+) to inspect texture detail, zoom out (−) to see the panel at room scale. Current zoom level is shown as a percentage.',
         attachTo: { element: function () {
           var svgs = document.querySelectorAll('[class*="zoom"], button[aria-label*="zoom" i]');
@@ -244,7 +237,7 @@
       },
       {
         id: 'studio-lighting',
-        title: '12. Studio Lighting',
+        title: '11. Studio Lighting',
         text: 'Three presets: <b>Off</b> (neutral), <b>Warm</b> (incandescent feel), <b>Soft</b> (cool daylight). Each tells a different story about how the panel reads in a space.',
         attachTo: { element: function () {
           // Case-insensitive — the rendered label uses CSS text-transform so
@@ -258,7 +251,7 @@
       },
       {
         id: 'angle',
-        title: '13. Angle dial',
+        title: '12. Angle dial',
         text: 'Drag the dot around the dial to rotate the key light. The degree readout updates live. Appears when Warm or Soft lighting is active.',
         attachTo: { element: function () {
           // Case-insensitive text match — DOM text is "Angle" (capital A only).
@@ -271,49 +264,49 @@
       },
       {
         id: 'save',
-        title: '14. Save this configuration',
+        title: '13. Save this configuration',
         text: 'Stores your current spec in your browser so you can come back to it. A green "Configuration saved!" toast confirms. No sign-in needed.',
         attachTo: { element: function () { return buttonByText('Save'); }, on: 'bottom' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'saved-list',
-        title: '15. Saved configurations',
+        title: '14. Saved configurations',
         text: 'Opens a modal with every saved spec (with a colour swatch and date). Click one to reload it; click the trash icon to delete. The badge shows how many you have.',
         attachTo: { element: function () { return buttonByText('Saved'); }, on: 'top' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'download',
-        title: '16. Download',
+        title: '15. Download',
         text: 'The primary action. Generates a PDF / image of your current configuration — ready to share with clients, architects, or your installer.',
         attachTo: { element: function () { return buttonByText('Download'); }, on: 'bottom' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'compare',
-        title: '17. Compare two configurations',
+        title: '16. Compare two configurations',
         text: 'Puts your current design in <b>Slot A</b> and lets you load another saved spec into <b>Slot B</b>. Hit Apply to view both side by side — perfect for client presentations.',
         attachTo: { element: function () { return buttonByText('Compare') || buttonByText('Close Compare'); }, on: 'bottom' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'tech-specs',
-        title: '18. View Tech Specs',
+        title: '17. View Tech Specs',
         text: 'Opens the official spec sheet PDF for your selected product — dimensions, tolerances, fire rating, NRC curves, installation guidance. Opens in a new tab.',
         attachTo: { element: function () { return buttonByText('View Tech Specs'); }, on: 'bottom' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'reset',
-        title: '19. Reset',
+        title: '18. Reset',
         text: 'Clears every selection and returns to a blank configurator. Handy when you want to start fresh without reloading the page.',
         attachTo: { element: function () { return buttonByText('Reset'); }, on: 'top' },
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'disclaimer',
-        title: '20. About the preview',
+        title: '19. About the preview',
         text: 'The 3D render is <i>indicative</i>. Real colour, sheen, and grain vary with lighting and installation. For specification-grade samples, order a physical swatch.',
         attachTo: { element: function () {
           var all = document.querySelectorAll('p, div, span');
@@ -326,7 +319,7 @@
       },
       {
         id: 'help-chat',
-        title: '21. Need a human?',
+        title: '20. Need a human?',
         text: 'The chat bubble (bottom-right) connects you to our specifier team. Ask about lead times, custom prints, bulk pricing, or installation questions.',
         attachTo: { element: function () {
           var btns = document.querySelectorAll('button, a, div[role="button"]');
@@ -342,19 +335,19 @@
       },
       {
         id: 'workflow-tip',
-        title: '22. The quickest workflow',
+        title: '21. The quickest workflow',
         text: 'Left column top to bottom: Product → Series → Category → Size → Thickness → Print. Then Save, Download, or Compare. You can switch any selection at any time — the preview always catches up.',
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'compare-tip',
-        title: '23. Pro tip — saved + Compare',
+        title: '22. Pro tip — saved + Compare',
         text: 'Configure option A → <b>Save</b>. Configure option B → <b>Save</b>. Now open <b>Compare</b>, drop A into one slot and B into the other, hit Apply, and screenshot the split view for your moodboard.',
         buttons: [backBtn, nextBtn]
       },
       {
         id: 'done',
-        title: "24. You're ready to design",
+        title: "23. You're ready to design",
         text: 'You can relaunch this tour anytime from the help menu. If anything is unclear, the chat bubble in the corner is staffed by humans who know the products inside out.',
         buttons: [{ text: 'Start exploring', action: function () { tour.complete(); } }]
       }

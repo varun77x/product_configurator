@@ -1,23 +1,28 @@
 // Hardcoded SKU data for VicStrip Panels
 // Each pattern has 16 colors
 
+// Colours are grouped visually in the picker by simple ordering — wood-ish
+// finishes first, then solid colours.  No header / divider in the UI; the
+// adjacency is what creates the visual grouping.
 const COLORS = [
-  { id: "alpine-frost", name: "Alpine Frost", hex: "#BCB9AB" },
-  { id: "amber-walnut", name: "Amber Walnut", hex: "#A4A499" },
-  { id: "auburn-oak", name: "Auburn Oak", hex: "#C99E61" },
-  { id: "bourbon-walnut", name: "Bourbon Walnut", hex: "#41322B" },
-  { id: "carbon-black", name: "Carbon Black", hex: "#1C1C1C" },
-  { id: "glacier-white", name: "Glacier White", hex: "#F8F8F8" },
-  { id: "lunar-ash", name: "Lunar Ash", hex: "#B0B0B0" },
-  { id: "merlot", name: "Merlot", hex: "#721F1F" },
-  { id: "monarch-oak", name: "Monarch Oak", hex: "#8B5A2B" },
-  { id: "obsidian-black", name: "Obsidian Black", hex: "#5B5849" },
-  { id: "sage-green", name: "Sage Green", hex: "#838E7C" },
-  { id: "sierra-elm", name: "Sierra Elm", hex: "#9D5B37" },
-  { id: "silver-birch", name: "Silver Birch", hex: "#C7BAA5" },
-  { id: "solara", name: "Solara", hex: "#78756C" },
-  { id: "toffee-oak", name: "Toffee Oak", hex: "#B17547" },
-  { id: "windsor-oak", name: "Windsor Oak", hex: "#B5A680" },
+  // ── Wood finishes ────────────────────────────────────────────────────
+  { id: "amber-walnut",    name: "Amber Walnut",    hex: "#A4A499" },
+  { id: "auburn-oak",      name: "Auburn Oak",      hex: "#C99E61" },
+  { id: "bourbon-walnut",  name: "Bourbon Walnut",  hex: "#41322B" },
+  { id: "monarch-oak",     name: "Monarch Oak",     hex: "#8B5A2B" },
+  { id: "obsidian-black",  name: "Obsidian Black",  hex: "#5B5849" },
+  { id: "sierra-elm",      name: "Sierra Elm",      hex: "#9D5B37" },
+  { id: "silver-birch",    name: "Silver Birch",    hex: "#C7BAA5" },
+  { id: "toffee-oak",      name: "Toffee Oak",      hex: "#B17547" },
+  { id: "windsor-oak",     name: "Windsor Oak",     hex: "#B5A680" },
+  // ── Solid colours ───────────────────────────────────────────────────
+  { id: "glacier-white",   name: "Glacier White",   hex: "#F8F8F8" },
+  { id: "lunar-ash",       name: "Lunar Ash",       hex: "#B0B0B0" },
+  { id: "merlot",          name: "Merlot",          hex: "#721F1F" },
+  { id: "sage-green",      name: "Sage Green",      hex: "#838E7C" },
+  { id: "carbon-black",    name: "Carbon Black",    hex: "#1C1C1C" },
+  { id: "solara",          name: "Solara",          hex: "#78756C" },
+  { id: "alpine-frost",    name: "Alpine Frost",    hex: "#BCB9AB" },
 ];
 
 const PATTERNS = [
@@ -311,8 +316,17 @@ export const FLAT_EMBOSSED_VMT_DEFAULT_CONFIG = {
  * returned from the API. Pre-generated full-panel overlay images live at:
  *   /static/images/flat-embossed-vmt/emboss-panels/{designCode}/{id}.png
  */
-// const FVP_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/flat-embossed-vmt/embossed_line_thumbnails/${file}`;
-const FVP_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/flat-embossed-vmt/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+// ── Single source of truth for emboss line-drawing thumbnails ──────────────
+// Every product (Flat-Embossed VMD, Color Core, Designer Textile, Ombre)
+// shares the same canonical folder.  Adding a new pattern: drop the source
+// PNG into backend/static/images/emboss-thumbnails/ and regenerate the
+// cache JPG / _area50 crop there too — no per-product duplication.
+const EMBOSS_THUMB = (file) =>
+  `${ASSETS_URL}/static/_thumbcache/emboss-thumbnails/${file.toLowerCase().replace(/\.[^.]+$/, '.jpg')}`;
+
+// Per-product aliases kept for backward-compatibility with existing call
+// sites — they all resolve to the same canonical URL now.
+const FVP_EMBOSS_THUMB = EMBOSS_THUMB;
 export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
   { id: "flux_ribbed", name: "Flux Ribbed", thumbnailUrl: FVP_EMBOSS_THUMB("flux_ribbed.png") },
   { id: "ribbed_25mm", name: "Ribbed 25mm", thumbnailUrl: FVP_EMBOSS_THUMB("ribbed_25mm.png") },
@@ -323,7 +337,21 @@ export const FLAT_EMBOSSED_EMBOSS_PATTERNS = [
   { id: "square_30",  name: "Square 30",  thumbnailUrl: FVP_EMBOSS_THUMB("square_30.png")  },
   { id: "deck",       name: "Deck",       thumbnailUrl: FVP_EMBOSS_THUMB("deck.png")       },
   { id: "aqualine",   name: "Aqualine",   thumbnailUrl: FVP_EMBOSS_THUMB("aqualine.png")   },
+  { id: "penray",     name: "Penray",     thumbnailUrl: FVP_EMBOSS_THUMB("penray.png")     },
 ];
+
+/**
+ * Leather (vmd-leather) size → allowed emboss-pattern IDs.
+ * Driven by product spec — other Bespoke Graphics categories (Marble, Nature
+ * Reimagined) still show every pattern.  Lookup is `LEATHER_EMBOSS_BY_SIZE[size]`
+ * and falls back to `null` if the size isn't listed (meaning "no filter").
+ */
+export const LEATHER_EMBOSS_BY_SIZE = {
+  "1200x2800": ["flux_ribbed", "ribbed_45mm", "ribbed_60mm", "tappered", "aqualine", "penray"],
+  "1200x2400": ["flux_ribbed", "ribbed_45mm", "ribbed_60mm", "tappered", "triangle", "square_30", "deck", "aqualine", "penray"],
+  "600x600":   ["triangle", "square_30", "deck"],
+  "600x1200":  ["triangle", "square_30", "deck"],
+};
 
 /**
  * Converts a relative backend asset path (e.g. "/static/images/...")
@@ -401,10 +429,9 @@ export const COLOR_CORE_COLORS = [
   { id: "CC-04", name: "Straw",         hex: "#f9d698" },
   { id: "CC-05", name: "Arabian Spice", hex: "#9e5239" },
   { id: "CC-06", name: "Coral Haze",    hex: "#b87857" },
-  { id: "CC-07", name: "Fog",           hex: "#f0efef" },
+  { id: "CC-07", name: "Fog",           hex: "#D3D3D3" },
   { id: "CC-08", name: "Glacier",       hex: "#b6b5b8" },
   { id: "CC-09", name: "Birch",         hex: "#95948d" },
-  { id: "CC-10", name: "Graphite",      hex: "#5b5f64" },
   { id: "CC-11", name: "Smoke Blue",    hex: "#6e7f92" },
   { id: "CC-12", name: "Shadow",        hex: "#6e8890" },
   { id: "CC-13", name: "Sand",          hex: "#c6ab9a" },
@@ -440,8 +467,7 @@ export const getColorCoreThumbnailUrl = (structureId, colorId) =>
 
 export const COLOR_CORE_SIZES = ["1200x2800", "1200x2400", "600x600", "600x1200"];
 
-// const CC_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/color-core/embossed_line_thumbnails/${file}`;
-const CC_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/fabric/color-core/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+const CC_EMBOSS_THUMB = EMBOSS_THUMB;
 
 export const COLOR_CORE_EMBOSS_PATTERNS = [
   { id: "ribbed_25mm", name: "Ribbed 25mm",  thumbnailUrl: CC_EMBOSS_THUMB("ribbed_25mm.png"),  availableSizes: ["1200x2800", "1200x2400"] },
@@ -632,8 +658,7 @@ export const OMBRE_COLOR_CORE_OVERLAYS = {
 export const getOmbreColorCorePanelUrl = (baseColorId, filename) =>
   `${BACKEND_URL}/static/images/ombre/color-core-ombre/panels/${baseColorId}/${encodeURIComponent(filename)}`;
 
-// const OMBRE_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/ombre/color-core-ombre/embossed_line_thumbnails/${file}`;
-const OMBRE_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/ombre/color-core-ombre/embossed_line_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+const OMBRE_EMBOSS_THUMB = EMBOSS_THUMB;
 // Ombre Color Core emboss patterns now render at BOTH product sizes —
 // previously 1200x2400 was groove-only, but that restriction was lifted
 // (both sizes carry both emboss and groove panels now).  availableSizes
@@ -838,8 +863,7 @@ export const DESIGNER_TEXTILE_THICKNESSES = [
 //   Large tall  (1200x2800, 1200x2400) : ribbed family, elliptera, ellipsia, flux, draft, aqualine, tapered, weave, bloom, afterflute, penray, shard
 //   Large square (1200x2400 only)      : + axis, square_8, square_30, deck, triangle, symmetric
 //   Small square (600x600)             : axis, square_8, square_30, deck, triangle
-// const DT_EMBOSS_THUMB = (file) => `${BACKEND_URL}/thumb/fabric/designer_textile/emboss_thumbnails/${file}`;
-const DT_EMBOSS_THUMB = (file) => `${ASSETS_URL}/static/_thumbcache/fabric/designer_textile/emboss_thumbnails/${file.replace(/\.[^.]+$/, '.jpg')}`;
+const DT_EMBOSS_THUMB = EMBOSS_THUMB;
 
 //   Small tall   (600x1200)            : axis, square_8, square_30, deck, triangle, symmetric
 export const DESIGNER_TEXTILE_EMBOSS_PATTERNS = [

@@ -264,7 +264,7 @@ const FlatEmbossedPreview = forwardRef(
 
     // ── Download: capture the wall-canvas DOM node to a PNG ──────────────
     useImperativeHandle(ref, () => ({
-      downloadImage: async () => {
+      downloadImage: async (overrideFilename, addHeader) => {
         const node = wallCanvasRef.current;
         if (!node) return;
         try {
@@ -272,9 +272,13 @@ const FlatEmbossedPreview = forwardRef(
           // corrupts blob: URLs (they don't support query strings) and causes
           // ERR_FILE_NOT_FOUND. skipFonts silences the cross-origin
           // Google Fonts SecurityError from html-to-image's CSS rule walk.
-          const dataUrl = await toPng(node, { pixelRatio: 2, skipFonts: true });
+          let dataUrl = await toPng(node, { pixelRatio: 2, skipFonts: true });
+          if (addHeader) {
+            try { dataUrl = await addHeader(dataUrl); }
+            catch (err) { console.error("[FlatEmbossedPreview] header failed:", err); }
+          }
           const link = document.createElement("a");
-          link.download = `univicoustic-design-${Date.now()}.png`;
+          link.download = overrideFilename || `univicoustic-design-${Date.now()}.png`;
           link.href = dataUrl;
           link.click();
         } catch (err) {

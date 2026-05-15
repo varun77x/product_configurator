@@ -57,18 +57,29 @@ export function useBlobPanel(url) {
         if (!res.ok) throw new Error(`Panel fetch failed: ${res.status} ${url}`);
         return res.blob();
       })
-      .then((blob) => {
+      .then(async (blob) => {
         if (!blob || controller.signal.aborted) return;
         if (blob.size === 0) {
           console.warn("[useBlobPanel] Empty blob received for", url);
           setIsLoading(false);
           return;
         }
+        const newUrl = URL.createObjectURL(blob);
+        // Decode before exposing — ensures the consumer paints atomically
+        // with no partial-image flash. decode() failure is non-fatal.
+        try {
+          const probe = new Image();
+          probe.src = newUrl;
+          await probe.decode();
+        } catch {}
+        if (controller.signal.aborted) {
+          URL.revokeObjectURL(newUrl);
+          return;
+        }
         // Atomic swap: revoke old only when new is ready — no blank flash
         if (currentBlobRef.current) {
           URL.revokeObjectURL(currentBlobRef.current);
         }
-        const newUrl = URL.createObjectURL(blob);
         currentBlobRef.current = newUrl;
         setBlobUrl(newUrl);
         setIsLoading(false);
@@ -149,10 +160,20 @@ export function useMultiBlobPanels(urls) {
           if (!res.ok) throw new Error(`Multi-blob fetch failed: ${res.status} ${url}`);
           return res.blob();
         })
-        .then((blob) => {
+        .then(async (blob) => {
           if (!blob || blob.size === 0 || controller.signal.aborted) return;
-          if (blobRefs.current[i]) URL.revokeObjectURL(blobRefs.current[i]);
           const newUrl = URL.createObjectURL(blob);
+          // Decode before exposing so the consumer paints atomically.
+          try {
+            const probe = new Image();
+            probe.src = newUrl;
+            await probe.decode();
+          } catch {}
+          if (controller.signal.aborted) {
+            URL.revokeObjectURL(newUrl);
+            return;
+          }
+          if (blobRefs.current[i]) URL.revokeObjectURL(blobRefs.current[i]);
           blobRefs.current[i] = newUrl;
           setBlobUrls((prev) => {
             const next = [...prev];

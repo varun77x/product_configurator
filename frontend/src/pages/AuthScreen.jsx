@@ -191,7 +191,7 @@ export default function AuthScreen() {
           <img
             src="/univicoustic-logo.png"
             alt="UniVicoustic"
-            className="h-7 w-auto object-contain"
+            className="h-12 md:h-14 w-auto object-contain"
             data-testid="auth-brand-logo"
           />
         </div>

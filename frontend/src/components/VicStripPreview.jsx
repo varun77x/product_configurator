@@ -149,16 +149,48 @@ const VicStripPreview = forwardRef(
     }, [textureUrl, fallbackColor]);
 
     // ── Download ───────────────────────────────────────────────────────────
+    // Strategy: when a real texture URL is present, fetch it directly so the
+    // user gets the FULL-resolution source asset, not the scaled-down version
+    // currently rendered on screen.  Fall back to html-to-image only when no
+    // texture exists yet (solid-colour fallback state).
     useImperativeHandle(ref, () => ({
-      downloadImage: async () => {
+      downloadImage: async (overrideFilename, addHeader) => {
+        const filename = overrideFilename || `univicoustic-${designLabel}-${Date.now()}.png`;
+
+        // Helper: trigger a download, optionally piping the image source
+        // through the addHeader callback first. Cleans up any object URL we
+        // created so we don't leak memory.
+        const finish = async (rawSrc, isObjectUrl) => {
+          let outSrc = rawSrc;
+          if (addHeader) {
+            try { outSrc = await addHeader(rawSrc); }
+            catch (err) { console.error("[VicStripPreview] header failed:", err); }
+          }
+          const link = document.createElement("a");
+          link.download = filename;
+          link.href = outSrc;
+          link.click();
+          if (isObjectUrl) setTimeout(() => URL.revokeObjectURL(rawSrc), 1000);
+        };
+
+        if (textureUrl) {
+          try {
+            const res = await fetch(textureUrl, { cache: "no-store" });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            await finish(url, true);
+            return;
+          } catch (err) {
+            console.error("[VicStripPreview] full-res fetch failed, falling back to capture:", err);
+            // Fall through to the html-to-image path below.
+          }
+        }
         const node = previewRef.current;
         if (!node) return;
         try {
           const dataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
-          const link = document.createElement("a");
-          link.download = `univicoustic-${designLabel}-${Date.now()}.png`;
-          link.href = dataUrl;
-          link.click();
+          await finish(dataUrl, false);
         } catch (err) {
           console.error("[VicStripPreview] download failed:", err);
         }
